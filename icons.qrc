@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>flat/animate.png</file>
+        <file>flat/bikini.png</file>
+        <file>flat/bubbles.png</file>
+        <file>flat/flippers.png</file>
+        <file>flat/jail.png</file>
+        <file>flat/link.png</file>
+        <file>flat/mermaid.png</file>
+        <file>flat/pool-depth.png</file>
+        <file>flat/pool-simple.png</file>
+        <file>flat/rope.png</file>
+        <file>flat/scallop.png</file>
+        <file>flat/sea.png</file>
+        <file>flat/swimsuit.png</file>
+        <file>flat/video-player.png</file>
+        <file>flat/warning.png</file>
+        <file>flat/weight.png</file>
+        <file>flat/xxx.png</file>
+        <file>linear/vibration.png</file>
+        <file>linear/vibration-w.png</file>
+        <file>flat/video.png</file>
+        <file>flat/watch.png</file>
+        <file>flat/kiss.png</file>
+        <file>linear/repeat.png</file>
+        <file>linear/repeat-disabled.png</file>
+        <file>flat/tag.png</file>
+        <file>flat/hanger.png</file>
+        <file>flat/water.png</file>
+    </qresource>
+</RCC>
