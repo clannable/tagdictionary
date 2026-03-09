@@ -2,7 +2,7 @@
 #include <QMenu>
 #include <QMimeData>
 #include <QCursor>
-#include "./taglistwidgetitem.h"
+#include "taglistwidgetitem.h"
 
 TagListWidget::TagListWidget(QWidget *parent) :
     QListWidget(parent) {

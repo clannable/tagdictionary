@@ -67,7 +67,7 @@ void FileListWidget::onOpenFiles() {
         "/home",
         "Media files (*.png *.jpg *.gif *.mp4 .mov)");
 
-    for (const QString& file : selected) {
+    for (const QString file : selected) {
         QString f = file;
         QListWidgetItem *item = new QListWidgetItem(f.replace("\\", "/"));
         item->setFlags(item->flags() | Qt::ItemIsEditable);

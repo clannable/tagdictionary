@@ -4,7 +4,8 @@
 
 TEMPLATE = app
 TARGET = tagviewer
-INCLUDEPATH += .
+INCLUDEPATH += include
+UI_DIR = ui
 
 # You can make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -14,8 +15,8 @@ INCLUDEPATH += .
 #DEFINES += QT_DISABLE_DEPRECATED_UP_TO=0x060000 # disables all APIs deprecated in Qt 6.0.0 and earlier
 
 # Input
-HEADERS += mainwindow.h \
-           pixmaplabel.h \
+HEADERS += include/mainwindow.h \
+           include/pixmaplabel.h \
            build/Clone_of_Desktop_Qt_6_10_0_MSVC2022_64bit-Debug/tagviewer_autogen/include/ui_mainwindow.h \
            build/Clone_of_Desktop_Qt_6_10_0_MSVC2022_64bit-Debug/_deps/json-src/include/nlohmann/adl_serializer.hpp \
            build/Clone_of_Desktop_Qt_6_10_0_MSVC2022_64bit-Debug/_deps/json-src/include/nlohmann/byte_container_with_subtype.hpp \
@@ -115,12 +116,12 @@ HEADERS += mainwindow.h \
            build/Desktop_Qt_6_10_0_llvm_mingw_64_bit-Debug/_deps/json-src/include/nlohmann/detail/meta/call_std/end.hpp \
            /build/Clone_of_Desktop_Qt_6_10_0_MSVC2022_64bit-Debug/tagviewer_autogen/include/ui_mainwindow.h \
            build/Clone_of_Desktop_Qt_6_10_0_MSVC2022_64bit-Debug/tagviewer_autogen/EWIEGA46WW/moc_mainwindow.cpp
-FORMS += mainwindow.ui
-SOURCES += main.cpp \
-           mainwindow.cpp \
-           pixmaplabel.cpp \
+FORMS += ui/mainwindow.ui
+SOURCES += src/main.cpp \
+           src/mainwindow.cpp \
+           src/pixmaplabel.cpp \
            build/Clone_of_Desktop_Qt_6_10_0_MSVC2022_64bit-Debug/tagviewer_autogen/mocs_compilation.cpp \
            build/Clone_of_Desktop_Qt_6_10_0_MSVC2022_64bit-Debug/tagviewer_autogen/EWIEGA46WW/qrc_icons.cpp \
            build/Clone_of_Desktop_Qt_6_10_0_MSVC2022_64bit-Debug/CMakeFiles/3.30.5/CompilerIdCXX/CMakeCXXCompilerId.cpp \
            build/Desktop_Qt_6_10_0_llvm_mingw_64_bit-Debug/CMakeFiles/3.30.5/CompilerIdCXX/CMakeCXXCompilerId.cpp
-RESOURCES += icons.qrc
+RESOURCES += resources/icons.qrc

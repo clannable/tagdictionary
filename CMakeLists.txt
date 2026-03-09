@@ -8,7 +8,8 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
+set(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Multimedia)
@@ -31,12 +32,13 @@ set(PROJECT_SOURCES
 )
 
 
-
-
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+
     qt_add_executable(tagviewer
         MANUAL_FINALIZATION
+        resources/icons.qrc
         ${PROJECT_SOURCES}
+        ${app_icon_resource_windows}
         resources/icons.qrc
 
         include/pixmaplabel.h src/pixmaplabel.cpp
@@ -56,32 +58,16 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 
         include/iconpanel.h src/iconpanel.cpp ui/iconpanel.ui
         include/icontable.h src/icontable.cpp
-        ${app_icon_resource_windows}
+
         include/mediadisplay.h src/mediadisplay.cpp ui/mediadisplay.ui
         include/tageditor.h src/tageditor.cpp ui/tageditor.ui
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET tagviewer APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
-        add_library(tagviewer SHARED
-            ${PROJECT_SOURCES}
 
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(tagviewer
-            ${PROJECT_SOURCES}
-            ${app_icon_resource_windows}
-        )
-    endif()
+
+    )
 endif()
 
 
-target_include_directories(tagviewer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(tagviewer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(tagviewer PRIVATE
     Qt6::Widgets
     Qt6::Multimedia

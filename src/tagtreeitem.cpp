@@ -1,5 +1,5 @@
 #include "tagtreeitem.h"
-#include "./jsonnode.h"
+#include "jsonnode.h"
 
 using json = nlohmann::json;
 

@@ -1,7 +1,8 @@
 #include "icondialog.h"
+#include "icontable.h"
 #include "ui_icondialog.h"
 #include <QScrollBar>
-#include "./icontable.h"
+
 
 IconDialog::IconDialog(QWidget *parent)
     : QDialog(parent)

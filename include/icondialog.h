@@ -6,7 +6,7 @@
 #include <QList>
 #include <QGridLayout>
 
-#include "./iconpanel.h"
+#include "iconpanel.h"
 namespace Ui {
 class IconDialog;
 }

@@ -5,7 +5,7 @@
 #include <QListWidgetItem>
 
 #include "./jsonnode.h"
-#include "icondialog.h"
+#include "./icondialog.h"
 #include <nlohmann/json.hpp>
 
 namespace Ui {

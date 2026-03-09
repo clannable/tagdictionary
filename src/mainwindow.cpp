@@ -1,7 +1,7 @@
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
-#include "./jsonnode.h"
-#include "./tagtreeitem.h"
+#include "ui_mainwindow.h"
+#include "jsonnode.h"
+#include "tagtreeitem.h"
 
 #include <iostream>
 #include <nlohmann/json.hpp>

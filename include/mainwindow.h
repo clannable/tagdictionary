@@ -7,9 +7,9 @@
 
 #include <QMap>
 #include <QSettings>
-#include "./jsonnode.h"
-#include "./tagtreeitem.h"
-#include "./icondialog.h"
+#include "jsonnode.h"
+#include "tagtreeitem.h"
+#include "icondialog.h"
 
 #include <nlohmann/json.hpp>
 

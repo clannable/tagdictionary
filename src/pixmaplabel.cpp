@@ -1,4 +1,4 @@
-#include "PixmapLabel.h"
+#include "pixmaplabel.h"
 #include <QPainter>
 #include <QPaintEvent>
 

@@ -1,6 +1,6 @@
 #include "tageditor.h"
 #include "ui_tageditor.h"
-#include "./taglistwidgetitem.h"
+#include "taglistwidgetitem.h"
 #include <iostream>
 
 TagEditor::TagEditor(QWidget *parent)

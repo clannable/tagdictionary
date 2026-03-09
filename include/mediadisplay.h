@@ -2,7 +2,7 @@
 #define MEDIADISPLAY_H
 
 #include <QWidget>
-#include "./jsonnode.h"
+#include "jsonnode.h"
 
 namespace Ui {
 class MediaDisplay;
