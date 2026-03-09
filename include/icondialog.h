@@ -23,6 +23,7 @@ public:
 public slots:
     virtual void accept() override;
     void clearSelection();
+    void browseIcon();
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -33,7 +34,7 @@ signals:
 
 private:
     Ui::IconDialog *ui;
-
+    QString iconPath = "";
     int getAvailableColumns() const;
 };
 

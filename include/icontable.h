@@ -24,6 +24,7 @@ signals:
     void columnsChanged(int columns);
 
 private:
+    QStringList icons;
     QList<IconPanel*> panels;
     IconPanel* current;
 

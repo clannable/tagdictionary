@@ -2,13 +2,14 @@
 #include "icontable.h"
 #include "ui_icondialog.h"
 #include <QScrollBar>
-
-
+#include <QFileDialog>
+#include <iostream>
 IconDialog::IconDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::IconDialog)
 {
     ui->setupUi(this);
+
 }
 
 void IconDialog::resizeEvent(QResizeEvent *event) {
@@ -28,11 +29,20 @@ void IconDialog::showEvent(QShowEvent *event) {
 }
 
 void IconDialog::setSelected(QString value) {
-    if (value.indexOf(":/icons/") != -1)
-        ui->iconTable->setCurrentItem(ui->iconTable->item(value.right(value.length() - 8)));
-    else
-        ui->iconTable->setCurrentItem(ui->iconTable->item(value));
+    iconPath = value;
 
+    ui->iconTable->setCurrentItem(ui->iconTable->item(value));
+}
+
+void IconDialog::browseIcon() {
+    QString filePath = QFileDialog::getOpenFileName(this,
+        "Select icon",
+        "/home",
+        "Image files (*.jpg *.png)"
+    );
+    filePath.replace("\\", "/");
+    emit iconSelected(filePath);
+    QDialog::accept();
 }
 
 void IconDialog::clearSelection() {
@@ -41,7 +51,7 @@ void IconDialog::clearSelection() {
 
 void IconDialog::accept() {
     IconPanel *selected = ui->iconTable->currentItem();
-    emit iconSelected(selected != nullptr ? selected->getIcon() : "");
+    emit iconSelected(selected != nullptr ? selected->getIcon() : iconPath);
     QDialog::accept();
 }
 

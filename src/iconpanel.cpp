@@ -10,11 +10,7 @@ IconPanel::IconPanel(QString iconPath, QWidget *parent)
 {
     ui->setupUi(this);
 
-    if (icon.startsWith(":/icons/"))
-        icon = icon.slice(8);
-    QIcon ic = QIcon(":/icons/" + icon);
-
-    ui->iconLabel->setPixmap(ic.pixmap(QSize(20, 20)));
+    ui->iconLabel->setPixmap(QIcon(icon).pixmap(QSize(20, 20)));
     QString shortName = icon.right(icon.length() - (icon.lastIndexOf("/")+1));
     this->setToolTip(shortName);
 

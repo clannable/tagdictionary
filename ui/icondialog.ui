@@ -152,6 +152,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="browseButton">
+       <property name="text">
+        <string>Browse...</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
@@ -214,8 +221,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>browseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>IconDialog</receiver>
+   <slot>browseIcon()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>393</x>
+     <y>273</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>398</x>
+     <y>297</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>clearSelection()</slot>
+  <slot>browseIcon()</slot>
  </slots>
 </ui>

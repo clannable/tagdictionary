@@ -2,6 +2,7 @@
 #include "ui_tageditor.h"
 #include "taglistwidgetitem.h"
 #include <iostream>
+#include <QFileInfo>
 
 TagEditor::TagEditor(QWidget *parent)
     : QWidget(parent)
@@ -43,8 +44,12 @@ void TagEditor::setTag(JsonNode *node) {
     }
     json tag = node->getData();
     ui->editButton->setEnabled(true);
-
-    iconPath = ":/icons/" + QString::fromStdString(tag.value("icon", ""));
+    QString ic = QString::fromStdString(tag.value("icon", ""));
+    if (QFileInfo::exists(ic) && QFileInfo(ic).isAbsolute()) {
+        iconPath = ic;
+    } else if (!ic.startsWith(":/icons/")) {
+        iconPath = ":/icons/" + ic;
+    }
     QIcon icon = QIcon(iconPath);
 
     ui->iconLabel->setPixmap(icon.pixmap(QSize(20, 20)));
@@ -97,8 +102,8 @@ void TagEditor::selectIcon() {
 }
 
 void TagEditor::iconSelected(QString icon) {
-    iconPath = QString(!icon.startsWith(":/icons/") ? ":/icons/" : "") + icon;
-    ui->iconButton->setIcon(QIcon((!iconPath.startsWith(":/icons/") ? ":/icons/" : "") + iconPath));
+    iconPath = icon;
+    ui->iconButton->setIcon(QIcon(iconPath));
 }
 
 void TagEditor::save() {
@@ -110,7 +115,7 @@ void TagEditor::save() {
     nlohmann::json nodeJson = nlohmann::json();
     nodeJson["key"] = ui->tagLabelEdit->text().toStdString();
     nodeJson["description"] = updatedDescription.toStdString();
-    nodeJson["icon"] = (iconPath.startsWith(":/icons/") ? iconPath.slice(8) : iconPath).toStdString();
+    nodeJson["icon"] = iconPath.toStdString();
 
     nodeJson["related"] = json(ui->relatedList->values().toList());
     nodeJson["required"] = json(ui->requiredList->values().toList());

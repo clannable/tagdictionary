@@ -46,7 +46,7 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>275</width>
+        <width>300</width>
         <height>0</height>
        </size>
       </property>
@@ -101,7 +101,7 @@
          </property>
          <property name="font">
           <font>
-           <pointsize>12</pointsize>
+           <pointsize>11</pointsize>
           </font>
          </property>
          <property name="frameShape">
@@ -132,7 +132,7 @@
           </size>
          </property>
          <property name="indentation">
-          <number>20</number>
+          <number>15</number>
          </property>
          <property name="sortingEnabled">
           <bool>false</bool>

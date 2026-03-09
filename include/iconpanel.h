@@ -17,7 +17,6 @@ public:
 
     void setSelected(bool selected);
     QString getIcon();
-
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;

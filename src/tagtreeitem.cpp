@@ -1,5 +1,6 @@
 #include "tagtreeitem.h"
 #include "jsonnode.h"
+#include <QFileInfo>
 
 using json = nlohmann::json;
 
@@ -13,8 +14,12 @@ TagTreeItem::TagTreeItem(JsonNode *node) :
 
     nlohmann::json json = this->node->getData();
 
-    if (json.contains("icon"))
-        setIcon(0, QIcon(QString::fromStdString(":/icons/" + json["icon"].get<std::string>())));
+    QString icon = QString::fromStdString(json.value("icon", ""));
+    if (QFileInfo::exists(icon) || icon.startsWith(":/icons/")) {
+        setIcon(0, QIcon(icon));
+    } else {
+        setIcon(0, QIcon(":/icons/" + icon));
+    }
 }
 
 JsonNode* TagTreeItem::getNode() const {
@@ -40,8 +45,12 @@ void TagTreeItem::jsonUpdated() {
     nlohmann::json json = node->getData();
 
     setText(0, QString::fromStdString(node->getKey()));
-    if (json.contains("icon"))
-        setIcon(0, QIcon(QString::fromStdString(json["icon"].get<std::string>())));
+    QString icon = QString::fromStdString(json.value("icon", ""));
+    if (QFileInfo::exists(icon) || icon.startsWith(":/icons/")) {
+        setIcon(0, QIcon(icon));
+    } else {
+        setIcon(0, QIcon(":/icons/" + icon));
+    }
 }
 
 

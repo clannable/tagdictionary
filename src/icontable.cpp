@@ -6,7 +6,6 @@
 IconTable::IconTable(QWidget *parent)
     : QWidget(parent), current(nullptr), panels()
 {
-    QStringList icons;
     QDirIterator it(":/icons/", QDirIterator::Subdirectories);
     while (it.hasNext()) {
         QString path = it.next();
@@ -23,8 +22,6 @@ IconTable::IconTable(QWidget *parent)
         panels.append(panel);
         connect(panel, &IconPanel::selected, this, &IconTable::setCurrentItem);
     }
-
-    updateLayout(9);
 }
 
 int IconTable::columnCount() const {
@@ -37,12 +34,9 @@ IconPanel* IconTable::currentItem() const {
 }
 
 IconPanel* IconTable::item(QString icon) {
-    for (int i = 0; i < panels.length(); i++) {
-        IconPanel *panel = panels[i];
-        if (panel->getIcon() == icon)
-            return panel;
-    }
-    return nullptr;
+    int index = icons.indexOf(icon);
+    if (index == -1) return nullptr;
+    return panels[index];
 }
 
 void IconTable::setCurrentItem(IconPanel *panel=nullptr) {
