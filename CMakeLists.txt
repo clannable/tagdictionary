@@ -24,10 +24,10 @@ FetchContent_MakeAvailable(json)
 set(app_icon_resource_windows "${CMAKE_CURRENT_SOURCE_DIR}/tagviewer.rc")
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
+        src/main.cpp
+        src/mainwindow.cpp
+        include/mainwindow.h
+        ui/mainwindow.ui
 )
 
 
@@ -37,28 +37,28 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(tagviewer
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        icons.qrc
+        resources/icons.qrc
 
-        pixmaplabel.h pixmaplabel.cpp
-        taglistwidgetitem.h taglistwidgetitem.cpp
+        include/pixmaplabel.h src/pixmaplabel.cpp
+        include/taglistwidgetitem.h src/taglistwidgetitem.cpp
 
-        tagtreeitem.h tagtreeitem.cpp
-        videoplayer.h videoplayer.cpp videoplayer.ui
+        include/tagtreeitem.h src/tagtreeitem.cpp
+        include/videoplayer.h src/videoplayer.cpp ui/videoplayer.ui
 
-        taglistwidget.h taglistwidget.cpp
-        filelistwidget.h filelistwidget.cpp filelistwidget.ui
+        include/taglistwidget.h src/taglistwidget.cpp
+        include/filelistwidget.h src/filelistwidget.cpp ui/filelistwidget.ui
 
-        jsonnode.h jsonnode.cpp
-        tagtree.cpp tagtree.h
+        include/jsonnode.h src/jsonnode.cpp
+        src/tagtree.cpp include/tagtree.h
 
-        icondialog.h icondialog.cpp icondialog.ui
-        newtagdialog.h newtagdialog.cpp newtagdialog.ui
+        include/icondialog.h src/icondialog.cpp ui/icondialog.ui
+        include/newtagdialog.h src/newtagdialog.cpp ui/newtagdialog.ui
 
-        iconpanel.h iconpanel.cpp iconpanel.ui
-        icontable.h icontable.cpp
+        include/iconpanel.h src/iconpanel.cpp ui/iconpanel.ui
+        include/icontable.h src/icontable.cpp
         ${app_icon_resource_windows}
-        mediadisplay.h mediadisplay.cpp mediadisplay.ui
-        tageditor.h tageditor.cpp tageditor.ui
+        include/mediadisplay.h src/mediadisplay.cpp ui/mediadisplay.ui
+        include/tageditor.h src/tageditor.cpp ui/tageditor.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET tagviewer APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
