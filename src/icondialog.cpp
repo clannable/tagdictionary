@@ -3,7 +3,7 @@
 #include "ui_icondialog.h"
 #include <QScrollBar>
 #include <QFileDialog>
-#include <iostream>
+
 IconDialog::IconDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::IconDialog)
@@ -38,7 +38,7 @@ void IconDialog::browseIcon() {
     QString filePath = QFileDialog::getOpenFileName(this,
         "Select icon",
         "/home",
-        "Image files (*.jpg *.png)"
+        "Icon files (*.png *ico *svg)"
     );
     filePath.replace("\\", "/");
     emit iconSelected(filePath);
