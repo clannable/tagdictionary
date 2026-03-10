@@ -13,7 +13,7 @@ public:
     JsonNode();
     JsonNode(json data, std::string key="", JsonNode* parent=nullptr);
 
-
+    ~JsonNode();
 
     json getData() const;
     std::string getKey() const;

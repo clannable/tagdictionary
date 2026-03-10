@@ -15,6 +15,10 @@ TagTree::TagTree(QWidget* parent) :
     connect(this, &QTreeWidget::itemClicked, this, &QTreeWidget::expandItem);
 }
 
+TagTree::~TagTree() {
+    delete rootNode;
+}
+
 TagTreeItem* TagTree::findTag(QString tagPath) {
     QTreeWidgetItemIterator it(this);
     while (*it) {

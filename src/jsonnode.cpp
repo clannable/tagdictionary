@@ -19,6 +19,11 @@ JsonNode::JsonNode(json data, std::string key, JsonNode* parent) {
     }
 }
 
+JsonNode::~JsonNode() {
+    for(const auto& [k, c] : children)
+        delete c;
+    this->data.~json();
+}
 json JsonNode::getData() const {
     return this->data;
 }
