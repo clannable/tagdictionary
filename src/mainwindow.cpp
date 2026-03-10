@@ -63,8 +63,8 @@ MainWindow::~MainWindow()
 /*---------  Tag Tree Slots ---------*/
 
 void MainWindow::onTagSelect() {
-    if (editModeEnabled) return;
-    selectedItem = static_cast<TagTreeItem*>(ui->tagTree->currentItem());
+    if (editModeEnabled || ui->tagTree->selectedItems().isEmpty()) return;
+    selectedItem = static_cast<TagTreeItem*>(ui->tagTree->selectedItems().first());
 
     JsonNode *node = selectedItem->getNode();
     ui->tagEditor->setTag(node);
@@ -83,10 +83,10 @@ void MainWindow::onTagDoubleClicked(QTreeWidgetItem *item, int column) {
 void MainWindow::onTagListSelect(QString tagPath) {
     if (editModeEnabled == true) return;
 
-    TagTreeItem *tag = ui->tagTree->findTag(tagPath);
+    TagTreeItem *tag = static_cast<TagTreeItem*>(ui->tagTree->findTag(tagPath));
     selectedItem->setSelected(false);
     selectedItem = tag;
-    selectedItem->setSelected(true);
+    tag->setSelected(true);
     ui->tagTree->expandItem(selectedItem);
 }
 

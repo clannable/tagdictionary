@@ -14,7 +14,7 @@ class TagTree : public QTreeWidget
 public:
     TagTree(QWidget* parent);
     ~TagTree();
-    TagTreeItem* findTag(QString tagPath);
+    QTreeWidgetItem* findTag(QString tagPath, QTreeWidgetItem* root=nullptr);
 
     void fromJson(nlohmann::json json);
     json toJson();
@@ -47,7 +47,7 @@ private:
     QPoint dragStartPosition;
 
     bool editModeEnabled;
-    TagTreeItem* findTag(TagTreeItem* item, QString tagPath);
+    // TagTreeItem* findTag(TagTreeItem* item, QString tagPath);
 
     void createChildren(TagTreeItem* item, JsonNode *node);
 

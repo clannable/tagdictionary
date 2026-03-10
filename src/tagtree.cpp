@@ -19,12 +19,24 @@ TagTree::~TagTree() {
     delete rootNode;
 }
 
-TagTreeItem* TagTree::findTag(QString tagPath) {
-    QTreeWidgetItemIterator it(this);
-    while (*it) {
-        TagTreeItem* item = static_cast<TagTreeItem*>(*it);
-        if (item->getNode()->getFullPath() == tagPath)
-            return item;
+QTreeWidgetItem* TagTree::findTag(QString tagPath, QTreeWidgetItem* root) {
+    int ix = tagPath.indexOf("/");
+    int c = root == nullptr ? topLevelItemCount() : root->childCount();
+
+    QString search = tagPath.left(ix);
+
+    for (int x = 0; x < c; x++) {
+        QTreeWidgetItem* item;
+        if (root == nullptr)
+            item = this->topLevelItem(x);
+        else
+            item = root->child(x);
+        if (item->text(0) == search) {
+            if (ix == -1)
+                return item;
+            else
+                return findTag(tagPath.sliced(ix+1), item);
+        }
     }
     return nullptr;
 }
