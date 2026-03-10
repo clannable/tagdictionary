@@ -24,7 +24,9 @@ VideoPlayer::VideoPlayer(QWidget *parent)
     connect(ui->repeatButton, &QPushButton::clicked, this, &VideoPlayer::toggleRepeat);
     QSettings settings("MyApp","Tag Viewer");
     settings.beginGroup("video");
-    audio->setVolume(settings.value("volume", 0.75).toFloat());
+    int volume = settings.value("volume", 75).toInt();
+    audio->setVolume(float(volume) / 100.0);
+    ui->volumeSlider->setValue(volume);
     repeat = settings.value("repeat", false).toBool();
     player->setLoops(repeat ? QMediaPlayer::Infinite : 1);
     ui->repeatButton->setIcon(QIcon(repeat ? ":/icons/linear/repeat" : ":/icons/linear/repeat-disabled"));
@@ -169,7 +171,7 @@ VideoPlayer::~VideoPlayer()
     player->stop();
     QSettings settings("MyApp","Tag Viewer");
     settings.beginGroup("video");
-    settings.setValue("volume", audio->volume());
+    settings.setValue("volume", ui->volumeSlider->value());
     settings.setValue("muted", audio->isMuted());
     settings.setValue("repeat", repeat);
     settings.endGroup();
