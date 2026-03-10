@@ -38,9 +38,11 @@ signals:
 private:
     Ui::TagEditor *ui;
     IconDialog *iconDialog;
+    JsonNode *currentTag = nullptr;
     bool editModeEnabled = false;
 
     QString iconPath;
+    QString description;
 };
 
 #endif // TAGEDITOR_H

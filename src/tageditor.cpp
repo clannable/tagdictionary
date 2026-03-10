@@ -11,6 +11,7 @@ TagEditor::TagEditor(QWidget *parent)
     ui->setupUi(this);
     ui->iconButton->hide();
     ui->descriptionEditor->hide();
+    ui->description->document()->setDefaultStyleSheet("ul li { list-style-type: \"-\"; margin-left: 5px;}");
     iconDialog = new IconDialog(this);
     connect(iconDialog, &IconDialog::iconSelected, this, &TagEditor::iconSelected);
 
@@ -32,6 +33,7 @@ TagEditor::~TagEditor()
 }
 
 void TagEditor::setTag(JsonNode *node) {
+    currentTag = node;
     if (node == nullptr) {
         ui->requiredList->clear();
         ui->relatedList->clear();
@@ -45,15 +47,17 @@ void TagEditor::setTag(JsonNode *node) {
     json tag = node->getData();
     ui->editButton->setEnabled(true);
     QString ic = QString::fromStdString(tag.value("icon", ""));
-    if (QFileInfo::exists(ic) && QFileInfo(ic).isAbsolute()) {
+    if (QFileInfo::exists(ic) || ic.startsWith(":/icons/")) {
         iconPath = ic;
     } else if (!ic.startsWith(":/icons/")) {
         iconPath = ":/icons/" + ic;
     }
     QIcon icon = QIcon(iconPath);
+    description = QString::fromStdString(tag.value("description", ""));
 
     ui->iconLabel->setPixmap(icon.pixmap(QSize(20, 20)));
-    ui->description->setMarkdown(QString::fromStdString(tag.value("description", "")));
+    ui->description->setMarkdown(description);
+    ui->descriptionEditor->setText(description);
     ui->tagLabelEdit->setText(QString::fromStdString(node->getKey()));
     ui->iconButton->setIcon(QIcon(iconPath));
     ui->relatedList->clear();
@@ -81,7 +85,7 @@ void TagEditor::toggleEditMode() {
     ui->editButton->setText(editModeEnabled ? "Cancel" : "Edit Tag");
     if (editModeEnabled) {
         ui->description->hide();
-        ui->descriptionEditor->setText(ui->description->toPlainText());
+        ui->descriptionEditor->setText(description);
         ui->descriptionEditor->show();
         ui->iconButton->show();
         ui->iconLabel->hide();
@@ -91,6 +95,17 @@ void TagEditor::toggleEditMode() {
         ui->description->show();
         ui->iconButton->hide();
         ui->iconLabel->show();
+        ui->relatedList->clear();
+        ui->requiredList->clear();
+        json tag = currentTag->getData();
+        if (tag.contains("required") && !tag["required"].empty()) {
+            for (const std::string&& t : tag["required"])
+                ui->requiredList->insertTag(QString::fromStdString(t));
+        }
+        if (tag.contains("related") && !tag["related"].empty()) {
+            for (const std::string&& t : tag["related"])
+                ui->relatedList->insertTag(QString::fromStdString(t));
+        }
     }
 
     emit editModeChanged(editModeEnabled);
@@ -110,6 +125,7 @@ void TagEditor::save() {
     QIcon icon = QIcon(iconPath);
     ui->iconLabel->setPixmap(icon.pixmap(QSize(20,20)));
     QString updatedDescription = ui->descriptionEditor->toPlainText();
+    description = updatedDescription;
     ui->description->setMarkdown(updatedDescription);
 
     nlohmann::json nodeJson = nlohmann::json();
