@@ -3,9 +3,7 @@
 
 #include <QWidget>
 #include "jsonnode.h"
-#include "pixmaplabel.h"
-#include "videoplayer.h"
-#include "filelistwidget.h"
+#include <QDropEvent>
 #include <QVBoxLayout>
 
 namespace Ui {
@@ -39,11 +37,14 @@ signals:
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void dragEnterEvent(QDragEnterEvent *event) override;
+    virtual void dropEvent(QDropEvent *event) override;
 
 private:
     Ui::MediaDisplay *ui;
     int currentPage = 0;
     QStringList files;
+    bool editModeEnabled = false;
 
     JsonNode* node = nullptr;
     QWidget* currentWidget = nullptr;
@@ -51,6 +52,8 @@ private:
     void showFile(int index);
     void showImage(QString filePath, bool animated);
     void showVideo(QString filePath);
+
+    void insertFile(QString filePath);
 
     void resizeImage();
     bool isImage = false;

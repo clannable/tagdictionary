@@ -10,6 +10,9 @@
     <height>539</height>
    </rect>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -120,6 +123,9 @@ QPushButton:disabled, QToolButton:disabled {
       </property>
       <item>
        <widget class="QToolButton" name="addFileButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string/>
         </property>

@@ -4,7 +4,10 @@
 #include <QMimeDatabase>
 #include <QFileDialog>
 #include <QInputDialog>
-#include <iostream>
+#include "filelistwidget.h"
+#include "videoplayer.h"
+#include "pixmaplabel.h"
+#include <QMimeData>
 #include <QDesktopServices>
 #include <QFileInfo>
 
@@ -27,9 +30,10 @@ MediaDisplay::~MediaDisplay()
 }
 
 void MediaDisplay::setFilesFromNode(JsonNode *node) {
+    this->node = node;
     currentPage = 0;
     files.clear();
-
+    ui->addFileButton->setEnabled(node != nullptr);
     if (node != nullptr) {
         const nlohmann::json data = node->getData();
 
@@ -54,6 +58,7 @@ void MediaDisplay::save() {
 }
 
 void MediaDisplay::setEditMode(bool mode) {
+    editModeEnabled = mode;
     ui->addFileButton->setVisible(!mode);
     if (mode) {
         delete currentWidget;
@@ -64,7 +69,6 @@ void MediaDisplay::setEditMode(bool mode) {
         ui->viewportLayout->insertWidget(0, currentWidget, 1);
 
         disableControls();
-        // ui->imageLabel->setImage(QPixmap());
     } else {
         showFile(currentPage);
     }
@@ -135,12 +139,19 @@ void MediaDisplay::addFile() {
     QString file = QInputDialog::getText(this, "Enter file path", "File path:", QLineEdit::Normal, "", &ok);
 
     if (ok && !file.isEmpty()) {
-        file.replace("\\", "/");
-        files.append(file);
-        showFile(files.length()-1);
-        emit fileAdded(file);
+        insertFile(file);
     }
 
+}
+
+void MediaDisplay::insertFile(QString filePath) {
+    filePath.replace("\\", "/");
+    files.append(filePath);
+    if (editModeEnabled)
+        static_cast<FileListWidget*>(currentWidget)->addFile(filePath);
+    else
+        showFile(files.length()-1);
+    emit fileAdded(filePath);
 }
 void MediaDisplay::resizeEvent(QResizeEvent* event)
 {
@@ -152,6 +163,33 @@ void MediaDisplay::resizeEvent(QResizeEvent* event)
         resizeImage();
 }
 
+void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
+    QMimeDatabase db;
+    const QMimeData* data = event->mimeData();
+    if (node == nullptr) {
+        event->ignore();
+    } else if (data->hasUrls()) {
+        QString filePath = data->urls()[0].toString();
+        QString mimeType = db.mimeTypeForFile(filePath).name();
+        if (mimeType.startsWith("image") || mimeType.startsWith("video")) {
+            event->setDropAction(Qt::CopyAction);
+            event->accept();
+        } else
+            event->ignore();
+    } else {
+        event->ignore();
+    }
+
+}
+
+void MediaDisplay::dropEvent(QDropEvent *event) {
+    QString filePath = event->mimeData()->urls().first().toString();
+    if (filePath.startsWith("file:///"))
+        filePath = filePath.slice(8);
+    if (!filePath.isEmpty())
+        insertFile(filePath);
+
+}
 void MediaDisplay::resizeImage() {
     int w = ui->viewport->width();
     int h = static_cast<PixmapLabel*>(currentWidget)->heightForWidth(w);
@@ -163,12 +201,4 @@ void MediaDisplay::disableControls() {
     ui->prevButton->setEnabled(false);
     ui->nextButton->setEnabled(false);
     ui->openButton->setEnabled(false);
-    /*ui->videoPlayer->clearVideo();
-    ui->videoContainer->hide();
-    ui->imageLabel->setImage(QPixmap());
-    ui->imageContainer->show();
-    ui->prevButton->setEnabled(false);
-    ui->nextButton->setEnabled(false);
-    ui->openButton->setEnabled(false);*/
-
 }
