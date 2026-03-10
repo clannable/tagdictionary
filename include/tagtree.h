@@ -31,6 +31,7 @@ protected:
     // virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent* event) override;
     virtual void dropEvent(QDropEvent *event) override;
+    // virtual void dragEnterEvent(QDragEnterEvent *event) override;
 
 signals:
     void addToRelated(JsonNode *node);
@@ -39,18 +40,20 @@ signals:
 
 private:
     JsonNode* rootNode;
-    // TagTreeItem* dragItem;
+
     TagTreeItem* menuItem;
 
-    // QPoint dragStartPosition;
-    QMap<QModelIndex,JsonNode*> nodeMap;
+    TagTreeItem* dragItem;
+    QPoint dragStartPosition;
+
     bool editModeEnabled;
     TagTreeItem* findTag(TagTreeItem* item, QString tagPath);
 
+    void createChildren(TagTreeItem* item, JsonNode *node);
+
+private slots:
     void signalRelated();
     void signalRequired();
-
-    void createChildren(TagTreeItem* item, JsonNode *node);
 };
 
 #endif // TAGTREE_H

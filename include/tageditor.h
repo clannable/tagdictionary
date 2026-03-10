@@ -6,6 +6,7 @@
 
 #include "./jsonnode.h"
 #include "./icondialog.h"
+#include "tagtree.h"
 #include <nlohmann/json.hpp>
 
 namespace Ui {
@@ -19,6 +20,8 @@ class TagEditor : public QWidget
 public:
     explicit TagEditor(QWidget *parent = nullptr);
     ~TagEditor();
+
+    void linkTagTreeToLists(const TagTree* tree);
 
 public slots:
     void toggleEditMode();

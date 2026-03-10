@@ -32,6 +32,11 @@ TagEditor::~TagEditor()
     delete ui;
 }
 
+void TagEditor::linkTagTreeToLists(const TagTree* ptr) {
+    ui->requiredList->linkTagTree(ptr);
+    ui->relatedList->linkTagTree(ptr);
+}
+
 void TagEditor::setTag(JsonNode *node) {
     currentTag = node;
     if (node == nullptr) {

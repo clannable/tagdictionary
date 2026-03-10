@@ -11,6 +11,7 @@ TagTreeItem::TagTreeItem(JsonNode *node) :
 
     if (this->node == nullptr) return;
     setText(0, QString::fromStdString(this->node->getKey()));
+    setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
 
     nlohmann::json json = this->node->getData();
 
@@ -32,11 +33,13 @@ json TagTreeItem::getJson() const {
 
 void TagTreeItem::setNode(JsonNode *node) {
     this->node = node;
+    setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
 }
 
 void TagTreeItem::setKey(QString str) {
     if (node != nullptr) {
         node->setKey(str.toStdString());
+        setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
     }
     setText(0, str);
 }
@@ -51,6 +54,7 @@ void TagTreeItem::jsonUpdated() {
     } else {
         setIcon(0, QIcon(":/icons/" + icon));
     }
+    setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
 }
 
 

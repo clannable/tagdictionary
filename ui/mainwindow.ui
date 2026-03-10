@@ -92,7 +92,7 @@
         </widget>
        </item>
        <item>
-        <widget class="TagTree" name="treeWidget">
+        <widget class="TagTree" name="tagTree">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -120,7 +120,10 @@
           <bool>true</bool>
          </property>
          <property name="dragDropMode">
-          <enum>QAbstractItemView::DragDropMode::InternalMove</enum>
+          <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
+         </property>
+         <property name="defaultDropAction">
+          <enum>Qt::DropAction::MoveAction</enum>
          </property>
          <property name="alternatingRowColors">
           <bool>false</bool>

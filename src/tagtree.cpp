@@ -103,6 +103,7 @@ void TagTree::createChildren(TagTreeItem* item, JsonNode *node) {
 }
 
 void TagTree::dropEvent(QDropEvent *event) {
+    if (event->source() != this) return;
     TagTreeItem* item = static_cast<TagTreeItem*>(currentItem());
 
     QTreeWidget::dropEvent(event);
@@ -113,6 +114,7 @@ void TagTree::dropEvent(QDropEvent *event) {
         } else {
             item->getNode()->setParent(rootNode);
         }
+        item->setData(0, Qt::UserRole, QString::fromStdString(item->getNode()->getFullPath()));
         // std::cout << item->text(0).toStdString() << "\n" << std::flush;
         sortItems(0, Qt::AscendingOrder);
         emit tagsChanged();
@@ -123,13 +125,13 @@ void TagTree::dropEvent(QDropEvent *event) {
 //     QTreeWidget::mousePressEvent(event);
 //     QTreeWidgetItem *item = this->itemAt(event->pos());
 //     this->expandItem(item);
-//     // if (dragEnabled()) {
-//     //     QTreeWidgetItem *item = this->itemAt(event->pos());
-//     //     if (item != nullptr) {
-//     //         dragItem = static_cast<TagTreeItem*>(item);
-//     //         dragStartPosition = event->pos();
-//     //     }
-//     // }
+//     if (dragEnabled()) {
+//         QTreeWidgetItem *item = this->itemAt(event->pos());
+//         if (item != nullptr) {
+//             dragItem = static_cast<TagTreeItem*>(item);
+//             dragStartPosition = event->pos();
+//         }
+//     }
 // }
 
 // void TagTree::mouseMoveEvent(QMouseEvent *event) {
@@ -148,6 +150,12 @@ void TagTree::dropEvent(QDropEvent *event) {
 //     Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
 //     dragItem = nullptr;
 //     dragStartPosition = QPoint();
+// }
+
+// void TagTree::mouseReleaseEvent(QMouseEvent *event) {
+//     dragItem = nullptr;
+//     dragStartPosition = QPoint();
+//     QTreeWidget::mouseReleaseEvent(event);
 // }
 
 void TagTree::contextMenuEvent(QContextMenuEvent *event) {
@@ -186,8 +194,4 @@ void TagTree::setEditMode(bool mode) {
     editModeEnabled = mode;
 }
 
-// void TagTree::mouseReleaseEvent(QMouseEvent *event) {
-//     dragItem = nullptr;
-//     dragStartPosition = QPoint();
-//     QTreeWidget::mouseReleaseEvent(event);
-// }
+

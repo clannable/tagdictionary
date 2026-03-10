@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    ui->tagEditor->linkTagTreeToLists(ui->tagTree);
     QMenu *fileMenu = ui->menuBar->addMenu("File");
     QAction *saveAction = new QAction("Save JSON", this);
     QAction *openAction = new QAction("Open...", this);
@@ -35,18 +36,18 @@ MainWindow::MainWindow(QWidget *parent)
     fileMenu->addAction(saveAction);
     fileMenu->addAction(openAction);
 
-    connect(ui->tagEditor, &TagEditor::editModeChanged, ui->treeWidget, &TagTree::setEditMode);
+    connect(ui->tagEditor, &TagEditor::editModeChanged, ui->tagTree, &TagTree::setEditMode);
     connect(ui->tagEditor, &TagEditor::editModeChanged, ui->mediaDisplay, &MediaDisplay::setEditMode);
     connect(ui->tagEditor, &TagEditor::listItemSelected, this, &MainWindow::onTagListSelect);
     connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onSave);
     connect(ui->tagEditor, &TagEditor::editModeChanged, this, &MainWindow::setEditMode);
     connect(ui->mediaDisplay, &MediaDisplay::fileAdded, this, &MainWindow::onAddFile);
 
-    connect(ui->treeWidget, &QTreeWidget::itemDoubleClicked, this, &MainWindow::onTagDoubleClicked);
-    connect(ui->treeWidget, &QTreeWidget::itemSelectionChanged, this, &MainWindow::onTagSelect);
-    connect(ui->treeWidget, &TagTree::tagsChanged, this, &MainWindow::saveJson);
-    connect(ui->treeWidget, &TagTree::addToRelated, ui->tagEditor, &TagEditor::addToRelated);
-    connect(ui->treeWidget, &TagTree::addToRequired, ui->tagEditor, &TagEditor::addToRequired);
+    connect(ui->tagTree, &QTreeWidget::itemDoubleClicked, this, &MainWindow::onTagDoubleClicked);
+    connect(ui->tagTree, &QTreeWidget::itemSelectionChanged, this, &MainWindow::onTagSelect);
+    connect(ui->tagTree, &TagTree::tagsChanged, this, &MainWindow::saveJson);
+    connect(ui->tagTree, &TagTree::addToRelated, ui->tagEditor, &TagEditor::addToRelated);
+    connect(ui->tagTree, &TagTree::addToRequired, ui->tagEditor, &TagEditor::addToRequired);
 
     QSettings settings("MyApp","Tag Viewer");
     jsonFilePath = settings.value("data/lastOpened", "").toString();
@@ -63,7 +64,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::onTagSelect() {
     if (editModeEnabled) return;
-    selectedItem = static_cast<TagTreeItem*>(ui->treeWidget->currentItem());
+    selectedItem = static_cast<TagTreeItem*>(ui->tagTree->currentItem());
 
     JsonNode *node = selectedItem->getNode();
     ui->tagEditor->setTag(node);
@@ -82,11 +83,11 @@ void MainWindow::onTagDoubleClicked(QTreeWidgetItem *item, int column) {
 void MainWindow::onTagListSelect(QString tagPath) {
     if (editModeEnabled == true) return;
 
-    TagTreeItem *tag = ui->treeWidget->findTag(tagPath);
+    TagTreeItem *tag = ui->tagTree->findTag(tagPath);
     selectedItem->setSelected(false);
     selectedItem = tag;
     selectedItem->setSelected(true);
-    ui->treeWidget->expandItem(selectedItem);
+    ui->tagTree->expandItem(selectedItem);
 }
 
 /*--------- Tag Editor Slots ---------*/
@@ -98,7 +99,7 @@ void MainWindow::setEditMode(bool mode) {
     font.setWeight(mode ? QFont::DemiBold : QFont::Normal);
     selectedItem->setFont(0, font);
 
-    ui->treeWidget->setCurrentItem(selectedItem);
+    ui->tagTree->setCurrentItem(selectedItem);
 }
 
 void MainWindow::onSave(json tag) {
@@ -137,7 +138,7 @@ void MainWindow::onAddFile(QString filePath) {
 
 void MainWindow::saveJson() {
     if (jsonFilePath.isNull() || jsonFilePath.isEmpty()) return;
-    json tags = ui->treeWidget->toJson();
+    json tags = ui->tagTree->toJson();
     std::ofstream of(jsonFilePath.toStdString());
     if (!of.is_open()) {
         std::cout << "Failed to open output file\n" << std::flush;
@@ -160,7 +161,7 @@ void MainWindow::openJson() {
 
 void MainWindow::reloadJson() {
     if (jsonFilePath.isNull() || jsonFilePath.isEmpty()) return;
-    ui->treeWidget->clear();
+    ui->tagTree->clear();
     editModeEnabled = false;
 
     selectedItem = nullptr;
@@ -172,8 +173,8 @@ void MainWindow::reloadJson() {
 
     std::ifstream f(jsonFilePath.toStdString());
     json tags = json::parse(f);
-    ui->treeWidget->fromJson(tags);
-    ui->treeWidget->sortByColumn(0, Qt::AscendingOrder);
+    ui->tagTree->fromJson(tags);
+    ui->tagTree->sortByColumn(0, Qt::AscendingOrder);
 
     f.close();
 }

@@ -3,6 +3,7 @@
 #include <QMimeData>
 #include <QCursor>
 #include "taglistwidgetitem.h"
+#include <iostream>
 
 TagListWidget::TagListWidget(QWidget *parent) :
     QListWidget(parent) {
@@ -24,29 +25,28 @@ void TagListWidget::insertTag(QString tagPath) {
     sortItems();
 }
 
-// void TagListWidget::dropEvent(QDropEvent *event) {
+void TagListWidget::linkTagTree(const TagTree* ptr) {
+    this->tagTree = ptr;
+}
 
-//     QString tagPath = event->mimeData()->text();
-//     addItem(new TagListWidgetItem(tagPath));
-//     event->acceptProposedAction();
-// }
+void TagListWidget::dropEvent(QDropEvent *event) {
+    if (!editModeEnabled) return;
+    QString tagPath = QString::fromStdString(static_cast<TagTreeItem*>(tagTree->currentItem())->getNode()->getFullPath());
+    for (int i = 0; i < count(); i++)
+        if ((static_cast<TagListWidgetItem*>(item(i)))->getValue() == tagPath) return;
 
-// void TagListWidget::dragEnterEvent(QDragEnterEvent *event) {
-//     std::cout << "Drag enter" << this->acceptDrops() << std::flush;
-//     if (event->mimeData()->hasFormat("text/plain")) {
+    addItem(new TagListWidgetItem(tagPath));
+}
 
-//         /*std::cout << event->mimeData()->text().toStdString() << std::flush;
-//         QString tagPath = event->mimeData()->text();
-//         for (int i = 0; i < count(); i++) {
-//             if ((static_cast<TagListWidgetItem*>(item(i)))->getValue() == tagPath) {
-//                 std::cout << "Tag exists in list" << std::flush;
-//                 event->ignore();
-//                 return;
-//             }
-//         }*/
-//         event->acceptProposedAction();
-//     }
-// }
+void TagListWidget::dragEnterEvent(QDragEnterEvent *event) {
+    // std::cout << event->source()->objectName().toStdString() << "\n" <<std::flush;
+    if (editModeEnabled && event->source() == tagTree) {
+        event->setDropAction(Qt::CopyAction);
+        event->accept();
+    } else {
+        event->ignore();
+    }
+}
 
 void TagListWidget::contextMenuEvent(QContextMenuEvent *event) {
     if (!editModeEnabled) return;

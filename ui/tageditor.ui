@@ -231,6 +231,9 @@ QToolButton:pressed {
        <property name="cursor" stdset="0">
         <cursorShape>ArrowCursor</cursorShape>
        </property>
+       <property name="acceptDrops">
+        <bool>true</bool>
+       </property>
        <property name="frameShape">
         <enum>QFrame::Shape::StyledPanel</enum>
        </property>
@@ -266,6 +269,9 @@ QToolButton:pressed {
          <italic>true</italic>
          <bold>false</bold>
         </font>
+       </property>
+       <property name="acceptDrops">
+        <bool>true</bool>
        </property>
        <property name="frameShape">
         <enum>QFrame::Shape::StyledPanel</enum>
