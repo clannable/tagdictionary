@@ -13,6 +13,7 @@
 #include <QMimeDatabase>
 #include <QAudioOutput>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QDesktopServices>
 
 
@@ -104,10 +105,17 @@ void MainWindow::onSave(json tag) {
 
     QString key = QString::fromStdString(tag.value("key", ""));
     tag.erase("key");
-    tag["files"] = json(ui->mediaDisplay->getFileList().toList());
+    ui->mediaDisplay->save();
+    QStringList files = ui->mediaDisplay->getFiles();
+    std::list<std::string> fileList;
+    for (const QString& f : files)
+        fileList.push_back(f.toStdString());
+
+    tag["files"] = json(fileList);
     selectedItem->setKey(key);
     selectedItem->getNode()->setData(tag);
-    selectedItem->setIcon(0, QIcon(":/icons/" + QString::fromStdString(tag.value("icon", ""))));
+    selectedItem->setIcon(0, QIcon(QString::fromStdString(tag.value("icon", ""))));
+
 
     ui->mediaDisplay->setFilesFromNode(selectedItem->getNode());
     saveJson();
@@ -116,7 +124,7 @@ void MainWindow::onSave(json tag) {
 /*--------- Media Display Slots ---------*/
 
 void MainWindow::onAddFile(QString filePath) {
-    if (editModeEnabled) return;
+    if (editModeEnabled) return; // Don't update json data if tag is still being edited
     json data = selectedItem->getJson();
     data.emplace("files", json::array());
     data["files"].push_back(filePath.toStdString());
@@ -157,7 +165,7 @@ void MainWindow::reloadJson() {
 
     selectedItem = nullptr;
 
-    ui->mediaDisplay->clear();
+    ui->mediaDisplay->setFilesFromNode(nullptr);
     ui->tagEditor->setTag(nullptr);
 
     std::cout << "Loading JSON file " << jsonFilePath.toStdString() << "\n" << std::flush;

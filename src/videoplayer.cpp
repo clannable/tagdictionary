@@ -1,5 +1,6 @@
 #include "videoplayer.h"
 #include "ui_videoplayer.h"
+#include <QSettings>
 
 VideoPlayer::VideoPlayer(QWidget *parent)
     : QWidget(parent)
@@ -21,7 +22,16 @@ VideoPlayer::VideoPlayer(QWidget *parent)
     connect(ui->progressSlider, &QSlider::sliderMoved, this, &VideoPlayer::onProgressSliderMove);
     connect(ui->progressSlider, &QSlider::actionTriggered, this, &VideoPlayer::onProgressSliderAction);
     connect(ui->repeatButton, &QPushButton::clicked, this, &VideoPlayer::toggleRepeat);
-    audio->setVolume(0.75);
+    QSettings settings("MyApp","Tag Viewer");
+    settings.beginGroup("video");
+    audio->setVolume(settings.value("volume", 0.75).toFloat());
+    repeat = settings.value("repeat", false).toBool();
+    player->setLoops(repeat ? QMediaPlayer::Infinite : 1);
+    ui->repeatButton->setIcon(QIcon(repeat ? ":/icons/linear/repeat" : ":/icons/linear/repeat-disabled"));
+    bool muted = settings.value("muted", false).toBool();
+    audio->setMuted(muted);
+    settings.endGroup();
+    ui->volumeSlider->setEnabled(!muted);
     updateVolumeIcon();
 }
 
@@ -156,5 +166,12 @@ void VideoPlayer::clearVideo() {
 
 VideoPlayer::~VideoPlayer()
 {
+    player->stop();
+    QSettings settings("MyApp","Tag Viewer");
+    settings.beginGroup("video");
+    settings.setValue("volume", audio->volume());
+    settings.setValue("muted", audio->isMuted());
+    settings.setValue("repeat", repeat);
+    settings.endGroup();
     delete ui;
 }

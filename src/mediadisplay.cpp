@@ -6,15 +6,13 @@
 #include <QInputDialog>
 #include <iostream>
 #include <QDesktopServices>
+#include <QFileInfo>
 
 MediaDisplay::MediaDisplay(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::MediaDisplay)
 {
     ui->setupUi(this);
-
-    ui->fileListEditor->hide();
-    ui->videoContainer->hide();
 
     connect(ui->prevButton, &QPushButton::clicked, this, &MediaDisplay::prevFile);
     connect(ui->nextButton, &QPushButton::clicked, this, &MediaDisplay::nextFile);
@@ -31,81 +29,93 @@ MediaDisplay::~MediaDisplay()
 void MediaDisplay::setFilesFromNode(JsonNode *node) {
     currentPage = 0;
     files.clear();
-    ui->fileListEditor->clear();
-    ui->fileListEditor->hide();
 
-    if (node == nullptr) return;
-    const nlohmann::json data = node->getData();
+    if (node != nullptr) {
+        const nlohmann::json data = node->getData();
 
-    if (data.contains("files") && !data["files"].empty()) {
-        for (const std::string&& file : data["files"])
-            files.append(QString::fromStdString(file));
-    } else {
-        clear();
+        if (data.contains("files") && !data["files"].empty()) {
+            for (const std::string&& file : data["files"])
+                files.append(QString::fromStdString(file));
+        }
+
     }
-
-    ui->fileListEditor->setFiles(files);
-
     showFile(0);
 }
 
-QList<std::string> MediaDisplay::getFileList() const {
-    return ui->fileListEditor->getFiles();
+QStringList MediaDisplay::getFiles() const {
+    return files;
+}
+
+void MediaDisplay::save() {
+    QList<std::string> newFiles = static_cast<FileListWidget*>(currentWidget)->getFiles();
+    files.clear();
+    for (const std::string& f : newFiles)
+        files.append(QString::fromStdString(f));
 }
 
 void MediaDisplay::setEditMode(bool mode) {
-
+    ui->addFileButton->setVisible(!mode);
     if (mode) {
-        ui->videoPlayer->stop();
-        ui->videoContainer->hide();
-        ui->imageContainer->hide();
-        ui->fileListEditor->show();
-        ui->prevButton->setEnabled(false);
-        ui->openButton->setEnabled(false);
-        ui->nextButton->setEnabled(false);
-        ui->fileCounter->setText("");
+        delete currentWidget;
+        FileListWidget* fileList = new FileListWidget(ui->viewport);
+        fileList->setFiles(this->files);
+
+        currentWidget = fileList;
+        ui->viewportLayout->insertWidget(0, currentWidget, 1);
+
+        disableControls();
         // ui->imageLabel->setImage(QPixmap());
     } else {
-        ui->fileListEditor->hide();
         showFile(currentPage);
     }
 }
 
 void MediaDisplay::showFile(int index) {
     currentPage = index;
+    if (currentWidget != nullptr)
+        delete currentWidget;
+
     if (files.isEmpty()) {
-        ui->videoContainer->hide();
-        ui->imageLabel->setImage(QPixmap());
-        ui->imageContainer->show();
-        return;
-    }
-    QMimeDatabase db;
-    QString filePath = files[currentPage];
-    QString mimeType = db.mimeTypeForFile(filePath).name();
-    ui->openButton->setEnabled(true);
-    if (mimeType.startsWith("image")) {
-        if (mimeType.endsWith("gif"))
-            ui->imageLabel->setMovieFile(filePath);
-        else
-            ui->imageLabel->setImage(QPixmap(filePath));
+        isImage = false;
+        QLabel* error = new QLabel();
+        error->setText("No files to display");
+        error->setAlignment(Qt::AlignCenter);
+        ui->fileCounter->setText("");
+        currentWidget = error;
+        disableControls();
 
-        ui->videoPlayer->clearVideo();
-        ui->videoContainer->hide();
+    } else {
+        QString filePath = files[currentPage];
+        if (!QFileInfo::exists(filePath)) {
+            isImage = false;
+            QLabel* error = new QLabel();
+            error->setText("Failed to load file");
+            error->setAlignment(Qt::AlignCenter);
+
+        }
+        QMimeDatabase db;
+        QString mimeType = db.mimeTypeForFile(filePath).name();
+        ui->openButton->setEnabled(true);
+        if (mimeType.startsWith("image")) {
+            isImage = true;
+            PixmapLabel* image = new PixmapLabel();
+            image->setImage(filePath, mimeType.endsWith("gif"));
+            currentWidget = image;
+        } else if (mimeType.startsWith("video")) {
+            isImage = false;
+            VideoPlayer* video = new VideoPlayer();
+            video->setVideo(filePath);
+            video->play();
+            currentWidget = video;
+        }
+        ui->fileCounter->setText(QString::number(currentPage+1) + " / " + QString::number(files.length()));
+        ui->prevButton->setEnabled(currentPage > 0);
+        ui->nextButton->setEnabled(currentPage < files.length()-1);
+    }
+    if (currentWidget != nullptr)
+        ui->viewportLayout->insertWidget(0, currentWidget, 1);
+    if (isImage)
         resizeImage();
-        ui->imageContainer->show();
-
-    } else if (mimeType.startsWith("video")) {
-        ui->imageContainer->hide();
-        ui->imageLabel->setImage(QPixmap());
-        ui->videoContainer->show();
-        ui->videoPlayer->stop();
-
-        ui->videoPlayer->setVideo(filePath);
-        ui->videoPlayer->play();
-    }
-    ui->fileCounter->setText(QString::number(currentPage+1) + " / " + QString::number(files.length()));
-    ui->prevButton->setEnabled(currentPage > 0);
-    ui->nextButton->setEnabled(currentPage < files.length()-1);
 }
 
 void MediaDisplay::prevFile() {
@@ -125,14 +135,9 @@ void MediaDisplay::addFile() {
     QString file = QInputDialog::getText(this, "Enter file path", "File path:", QLineEdit::Normal, "", &ok);
 
     if (ok && !file.isEmpty()) {
-        // QString file = QFileDialog::getOpenFileName(this,
-        //     "Select file to add",
-        //     "/home",
-        //     "Media files (*.png *.jpg *.gif *.mp4 .mov)");
         file.replace("\\", "/");
         files.append(file);
         showFile(files.length()-1);
-        ui->fileListEditor->addFile(file);
         emit fileAdded(file);
     }
 
@@ -143,24 +148,27 @@ void MediaDisplay::resizeEvent(QResizeEvent* event)
 
     // force QLabel to follow fixed dimensions
     // based on the loaded QPixmap aspect ratio
-    if (ui->imageLabel->hasImage())
+    if (isImage)
         resizeImage();
 }
 
 void MediaDisplay::resizeImage() {
-    int w = ui->imageContainer->width();
-    int h = ui->imageLabel->heightForWidth(w);
-    ui->imageLabel->setFixedHeight(std::min(h, ui->imageContainer->height()));
+    int w = ui->viewport->width();
+    int h = static_cast<PixmapLabel*>(currentWidget)->heightForWidth(w);
+    static_cast<PixmapLabel*>(currentWidget)->setFixedHeight(std::min(h, ui->viewport->height()));
 
 }
 
-void MediaDisplay::clear() {
-    ui->videoPlayer->clearVideo();
+void MediaDisplay::disableControls() {
+    ui->prevButton->setEnabled(false);
+    ui->nextButton->setEnabled(false);
+    ui->openButton->setEnabled(false);
+    /*ui->videoPlayer->clearVideo();
     ui->videoContainer->hide();
     ui->imageLabel->setImage(QPixmap());
     ui->imageContainer->show();
     ui->prevButton->setEnabled(false);
     ui->nextButton->setEnabled(false);
-    ui->openButton->setEnabled(false);
-    ui->fileCounter->setText("");
+    ui->openButton->setEnabled(false);*/
+
 }

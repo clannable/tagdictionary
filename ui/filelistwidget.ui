@@ -45,9 +45,9 @@ QPushButton:pressed, QToolButton:pressed {
 }
 
 QPushButton:disabled, QToolButton:disabled {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #dadada, stop: 1 #a5a5a5);
-	border-color: #8e8e8e;
-	color: #9a9a9a;
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eaeaea, stop: 1 #c5c5c5);
+	border-color: #bebebe;
+	color: #bebebe;
 }</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">

@@ -1,6 +1,7 @@
 #include "pixmaplabel.h"
 #include <QPainter>
 #include <QPaintEvent>
+#include <QMimeDatabase>
 
 PixmapLabel::PixmapLabel(QWidget* parent) :
     QLabel(parent),
@@ -15,35 +16,21 @@ PixmapLabel::PixmapLabel(QWidget* parent) :
     // setStyleSheet("QLabel{border: 1px solid black; background: gray;}");
 }
 
+PixmapLabel::~PixmapLabel() {
+    if (m_movie != nullptr)
+        delete m_movie;
+}
+
 bool PixmapLabel::hasImage() {
     return !m_pixmap.isNull();
 }
-void PixmapLabel::setImage(const QPixmap& image)
+void PixmapLabel::setImage(const QString& filePath, bool animated=false)
 {
-    m_pixmap = image;
 
-    if (m_movie != nullptr) {
-        m_movie->stop();
-        disconnect(m_movie, &QMovie::frameChanged, this, &PixmapLabel::onMovieUpdate);
 
-        delete m_movie;
-        m_movie = nullptr;
-    }
+    QPixmap pm(filePath);
+    if (animated) {
 
-    m_cols = m_pixmap.width();
-    m_rows = m_pixmap.height();
-
-    update();
-}
-
-void PixmapLabel::onMovieUpdate() {
-    update();
-}
-
-void PixmapLabel::setMovieFile(QString filePath) {
-
-    if (!filePath.isEmpty()) {
-        QPixmap pm(filePath);
         m_cols = pm.width();
         m_rows = pm.height();
         m_pixmap = QPixmap();
@@ -51,12 +38,24 @@ void PixmapLabel::setMovieFile(QString filePath) {
         m_movie = new QMovie(filePath);
         connect(m_movie, &QMovie::frameChanged, this, &PixmapLabel::onMovieUpdate);
         m_movie->start();
-
     } else {
-        m_cols = 0;
-        m_rows = 0;
+        m_pixmap = pm;
+        m_cols = m_pixmap.width();
+        m_rows = m_pixmap.height();
+
+        if (m_movie != nullptr) {
+            m_movie->stop();
+            disconnect(m_movie, &QMovie::frameChanged, this, &PixmapLabel::onMovieUpdate);
+
+            delete m_movie;
+            m_movie = nullptr;
+        }
     }
 
+    update();
+}
+
+void PixmapLabel::onMovieUpdate() {
     update();
 }
 

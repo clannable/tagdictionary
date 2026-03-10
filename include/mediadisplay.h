@@ -3,6 +3,10 @@
 
 #include <QWidget>
 #include "jsonnode.h"
+#include "pixmaplabel.h"
+#include "videoplayer.h"
+#include "filelistwidget.h"
+#include <QVBoxLayout>
 
 namespace Ui {
 class MediaDisplay;
@@ -17,12 +21,13 @@ public:
     ~MediaDisplay();
 
     void setFilesFromNode(JsonNode* node);
-    QList<std::string> getFileList() const;
+    QStringList getFiles() const;
 
 public slots:
-    void clear();
+    void disableControls();
     void setEditMode(bool mode);
 
+    void save();
     void prevFile();
     void nextFile();
     void openFile();
@@ -40,9 +45,15 @@ private:
     int currentPage = 0;
     QStringList files;
 
+    JsonNode* node = nullptr;
+    QWidget* currentWidget = nullptr;
+
     void showFile(int index);
+    void showImage(QString filePath, bool animated);
+    void showVideo(QString filePath);
 
     void resizeImage();
+    bool isImage = false;
 };
 
 #endif // MEDIADISPLAY_H

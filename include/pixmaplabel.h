@@ -10,14 +10,14 @@ class PixmapLabel : public QLabel
 public:
 
     PixmapLabel(QWidget* parent = nullptr);
+    ~PixmapLabel();
+
     virtual QSize sizeHint() const override;
 
     bool hasImage();
 
-    void setImage(const QPixmap& image);
+    void setImage(const QString& filePath, bool animated);
     int heightForWidth(int width) const override;
-
-    void setMovieFile(QString filePath);
 
 public slots:
     void onMovieUpdate();
