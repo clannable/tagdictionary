@@ -166,7 +166,7 @@ void MediaDisplay::resizeEvent(QResizeEvent* event)
 void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
     QMimeDatabase db;
     const QMimeData* data = event->mimeData();
-    if (node == nullptr) {
+    if (node == nullptr || event->source() != nullptr) {
         event->ignore();
     } else if (data->hasUrls()) {
         QString filePath = data->urls()[0].toString();

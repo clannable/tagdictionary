@@ -35,7 +35,7 @@ void TagListWidget::dropEvent(QDropEvent *event) {
     for (int i = 0; i < count(); i++)
         if ((static_cast<TagListWidgetItem*>(item(i)))->getValue() == tagPath) return;
 
-    addItem(new TagListWidgetItem(tagPath));
+    insertTag(tagPath);
 }
 
 void TagListWidget::dragEnterEvent(QDragEnterEvent *event) {
