@@ -24,6 +24,9 @@ public slots:
     void onCreateTag();
     void onNewTag(JsonNode* node);
     void onRemoveTag();
+
+    void expandTreeTo(QTreeWidgetItem* item);
+
 protected:
 
     // virtual void mouseMoveEvent(QMouseEvent *event) override;

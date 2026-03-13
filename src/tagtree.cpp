@@ -12,7 +12,7 @@ TagTree::TagTree(QWidget* parent) :
     QTreeWidget(parent),
     editModeEnabled(false)
 {
-    connect(this, &QTreeWidget::itemClicked, this, &QTreeWidget::expandItem);
+    // connect(this, &QTreeWidget::itemClicked, this, &QTreeWidget::expandItem);
 }
 
 TagTree::~TagTree() {
@@ -104,6 +104,14 @@ void TagTree::onRemoveTag() {
     }
 
 
+}
+
+void TagTree::expandTreeTo(QTreeWidgetItem* item) {
+    QTreeWidgetItem* ptr = item;
+    while ((ptr = ptr->parent()) != nullptr) {
+        expandItem(ptr);
+    }
+    this->scrollToItem(item);
 }
 
 void TagTree::createChildren(TagTreeItem* item, JsonNode *node) {

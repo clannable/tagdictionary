@@ -15,7 +15,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QDesktopServices>
-
+#include <QMessageBox>
 
 using json = nlohmann::json;
 
@@ -27,14 +27,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->tagEditor->linkTagTreeToLists(ui->tagTree);
     QMenu *fileMenu = ui->menuBar->addMenu("File");
-    QAction *saveAction = new QAction("Save JSON", this);
-    QAction *openAction = new QAction("Open...", this);
+    QAction *newAction = new QAction("New Dictionary", this);
+    saveAction = new QAction("Save Dictionary", this);
+    openAction = new QAction("Open Dictionary...", this);
+    newAction->setShortcuts(QKeySequence::New);
     openAction->setShortcuts(QKeySequence::Open);
     saveAction->setShortcuts(QKeySequence::Save);
+    connect(newAction, &QAction::triggered, this, &MainWindow::newJson);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveJson);
     connect(openAction, &QAction::triggered, this, &MainWindow::openJson);
-    fileMenu->addAction(saveAction);
+    fileMenu->addAction(newAction);
     fileMenu->addAction(openAction);
+    fileMenu->addAction(saveAction);
+
 
     connect(ui->tagEditor, &TagEditor::editModeChanged, ui->tagTree, &TagTree::setEditMode);
     connect(ui->tagEditor, &TagEditor::editModeChanged, ui->mediaDisplay, &MediaDisplay::setEditMode);
@@ -51,7 +56,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     QSettings settings("MyApp","Tag Viewer");
     jsonFilePath = settings.value("data/lastOpened", "").toString();
-
+    if (!jsonFilePath.isEmpty() && !QFileInfo::exists(jsonFilePath)) {
+        QMessageBox::critical(this, "Failed to load file", "ERROR: Failed to load dictionary file");
+        jsonFilePath = "";
+    }
+    saveAction->setEnabled(!jsonFilePath.isEmpty());
     reloadJson();
 }
 
@@ -87,7 +96,7 @@ void MainWindow::onTagListSelect(QString tagPath) {
     selectedItem->setSelected(false);
     selectedItem = tag;
     tag->setSelected(true);
-    ui->tagTree->expandItem(selectedItem);
+    ui->tagTree->expandTreeTo(tag);
 }
 
 /*--------- Tag Editor Slots ---------*/
@@ -109,7 +118,7 @@ void MainWindow::onSave(json tag) {
     ui->mediaDisplay->save();
     QStringList files = ui->mediaDisplay->getFiles();
     std::list<std::string> fileList;
-    for (const QString& f : files)
+    for (const auto& f : files)
         fileList.push_back(f.toStdString());
 
     tag["files"] = json(fileList);
@@ -136,6 +145,31 @@ void MainWindow::onAddFile(QString filePath) {
 
 /*--------- JSON Functions ---------*/
 
+void MainWindow::newJson() {
+    jsonFilePath = QFileDialog::getSaveFileName(
+        this,
+        "Select where to save JSON file",
+        jsonFilePath.isEmpty() ? "" : QFileInfo(jsonFilePath).dir().absolutePath(),
+        "Tag Dictionary (*.json)"
+    );
+    if (!jsonFilePath.isEmpty()) {
+        std::ofstream of(jsonFilePath.toStdString());
+        if (!of.is_open()) {
+            std::cout << "Failed to open output file\n" << std::flush;
+        } else {
+            of << json({}).dump(2);
+            of.close();
+        }
+        QSettings settings("MyApp","Tag Viewer");
+        settings.setValue("data/lastOpened", jsonFilePath);
+        reloadJson();
+    }
+
+    saveAction->setEnabled(!jsonFilePath.isEmpty());
+
+
+}
+
 void MainWindow::saveJson() {
     if (jsonFilePath.isNull() || jsonFilePath.isEmpty()) return;
     json tags = ui->tagTree->toJson();
@@ -152,7 +186,7 @@ void MainWindow::openJson() {
     jsonFilePath = QFileDialog::getOpenFileName(
         this,
         "Select JSON file",
-        "/home",
+        jsonFilePath.isEmpty() ? "" : QFileInfo(jsonFilePath).dir().absolutePath(),
         "Tag Dictionary (*.json)");
     QSettings settings("MyApp","Tag Viewer");
     settings.setValue("data/lastOpened", jsonFilePath);

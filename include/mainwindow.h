@@ -40,6 +40,7 @@ public slots:
     void onAddFile(QString filePath);
     void saveJson();
     void openJson();
+    void newJson();
     void reloadJson();
 
 private:
@@ -47,6 +48,8 @@ private:
     TagTreeItem* selectedItem;
 
     QString jsonFilePath;
+    QAction* saveAction;
+    QAction* openAction;
 
     bool editModeEnabled = false;
 };
