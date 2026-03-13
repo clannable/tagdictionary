@@ -327,27 +327,36 @@ QToolButton:pressed {
        </property>
        <property name="styleSheet">
         <string notr="true">QPushButton {
+	width: 40px;
+}
+
+QToolButton {
+	width: 25px;
+	height: 25px;
+}
+
+QPushButton, QToolButton {
 	border-radius: 4px;
 	border: 1px solid #b9b9b9;
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #247ccf, stop: 1 #1c62a3);
-	color: #c5c5c5; 
-	height: 24px;
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f9f9f9, stop: 1 #e5e5e5);
+	color: #3a3a3a; 
+	height: 25px;
 }
 
-QPushButton:hover {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #1f6bb3, stop: 1 #18578d);
+QPushButton:hover, QToolButton:hover {
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #c9c9c9, stop: 1 #a5a5a5);
     border-color: #8f8f8f;
 }
 
-QPushButton:pressed{
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #18578d, stop: 1 #1f6bb3);
+QPushButton:pressed, QToolButton:pressed {
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #a9a9a9, stop: 1 #959595);
     border-color: #8f8f8f;
 }
 
-QPushButton:disabled {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #dadada, stop: 1 #a5a5a5);
-	border-color: #8e8e8e;
-	color: #9a9a9a;
+QPushButton:disabled, QToolButton:disabled {
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eaeaea, stop: 1 #c5c5c5);
+	border-color: #bebebe;
+	color: #bebebe;
 }</string>
        </property>
        <property name="text">
@@ -377,27 +386,36 @@ QPushButton:disabled {
        </property>
        <property name="styleSheet">
         <string notr="true">QPushButton {
+	width: 40px;
+}
+
+QToolButton {
+	width: 25px;
+	height: 25px;
+}
+
+QPushButton, QToolButton {
 	border-radius: 4px;
 	border: 1px solid #b9b9b9;
 	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f9f9f9, stop: 1 #e5e5e5);
 	color: #3a3a3a; 
-	height: 24px;
+	height: 25px;
 }
 
-QPushButton:hover {
+QPushButton:hover, QToolButton:hover {
 	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #c9c9c9, stop: 1 #a5a5a5);
     border-color: #8f8f8f;
 }
 
-QPushButton:pressed{
+QPushButton:pressed, QToolButton:pressed {
 	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #a9a9a9, stop: 1 #959595);
     border-color: #8f8f8f;
 }
 
-QPushButton:disabled {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #dadada, stop: 1 #a5a5a5);
-	border-color: #8e8e8e;
-	color: #9a9a9a;
+QPushButton:disabled, QToolButton:disabled {
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eaeaea, stop: 1 #c5c5c5);
+	border-color: #bebebe;
+	color: #bebebe;
 }</string>
        </property>
        <property name="text">
