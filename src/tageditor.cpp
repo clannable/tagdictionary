@@ -1,7 +1,6 @@
 #include "tageditor.h"
 #include "ui_tageditor.h"
 #include "taglistwidgetitem.h"
-#include <iostream>
 #include <QFileInfo>
 
 TagEditor::TagEditor(QWidget *parent)
@@ -23,8 +22,6 @@ TagEditor::TagEditor(QWidget *parent)
 
     connect(this, &TagEditor::editModeChanged, ui->relatedList, &TagListWidget::setEditMode);
     connect(this, &TagEditor::editModeChanged, ui->requiredList, &TagListWidget::setEditMode);
-
-    std::cout << "Initialized TagEditor\n" << std::flush;
 }
 
 TagEditor::~TagEditor()
@@ -49,6 +46,10 @@ void TagEditor::setTag(JsonNode *node) {
         ui->description->setMarkdown("");
         return;
     }
+    ui->relatedList->setTag(node);
+    ui->requiredList->setTag(node);
+    ui->relatedList->setEnabled(node != nullptr);
+    ui->requiredList->setEnabled(node != nullptr);
     json tag = node->getData();
     ui->editButton->setEnabled(true);
     QString ic = QString::fromStdString(tag.value("icon", ""));
@@ -102,6 +103,7 @@ void TagEditor::toggleEditMode() {
         ui->iconLabel->show();
         ui->relatedList->clear();
         ui->requiredList->clear();
+
         json tag = currentTag->getData();
         if (tag.contains("required") && !tag["required"].empty()) {
             for (const std::string&& t : tag["required"])

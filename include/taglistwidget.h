@@ -25,21 +25,20 @@ public slots:
     void setEditMode(bool mode);
     void insertTag(JsonNode* node);
     void insertTag(QString tagPath);
-
+    void setTag(JsonNode* node);
 
 protected:
     virtual void dropEvent(QDropEvent *event) override;
     virtual void dragEnterEvent(QDragEnterEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent *event) override;
 
-
-
 private:
-
     const TagTree* tagTree = nullptr;
-    bool editModeEnabled;
-    QListWidgetItem *selectedItem;
-    QListWidgetItem *menuItem;
+    bool editModeEnabled = false;
+    QListWidgetItem *selectedItem = nullptr;
+    QListWidgetItem *menuItem = nullptr;
+
+    JsonNode* currentTag = nullptr;
     void onRemoveTag();
 };
 

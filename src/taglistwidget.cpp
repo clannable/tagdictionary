@@ -29,8 +29,14 @@ void TagListWidget::linkTagTree(const TagTree* ptr) {
     this->tagTree = ptr;
 }
 
+void TagListWidget::setTag(JsonNode* node) {
+    this->currentTag = node;
+}
+
 void TagListWidget::dropEvent(QDropEvent *event) {
     if (!editModeEnabled) return;
+    JsonNode* node = static_cast<TagTreeItem*>(tagTree->currentItem())->getNode();
+    if (node == this->currentTag) return;
     QString tagPath = QString::fromStdString(static_cast<TagTreeItem*>(tagTree->currentItem())->getNode()->getFullPath());
     for (int i = 0; i < count(); i++)
         if ((static_cast<TagListWidgetItem*>(item(i)))->getValue() == tagPath) return;
@@ -41,9 +47,16 @@ void TagListWidget::dropEvent(QDropEvent *event) {
 void TagListWidget::dragEnterEvent(QDragEnterEvent *event) {
     // std::cout << event->source()->objectName().toStdString() << "\n" <<std::flush;
     if (editModeEnabled && event->source() == tagTree) {
-        event->setDropAction(Qt::CopyAction);
-        event->accept();
+        JsonNode* node = static_cast<TagTreeItem*>(tagTree->currentItem())->getNode();
+        if (node != this->currentTag) {
+            event->setDropAction(Qt::CopyAction);
+            event->accept();
+        } else {
+            event->setDropAction(Qt::IgnoreAction);
+            event->ignore();
+        }
     } else {
+        event->setDropAction(Qt::IgnoreAction);
         event->ignore();
     }
 }

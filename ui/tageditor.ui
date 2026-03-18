@@ -221,6 +221,9 @@ QToolButton:pressed {
     <layout class="QGridLayout" name="gridLayout" columnstretch="1">
      <item row="2" column="0">
       <widget class="TagListWidget" name="requiredList">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="font">
         <font>
          <pointsize>10</pointsize>
@@ -263,6 +266,9 @@ QToolButton:pressed {
      </item>
      <item row="4" column="0">
       <widget class="TagListWidget" name="relatedList">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="font">
         <font>
          <pointsize>10</pointsize>
@@ -328,6 +334,7 @@ QToolButton:pressed {
        <property name="styleSheet">
         <string notr="true">QPushButton {
 	width: 40px;
+	
 }
 
 QToolButton {
@@ -338,18 +345,18 @@ QToolButton {
 QPushButton, QToolButton {
 	border-radius: 4px;
 	border: 1px solid #b9b9b9;
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f9f9f9, stop: 1 #e5e5e5);
-	color: #3a3a3a; 
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #247ccf, stop: 1 #1c62a3);
+	color: #c5c5c5; 
 	height: 25px;
 }
 
 QPushButton:hover, QToolButton:hover {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #c9c9c9, stop: 1 #a5a5a5);
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #1f6bb3, stop: 1 #18578d);
     border-color: #8f8f8f;
 }
 
 QPushButton:pressed, QToolButton:pressed {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #a9a9a9, stop: 1 #959595);
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #18578d, stop: 1 #1f6bb3);
     border-color: #8f8f8f;
 }
 
