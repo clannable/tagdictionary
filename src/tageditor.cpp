@@ -46,6 +46,7 @@ void TagEditor::setTag(TagNode *node) {
         ui->description->setMarkdown("");
         return;
     }
+
     ui->relatedList->setTag(node);
     ui->requiredList->setTag(node);
     ui->relatedList->setEnabled(node != nullptr);
@@ -88,7 +89,14 @@ void TagEditor::toggleEditMode() {
         ui->iconLabel->hide();
     }
     else {
-        this->setTag(this->currentTag);
+        ui->descriptionEditor->hide();
+        ui->description->show();
+        ui->iconButton->hide();
+        ui->iconLabel->show();
+        ui->relatedList->clear();
+        ui->requiredList->clear();
+
+        refreshLists();
     }
 
     emit editModeChanged(editModeEnabled);
