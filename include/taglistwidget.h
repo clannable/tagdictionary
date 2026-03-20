@@ -3,9 +3,11 @@
 
 #include <QListWidget>
 #include <nlohmann/json.hpp>
-#include "jsonnode.h"
+#include "tagnode.h"
 #include "tagtree.h"
 #include <qevent.h>
+#include <list>
+
 using json = nlohmann::json;
 
 class TagListWidget : public QListWidget
@@ -16,16 +18,15 @@ public:
     TagListWidget(QWidget *parent);
 
     bool contains(json tag);
-    QList<std::string> values();
-    QList<json> tags();
+    std::list<std::string> values();
 
     void linkTagTree(const TagTree* ptr);
 
 public slots:
     void setEditMode(bool mode);
-    void insertTag(JsonNode* node);
+    void insertTag(TagNode* node);
     void insertTag(QString tagPath);
-    void setTag(JsonNode* node);
+    void setTag(TagNode* node);
 
 protected:
     virtual void dropEvent(QDropEvent *event) override;
@@ -38,7 +39,7 @@ private:
     QListWidgetItem *selectedItem = nullptr;
     QListWidgetItem *menuItem = nullptr;
 
-    JsonNode* currentTag = nullptr;
+    TagNode* currentTag = nullptr;
     void onRemoveTag();
 };
 

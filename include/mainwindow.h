@@ -4,12 +4,11 @@
 #include <QMainWindow>
 #include <QTreeWidgetItem>
 #include <QListWidgetItem>
-
 #include <QMap>
 #include <QSettings>
-#include "jsonnode.h"
+
+#include "tagnode.h"
 #include "tagtreeitem.h"
-#include "icondialog.h"
 
 #include <nlohmann/json.hpp>
 
@@ -36,7 +35,7 @@ public slots:
 
     void setEditMode(bool mode);
 
-    void onSave(json tag);
+    void onSave(TagNode* tag, std::string oldPath);
     void onAddFile(QString filePath);
     void saveJson();
     void openJson();
@@ -50,6 +49,7 @@ private:
     QString jsonFilePath;
     QAction* saveAction;
     QAction* openAction;
+    QAction* newTagAction;
 
     bool editModeEnabled = false;
 };

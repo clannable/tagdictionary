@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "jsonnode.h"
+#include "tagnode.h"
 #include "tagtreeitem.h"
 
 #include <iostream>
@@ -40,6 +40,14 @@ MainWindow::MainWindow(QWidget *parent)
     fileMenu->addAction(openAction);
     fileMenu->addAction(saveAction);
 
+    QMenu *tagMenu = ui->menuBar->addMenu("Tags");
+    newTagAction = new QAction("Create New Tag", this);
+
+    connect(newTagAction, &QAction::triggered, ui->tagTree, &TagTree::onCreateTag);
+    newTagAction->setEnabled(false);
+
+    tagMenu->addAction(newTagAction);
+
 
     connect(ui->tagEditor, &TagEditor::editModeChanged, ui->tagTree, &TagTree::setEditMode);
     connect(ui->tagEditor, &TagEditor::editModeChanged, ui->mediaDisplay, &MediaDisplay::setEditMode);
@@ -53,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->tagTree, &TagTree::tagsChanged, this, &MainWindow::saveJson);
     connect(ui->tagTree, &TagTree::addToRelated, ui->tagEditor, &TagEditor::addToRelated);
     connect(ui->tagTree, &TagTree::addToRequired, ui->tagEditor, &TagEditor::addToRequired);
-
+    connect(ui->tagTree, &TagTree::tagsChanged, ui->tagEditor, &TagEditor::refreshLists);
     QSettings settings("MyApp","Tag Viewer");
     jsonFilePath = settings.value("data/lastOpened", "").toString();
     if (!jsonFilePath.isEmpty() && !QFileInfo::exists(jsonFilePath)) {
@@ -75,7 +83,7 @@ void MainWindow::onTagSelect() {
     if (editModeEnabled || ui->tagTree->selectedItems().isEmpty()) return;
     selectedItem = static_cast<TagTreeItem*>(ui->tagTree->selectedItems().first());
 
-    JsonNode *node = selectedItem->getNode();
+    TagNode *node = selectedItem->getNode();
     ui->tagEditor->setTag(node);
     ui->mediaDisplay->setFilesFromNode(node);
 }
@@ -111,21 +119,17 @@ void MainWindow::setEditMode(bool mode) {
     ui->tagTree->setCurrentItem(selectedItem);
 }
 
-void MainWindow::onSave(json tag) {
+void MainWindow::onSave(TagNode* tag, std::string oldPath) {
 
-    QString key = QString::fromStdString(tag.value("key", ""));
-    tag.erase("key");
     ui->mediaDisplay->save();
     QStringList files = ui->mediaDisplay->getFiles();
     std::list<std::string> fileList;
     for (const auto& f : files)
         fileList.push_back(f.toStdString());
+    tag->setFiles(fileList);
 
-    tag["files"] = json(fileList);
-    selectedItem->setKey(key);
-    selectedItem->getNode()->setData(tag);
-    selectedItem->setIcon(0, QIcon(QString::fromStdString(tag.value("icon", ""))));
-
+    selectedItem->setText(0, QString::fromStdString(tag->getKey()));
+    selectedItem->setIcon(0, QIcon(QString::fromStdString(tag->getIcon())));
 
     ui->mediaDisplay->setFilesFromNode(selectedItem->getNode());
     saveJson();
@@ -135,10 +139,7 @@ void MainWindow::onSave(json tag) {
 
 void MainWindow::onAddFile(QString filePath) {
     if (editModeEnabled) return; // Don't update json data if tag is still being edited
-    json data = selectedItem->getJson();
-    data.emplace("files", json::array());
-    data["files"].push_back(filePath.toStdString());
-    selectedItem->getNode()->setData(data);
+    selectedItem->getNode()->addFile(filePath.toStdString());
     saveJson();
 }
 

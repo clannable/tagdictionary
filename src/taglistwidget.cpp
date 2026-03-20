@@ -3,13 +3,12 @@
 #include <QMimeData>
 #include <QCursor>
 #include "taglistwidgetitem.h"
-#include <iostream>
 
 TagListWidget::TagListWidget(QWidget *parent) :
     QListWidget(parent) {
 }
 
-void TagListWidget::insertTag(JsonNode *node) {
+void TagListWidget::insertTag(TagNode *node) {
     QString tagPath = QString::fromStdString(node->getFullPath());
     for (int i = 0; i < count(); i++) {
         if (static_cast<TagListWidgetItem*>(item(i))->getValue() == tagPath)
@@ -29,13 +28,13 @@ void TagListWidget::linkTagTree(const TagTree* ptr) {
     this->tagTree = ptr;
 }
 
-void TagListWidget::setTag(JsonNode* node) {
+void TagListWidget::setTag(TagNode* node) {
     this->currentTag = node;
 }
 
 void TagListWidget::dropEvent(QDropEvent *event) {
     if (!editModeEnabled) return;
-    JsonNode* node = static_cast<TagTreeItem*>(tagTree->currentItem())->getNode();
+    TagNode* node = static_cast<TagTreeItem*>(tagTree->currentItem())->getNode();
     if (node == this->currentTag) return;
     QString tagPath = QString::fromStdString(static_cast<TagTreeItem*>(tagTree->currentItem())->getNode()->getFullPath());
     for (int i = 0; i < count(); i++)
@@ -47,7 +46,7 @@ void TagListWidget::dropEvent(QDropEvent *event) {
 void TagListWidget::dragEnterEvent(QDragEnterEvent *event) {
     // std::cout << event->source()->objectName().toStdString() << "\n" <<std::flush;
     if (editModeEnabled && event->source() == tagTree) {
-        JsonNode* node = static_cast<TagTreeItem*>(tagTree->currentItem())->getNode();
+        TagNode* node = static_cast<TagTreeItem*>(tagTree->currentItem())->getNode();
         if (node != this->currentTag) {
             event->setDropAction(Qt::CopyAction);
             event->accept();
@@ -87,11 +86,11 @@ void TagListWidget::setEditMode(bool mode) {
     // setAcceptDrops(mode);
 }
 
-QList<std::string> TagListWidget::values() {
-    QList<std::string> *list = new QList<std::string>();
+std::list<std::string> TagListWidget::values() {
+    std::list<std::string> list;
     for (int i = 0; i < count(); i++) {
         TagListWidgetItem *item = static_cast<TagListWidgetItem*>(this->item(i));
-        list->append(item->getValue().toStdString());
+        list.push_back(item->getValue().toStdString());
     }
-    return *list;
+    return list;
 }

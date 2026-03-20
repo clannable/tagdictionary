@@ -44,6 +44,9 @@ QToolButton:disabled {
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0">
+   <property name="topMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QWidget" name="viewport" native="true">
      <layout class="QVBoxLayout" name="viewportLayout">

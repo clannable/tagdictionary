@@ -2,7 +2,7 @@
 #define NEWTAGDIALOG_H
 
 #include <QDialog>
-#include "./jsonnode.h"
+#include "./tagnode.h"
 #include "./icondialog.h"
 namespace Ui {
 class NewTagDialog;
@@ -16,7 +16,7 @@ public:
     explicit NewTagDialog(QWidget *parent = nullptr);
     ~NewTagDialog();
 
-    void setParentNode(JsonNode* node);
+    void setParentNode(TagNode* node);
 
 public slots:
     void onNameChange(QString text);
@@ -26,12 +26,12 @@ public slots:
     void resetIcon();
 
 signals:
-    void submit(JsonNode* node);
+    void submit(TagNode* node);
 
 
 private:
     Ui::NewTagDialog *ui;
-    JsonNode* parentNode;
+    TagNode* parentNode;
     IconDialog* iconDialog;
     QString iconPath;
 };

@@ -1,60 +1,47 @@
 #include "tagtreeitem.h"
-#include "jsonnode.h"
+#include "tagnode.h"
 #include <QFileInfo>
 
 using json = nlohmann::json;
 
-TagTreeItem::TagTreeItem(JsonNode *node) :
-    QTreeWidgetItem()
+TagTreeItem::TagTreeItem(TagNode *node) : QTreeWidgetItem()
 {
     this->node = node;
 
     if (this->node == nullptr) return;
+
     setText(0, QString::fromStdString(this->node->getKey()));
     setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
 
-    nlohmann::json json = this->node->getData();
-
-    QString icon = QString::fromStdString(json.value("icon", ""));
-    if (QFileInfo::exists(icon) || icon.startsWith(":/icons/")) {
+    QString icon = QString::fromStdString(this->node->getIcon());
+    if (QFileInfo::exists(icon) || icon.startsWith(":/icons/"))
         setIcon(0, QIcon(icon));
-    } else {
+    else
         setIcon(0, QIcon(":/icons/" + icon));
-    }
 }
 
-JsonNode* TagTreeItem::getNode() const {
+TagNode* TagTreeItem::getNode() const {
     return node;
 }
 
-json TagTreeItem::getJson() const {
-    return this->node->getData();
-}
-
-void TagTreeItem::setNode(JsonNode *node) {
+void TagTreeItem::setNode(TagNode *node) {
     this->node = node;
-    setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
 }
 
 void TagTreeItem::setKey(QString str) {
-    if (node != nullptr) {
+    if (node != nullptr)
         node->setKey(str.toStdString());
-        setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
-    }
     setText(0, str);
 }
 
 void TagTreeItem::jsonUpdated() {
-    nlohmann::json json = node->getData();
-
     setText(0, QString::fromStdString(node->getKey()));
-    QString icon = QString::fromStdString(json.value("icon", ""));
-    if (QFileInfo::exists(icon) || icon.startsWith(":/icons/")) {
+    QString icon = QString::fromStdString(node->getIcon());
+    if (QFileInfo::exists(icon) || icon.startsWith(":/icons/"))
         setIcon(0, QIcon(icon));
-    } else {
+    else
         setIcon(0, QIcon(":/icons/" + icon));
-    }
-    setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
+
 }
 
 

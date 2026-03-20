@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QListWidgetItem>
 
-#include "./jsonnode.h"
+#include "./tagnode.h"
 #include "./icondialog.h"
 #include "tagtree.h"
 #include <nlohmann/json.hpp>
@@ -27,21 +27,23 @@ public slots:
     void toggleEditMode();
     void selectIcon();
     void iconSelected(QString icon);
-    void setTag(JsonNode *node);
+    void setTag(TagNode *node);
     void save();
     void onListItemSelect(QListWidgetItem* item);
-    void addToRelated(JsonNode* node);
-    void addToRequired(JsonNode* node);
+    void addToRelated(TagNode* node);
+    void addToRequired(TagNode* node);
+    void refreshLists();
+
 
 signals:
     void editModeChanged(bool mode);
-    void tagSaved(nlohmann::json tag);
+    void tagSaved(TagNode* tag, std::string oldPath);
     void listItemSelected(QString tagPath);
 
 private:
     Ui::TagEditor *ui;
     IconDialog *iconDialog;
-    JsonNode *currentTag = nullptr;
+    TagNode *currentTag = nullptr;
     bool editModeEnabled = false;
 
     QString iconPath;

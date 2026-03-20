@@ -42,7 +42,7 @@ QTreeWidgetItem* TagTree::findTag(QString tagPath, QTreeWidgetItem* root) {
 }
 
 void TagTree::fromJson(nlohmann::json json) {
-    rootNode = JsonNode::createRoot(json);
+    rootNode = TagNode::createRoot(json);
 
     for (auto& [key, node] : rootNode->getChildren()) {
         TagTreeItem *item = new TagTreeItem(node);
@@ -69,7 +69,7 @@ void TagTree::onCreateTag() {
     disconnect(dialog, &NewTagDialog::submit, this, &TagTree::onNewTag);
 }
 
-void TagTree::onNewTag(JsonNode *node) {
+void TagTree::onNewTag(TagNode *node) {
     TagTreeItem* tag = new TagTreeItem(node);
 
     if (menuItem != nullptr) {
@@ -90,20 +90,25 @@ void TagTree::onNewTag(JsonNode *node) {
 }
 
 void TagTree::onRemoveTag() {
-    JsonNode* node = menuItem->getNode();
 
     if (QMessageBox::question(this, "Remove Tag",
         "Are you sure you want to remove the tag \"" +
-        QString::fromStdString(node->getKey()) +
+        QString::fromStdString(menuItem->getNode()->getKey()) +
         "\"? This will also remove all sub-tags inside this tag.") == QMessageBox::Yes)
     {
-        JsonNode *parent = node->getParent();
+        PathChanges changes;
+        QTreeWidgetItemIterator it(menuItem);
+        while (*it) {
+            changes.push_back({ static_cast<TagTreeItem*>(*it)->getNode()->getFullPath(), ""});
+            ++it;
+        }
+
+        TagNode* node = menuItem->getNode();
         node->getParent()->removeChildAt(node->getKey());
         delete menuItem;
+        rootNode->renameListEntries(changes);
         emit tagsChanged();
     }
-
-
 }
 
 void TagTree::expandTreeTo(QTreeWidgetItem* item) {
@@ -114,7 +119,7 @@ void TagTree::expandTreeTo(QTreeWidgetItem* item) {
     this->scrollToItem(item);
 }
 
-void TagTree::createChildren(TagTreeItem* item, JsonNode *node) {
+void TagTree::createChildren(TagTreeItem* item, TagNode *node) {
     for (auto& [k, c] : node->getChildren()) {
         TagTreeItem *child = new TagTreeItem(c);
         item->addChild(child);
@@ -125,7 +130,7 @@ void TagTree::createChildren(TagTreeItem* item, JsonNode *node) {
 void TagTree::dropEvent(QDropEvent *event) {
     if (event->source() != this) return;
     TagTreeItem* item = static_cast<TagTreeItem*>(currentItem());
-
+    std::string oldPath = item->getNode()->getFullPath();
     QTreeWidget::dropEvent(event);
     if (event->isAccepted()) {
         if (item->parent() != nullptr) {
@@ -134,7 +139,8 @@ void TagTree::dropEvent(QDropEvent *event) {
         } else {
             item->getNode()->setParent(rootNode);
         }
-        item->setData(0, Qt::UserRole, QString::fromStdString(item->getNode()->getFullPath()));
+        std::string newPath = item->getNode()->getFullPath();
+        // item->setData(0, Qt::UserRole, QString::fromStdString(item->getNode()->getFullPath()));
         // std::cout << item->text(0).toStdString() << "\n" << std::flush;
         sortItems(0, Qt::AscendingOrder);
         emit tagsChanged();

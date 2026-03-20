@@ -3,8 +3,8 @@
 
 #include <QTreeWidget>
 #include <QMouseEvent>
-#include "./jsonnode.h"
-#include "./tagtreeitem.h"
+#include "tagnode.h"
+#include "tagtreeitem.h"
 #include <nlohmann/json.hpp>
 
 class TagTree : public QTreeWidget
@@ -22,7 +22,7 @@ public:
 public slots:
     void setEditMode(bool mode);
     void onCreateTag();
-    void onNewTag(JsonNode* node);
+    void onNewTag(TagNode* node);
     void onRemoveTag();
 
     void expandTreeTo(QTreeWidgetItem* item);
@@ -37,12 +37,13 @@ protected:
     // virtual void dragEnterEvent(QDragEnterEvent *event) override;
 
 signals:
-    void addToRelated(JsonNode *node);
-    void addToRequired(JsonNode *node);
+    void addToRelated(TagNode *node);
+    void addToRequired(TagNode *node);
     void tagsChanged();
+    void listsUpdated();
 
 private:
-    JsonNode* rootNode;
+    TagNode* rootNode;
 
     TagTreeItem* menuItem;
 
@@ -52,7 +53,7 @@ private:
     bool editModeEnabled;
     // TagTreeItem* findTag(TagTreeItem* item, QString tagPath);
 
-    void createChildren(TagTreeItem* item, JsonNode *node);
+    void createChildren(TagTreeItem* item, TagNode *node);
 
 private slots:
     void signalRelated();

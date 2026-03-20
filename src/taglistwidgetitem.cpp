@@ -6,6 +6,7 @@ TagListWidgetItem::TagListWidgetItem(QString tagPath, QListWidget* parent) :
 {
     int rstart = tagPath.lastIndexOf("/");
     setText(rstart == -1 ? tagPath : tagPath.right(tagPath.size() - (rstart+1)));
+    setToolTip(value);
 }
 
 QString TagListWidgetItem::getValue() {

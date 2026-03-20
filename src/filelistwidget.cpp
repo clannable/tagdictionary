@@ -50,6 +50,7 @@ void FileListWidget::onSelection() {
 }
 
 void FileListWidget::addFile(QString filePath) {
+    if (!ui->fileList->findItems(filePath, Qt::MatchExactly).empty()) return;
     ui->fileList->addItem(filePath);
 }
 

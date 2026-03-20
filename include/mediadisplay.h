@@ -2,7 +2,7 @@
 #define MEDIADISPLAY_H
 
 #include <QWidget>
-#include "jsonnode.h"
+#include "tagnode.h"
 #include <QDropEvent>
 #include <QVBoxLayout>
 
@@ -18,7 +18,7 @@ public:
     explicit MediaDisplay(QWidget *parent = nullptr);
     ~MediaDisplay();
 
-    void setFilesFromNode(JsonNode* node);
+    void setFilesFromNode(TagNode* node);
     QStringList getFiles() const;
 
 public slots:
@@ -46,7 +46,7 @@ private:
     QStringList files;
     bool editModeEnabled = false;
 
-    JsonNode* node = nullptr;
+    TagNode* node = nullptr;
     QWidget* currentWidget = nullptr;
 
     void showFile(int index);

@@ -39,10 +39,11 @@ void NewTagDialog::onIconSelect() {
     iconDialog->exec();
 }
 
-void NewTagDialog::setParentNode(JsonNode* node) {
+void NewTagDialog::setParentNode(TagNode* node) {
     this->parentNode = node;
     if (node != nullptr) {
-        QString icon = QString::fromStdString(node->getData().value("icon", ":/icons/flat/tag"));
+        std::string parentIcon = node->getIcon();
+        QString icon = QString::fromStdString(parentIcon.empty() ? ":/icons/flat/tag" : parentIcon);
         if (!QFileInfo::exists(icon) && !icon.startsWith(":/icons/"))
             icon = ":/icons/" + icon;
         iconPath = icon;
@@ -68,7 +69,7 @@ void NewTagDialog::accept() {
     nlohmann::json data = nlohmann::json();
     data["description"] = ui->descriptionEdit->toPlainText().toStdString();
     data["icon"] = iconPath.toStdString();
-    JsonNode *ret = new JsonNode(data, ui->nameEdit->text().toStdString(), parentNode);
+    TagNode *ret = new TagNode(data, ui->nameEdit->text().toStdString(), parentNode);
     emit submit(ret);
     QDialog::accept();
 }

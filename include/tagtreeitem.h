@@ -2,26 +2,23 @@
 #define TAGTREEITEM_H
 
 #include <QTreeWidgetItem>
-#include "./jsonnode.h"
+#include "tagnode.h"
 #include <nlohmann/json.hpp>
 
 class TagTreeItem : public QTreeWidgetItem
 {
 public:
-    TagTreeItem(JsonNode* node);
+    TagTreeItem(TagNode* node);
 
-    JsonNode* getNode() const;
-    json getJson() const;
+    TagNode* getNode() const;
 
-    void setNode(JsonNode* node);
+    void setNode(TagNode* node);
     void setKey(QString str);
 
     void jsonUpdated();
 
-
-
 private:
-    JsonNode* node;
+    TagNode* node;
 
     bool operator<(const TagTreeItem &other)const {
         int column = treeWidget()->sortColumn();

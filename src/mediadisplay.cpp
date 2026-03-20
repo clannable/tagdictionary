@@ -29,19 +29,14 @@ MediaDisplay::~MediaDisplay()
     delete ui;
 }
 
-void MediaDisplay::setFilesFromNode(JsonNode *node) {
+void MediaDisplay::setFilesFromNode(TagNode *node) {
     this->node = node;
     currentPage = 0;
     files.clear();
     ui->addFileButton->setEnabled(node != nullptr);
     if (node != nullptr) {
-        const nlohmann::json data = node->getData();
-
-        if (data.contains("files") && !data["files"].empty()) {
-            for (const std::string&& file : data["files"])
-                files.append(QString::fromStdString(file));
-        }
-
+        for (const std::string& file : node->getFiles())
+            files.append(QString::fromStdString(file));
     }
     showFile(0);
 }
@@ -146,6 +141,8 @@ void MediaDisplay::addFile() {
 
 void MediaDisplay::insertFile(QString filePath) {
     filePath.replace("\\", "/");
+    if (files.contains(filePath)) return;
+
     files.append(filePath);
     if (editModeEnabled)
         static_cast<FileListWidget*>(currentWidget)->addFile(filePath);
@@ -169,7 +166,7 @@ void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
     if (node == nullptr || event->source() != nullptr) {
         event->ignore();
     } else if (data->hasUrls()) {
-        QString filePath = data->urls()[0].toString();
+        QString filePath = data->urls()[0].toString(QUrl::DecodeReserved);
         QString mimeType = db.mimeTypeForFile(filePath).name();
         if (mimeType.startsWith("image") || mimeType.startsWith("video")) {
             event->setDropAction(Qt::CopyAction);
@@ -183,7 +180,8 @@ void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
 }
 
 void MediaDisplay::dropEvent(QDropEvent *event) {
-    QString filePath = event->mimeData()->urls().first().toString();
+    QUrl url = event->mimeData()->urls().first();
+    QString filePath = event->mimeData()->urls().first().toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
     if (filePath.startsWith("file:///"))
         filePath = filePath.slice(8);
     if (!filePath.isEmpty())

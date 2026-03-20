@@ -34,7 +34,7 @@ void TagEditor::linkTagTreeToLists(const TagTree* ptr) {
     ui->relatedList->linkTagTree(ptr);
 }
 
-void TagEditor::setTag(JsonNode *node) {
+void TagEditor::setTag(TagNode *node) {
     currentTag = node;
     if (node == nullptr) {
         ui->requiredList->clear();
@@ -50,33 +50,24 @@ void TagEditor::setTag(JsonNode *node) {
     ui->requiredList->setTag(node);
     ui->relatedList->setEnabled(node != nullptr);
     ui->requiredList->setEnabled(node != nullptr);
-    json tag = node->getData();
     ui->editButton->setEnabled(true);
-    QString ic = QString::fromStdString(tag.value("icon", ""));
+
+    QString ic = QString::fromStdString(node->getIcon());
     if (QFileInfo::exists(ic) || ic.startsWith(":/icons/")) {
         iconPath = ic;
     } else if (!ic.startsWith(":/icons/")) {
         iconPath = ":/icons/" + ic;
     }
     QIcon icon = QIcon(iconPath);
-    description = QString::fromStdString(tag.value("description", ""));
+    description = QString::fromStdString(node->getDescription());
 
     ui->iconLabel->setPixmap(icon.pixmap(QSize(20, 20)));
     ui->description->setMarkdown(description);
     ui->descriptionEditor->setText(description);
     ui->tagLabelEdit->setText(QString::fromStdString(node->getKey()));
     ui->iconButton->setIcon(QIcon(iconPath));
-    ui->relatedList->clear();
-    ui->requiredList->clear();
 
-    if (tag.contains("required") && !tag["required"].empty()) {
-        for (const std::string&& t : tag["required"])
-            ui->requiredList->insertTag(QString::fromStdString(t));
-    }
-    if (tag.contains("related") && !tag["related"].empty()) {
-        for (const std::string&& t : tag["related"])
-            ui->relatedList->insertTag(QString::fromStdString(t));
-    }
+    refreshLists();
 }
 
 void TagEditor::toggleEditMode() {
@@ -97,22 +88,7 @@ void TagEditor::toggleEditMode() {
         ui->iconLabel->hide();
     }
     else {
-        ui->descriptionEditor->hide();
-        ui->description->show();
-        ui->iconButton->hide();
-        ui->iconLabel->show();
-        ui->relatedList->clear();
-        ui->requiredList->clear();
-
-        json tag = currentTag->getData();
-        if (tag.contains("required") && !tag["required"].empty()) {
-            for (const std::string&& t : tag["required"])
-                ui->requiredList->insertTag(QString::fromStdString(t));
-        }
-        if (tag.contains("related") && !tag["related"].empty()) {
-            for (const std::string&& t : tag["related"])
-                ui->relatedList->insertTag(QString::fromStdString(t));
-        }
+        this->setTag(this->currentTag);
     }
 
     emit editModeChanged(editModeEnabled);
@@ -128,6 +104,18 @@ void TagEditor::iconSelected(QString icon) {
     ui->iconButton->setIcon(QIcon(iconPath));
 }
 
+void TagEditor::refreshLists() {
+    ui->relatedList->clear();
+    ui->requiredList->clear();
+
+    if (currentTag == nullptr) return;
+
+    for (const std::string& t : currentTag->getRequired())
+        ui->requiredList->insertTag(QString::fromStdString(t));
+    for (const std::string& t : currentTag->getRelated())
+        ui->relatedList->insertTag(QString::fromStdString(t));
+}
+
 void TagEditor::save() {
     QIcon icon = QIcon(iconPath);
     ui->iconLabel->setPixmap(icon.pixmap(QSize(20,20)));
@@ -135,15 +123,15 @@ void TagEditor::save() {
     description = updatedDescription;
     ui->description->setMarkdown(updatedDescription);
 
-    nlohmann::json nodeJson = nlohmann::json();
-    nodeJson["key"] = ui->tagLabelEdit->text().toStdString();
-    nodeJson["description"] = updatedDescription.toStdString();
-    nodeJson["icon"] = iconPath.toStdString();
+    std::string oldPath = currentTag->getFullPath();
 
-    nodeJson["related"] = json(ui->relatedList->values().toList());
-    nodeJson["required"] = json(ui->requiredList->values().toList());
+    currentTag->setKey(ui->tagLabelEdit->text());
+    currentTag->setDescription(updatedDescription);
+    currentTag->setIcon(iconPath);
+    currentTag->setRelated(ui->relatedList->values());
+    currentTag->setRequired(ui->requiredList->values());
 
-    emit tagSaved(nodeJson);
+    emit tagSaved(currentTag, oldPath);
     toggleEditMode();
 }
 
@@ -151,11 +139,11 @@ void TagEditor::onListItemSelect(QListWidgetItem *item) {
     emit listItemSelected(static_cast<TagListWidgetItem*>(item)->getValue());
 }
 
-void TagEditor::addToRelated(JsonNode *node) {
+void TagEditor::addToRelated(TagNode *node) {
     ui->relatedList->insertTag(node);
 }
 
-void TagEditor::addToRequired(JsonNode *node) {
+void TagEditor::addToRequired(TagNode *node) {
     ui->requiredList->insertTag(node);
 }
 
