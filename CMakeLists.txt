@@ -50,7 +50,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         include/taglistwidget.h src/taglistwidget.cpp
         include/filelistwidget.h src/filelistwidget.cpp ui/filelistwidget.ui
 
-        include/jsonnode.h src/jsonnode.cpp
+        include/tagnode.h src/tagnode.cpp
         src/tagtree.cpp include/tagtree.h
 
         include/icondialog.h src/icondialog.cpp ui/icondialog.ui
