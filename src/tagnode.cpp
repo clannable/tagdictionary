@@ -20,6 +20,8 @@ TagNode::TagNode(json data, string key, TagNode* parent) {
         this->related = data["related"].get<list<string>>();
     if (data.contains("required") && !data["required"].empty())
         this->required = data["required"].get<list<string>>();
+    if (data.contains("files") && !data["files"].empty())
+        this->files = data["files"].get<list<string>>();
 
 
 }
@@ -165,10 +167,11 @@ void TagNode::renameListEntries(PathChanges changes) {
 
 json TagNode::toJson() {
     json ret = json({
-     { "description", this->description },
-     { "icon", this->icon },
-     { "related", this->related },
-     { "required", this->required }
+        { "description", this->description },
+        { "icon", this->icon },
+        { "related", this->related },
+        { "required", this->required },
+        { "files", this->files }
     });
 
     if (!children.empty()) {
