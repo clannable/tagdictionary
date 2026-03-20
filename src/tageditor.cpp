@@ -10,7 +10,6 @@ TagEditor::TagEditor(QWidget *parent)
     ui->setupUi(this);
     ui->iconButton->hide();
     ui->descriptionEditor->hide();
-    ui->description->document()->setDefaultStyleSheet("ul li { list-style-type: \"-\"; margin-left: 5px;}");
     iconDialog = new IconDialog(this);
     connect(iconDialog, &IconDialog::iconSelected, this, &TagEditor::iconSelected);
 
