@@ -34,6 +34,7 @@ protected:
     // virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent* event) override;
     virtual void dropEvent(QDropEvent *event) override;
+    virtual void dragMoveEvent(QDragMoveEvent *event) override;
     // virtual void dragEnterEvent(QDragEnterEvent *event) override;
 
 signals:

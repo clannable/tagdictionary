@@ -184,6 +184,33 @@ void TagTree::dropEvent(QDropEvent *event) {
 //     QTreeWidget::mouseReleaseEvent(event);
 // }
 
+void TagTree::dragMoveEvent(QDragMoveEvent *event) {
+    this->setDropIndicatorShown(true);
+    QTreeWidget::dragMoveEvent(event);
+    if (event->source() != this) event->ignore();
+
+    QTreeWidgetItem *item = this->itemAt(event->position().toPoint());
+    QTreeWidgetItem *selected = this->selectedItems().first();
+
+    switch(this->dropIndicatorPosition()) {
+    case QAbstractItemView::AboveItem:
+    case QAbstractItemView::BelowItem:
+        if (item->parent() == selected->parent()) {
+            event->ignore();
+            this->setDropIndicatorShown(false);
+        }
+        break;
+    case QAbstractItemView::OnViewport:
+        if (selected->parent() == nullptr) {
+            event->ignore();
+            this->setDropIndicatorShown(false);
+        }
+        break;
+    case QAbstractItemView::OnItem:
+        break;
+    }
+}
+
 void TagTree::contextMenuEvent(QContextMenuEvent *event) {
     menuItem = static_cast<TagTreeItem*>(itemAt(event->pos()));
     QMenu *menu = new QMenu(this);
