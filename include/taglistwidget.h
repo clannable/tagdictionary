@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <list>
 #include <QLabel>
+#include "taglist.h"
 
 using json = nlohmann::json;
 
@@ -33,14 +34,14 @@ public slots:
     void onItemSelected(QListWidgetItem* item);
     void clear();
     void toggleExpanded();
-
+    void updateTitle();
 signals:
     void tagSelected(QString tag);
 
 protected:
     virtual void dropEvent(QDropEvent *event) override;
     virtual void dragEnterEvent(QDragEnterEvent *event) override;
-    virtual void contextMenuEvent(QContextMenuEvent *event) override;
+    // virtual void contextMenuEvent(QContextMenuEvent *event) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
@@ -48,7 +49,7 @@ private:
     bool editModeEnabled = false;
     QListWidgetItem *selectedItem = nullptr;
     QListWidgetItem *menuItem = nullptr;
-    QListWidget *list;
+    TagList *list;
     QLabel *countLabel;
     QWidget *header;
     QPushButton *expandToggle;
@@ -57,7 +58,7 @@ private:
     TagNode* currentTag = nullptr;
     void onRemoveTag();
 
-    void updateTitle();
+
 };
 
 #endif // TAGLISTWIDGET_H

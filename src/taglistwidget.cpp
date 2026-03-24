@@ -32,7 +32,7 @@ TagListWidget::TagListWidget(QString title, QWidget *parent) :
     headerLayout->addWidget(expandToggle, 0, Qt::AlignRight);
     expandToggle->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::ListAdd));
     expandToggle->setFlat(true);
-    this->list = new QListWidget(f);
+    this->list = new TagList(f);
     this->list->setMaximumHeight(200);
     this->list->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     layout->addWidget(header);
@@ -43,6 +43,7 @@ TagListWidget::TagListWidget(QString title, QWidget *parent) :
     this->setAcceptDrops(true);
 
     connect(this->list, &QListWidget::itemDoubleClicked, this, &TagListWidget::onItemSelected);
+    connect(this->list, &TagList::tagRemoved, this, &TagListWidget::updateTitle);
     connect(this->expandToggle, &QPushButton::clicked, this, &TagListWidget::toggleExpanded);
 }
 
@@ -111,30 +112,10 @@ void TagListWidget::mousePressEvent(QMouseEvent *event) {
     else
         QWidget::mousePressEvent(event);
 }
-void TagListWidget::contextMenuEvent(QContextMenuEvent *event) {
-    if (!editModeEnabled) return;
-    QListWidgetItem *item = this->list->itemAt(event->pos());
-    if (item == nullptr) return;
-
-    menuItem = item;
-
-    QMenu *menu = new QMenu(this);
-    QAction *removeTag = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove), "Remove \""+item->text()+"\"");
-    menu->addAction(removeTag);
-    connect(removeTag, &QAction::triggered, this, &TagListWidget::onRemoveTag);
-    menu->exec(QCursor::pos());
-}
-
-void TagListWidget::onRemoveTag() {
-    if (!editModeEnabled || menuItem == nullptr) return;
-
-    delete menuItem;
-    updateTitle();
-}
 
 void TagListWidget::setEditMode(bool mode) {
     editModeEnabled = mode;
-
+    this->list->setEditMode(mode);
     // setAcceptDrops(mode);
 }
 
