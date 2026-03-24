@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,2,2,3,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,2,2,0,0,0">
    <property name="topMargin">
     <number>0</number>
    </property>
@@ -218,92 +218,7 @@ QToolButton:pressed {
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout" columnstretch="1">
-     <item row="2" column="0">
-      <widget class="TagListWidget" name="requiredList">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <italic>true</italic>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="cursor" stdset="0">
-        <cursorShape>ArrowCursor</cursorShape>
-       </property>
-       <property name="acceptDrops">
-        <bool>true</bool>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::Shape::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Shadow::Sunken</enum>
-       </property>
-       <property name="showDropIndicator" stdset="0">
-        <bool>true</bool>
-       </property>
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::DragDropMode::DropOnly</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Related Tags</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="TagListWidget" name="relatedList">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <italic>true</italic>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="acceptDrops">
-        <bool>true</bool>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::Shape::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Shadow::Sunken</enum>
-       </property>
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::DragDropMode::DropOnly</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Required Tags</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <layout class="QVBoxLayout" name="listLayout"/>
    </item>
    <item>
     <widget class="Line" name="line_2">
@@ -437,18 +352,9 @@ QPushButton:disabled, QToolButton:disabled {
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>TagListWidget</class>
-   <extends>QListWidget</extends>
-   <header>taglistwidget.h</header>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>iconButton</tabstop>
   <tabstop>tagLabelEdit</tabstop>
-  <tabstop>requiredList</tabstop>
-  <tabstop>relatedList</tabstop>
  </tabstops>
  <resources/>
  <connections/>

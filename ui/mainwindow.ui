@@ -182,6 +182,18 @@
         <height>16777215</height>
        </size>
       </property>
+      <property name="styleSheet">
+       <string notr="true">TagListWidget QLabel {
+	font: 700 10pt &quot;Segoe UI&quot;;
+}
+
+TagListWidget QListWidget {
+	background: transparent;
+	border: none;
+	
+	font: 350 italic 10pt &quot;Segoe UI&quot;;
+}</string>
+      </property>
      </widget>
     </item>
     <item>

@@ -4,9 +4,10 @@
 #include <QWidget>
 #include <QListWidgetItem>
 
-#include "./tagnode.h"
-#include "./icondialog.h"
+#include "tagnode.h"
+#include "icondialog.h"
 #include "tagtree.h"
+#include "taglistwidget.h"
 #include <nlohmann/json.hpp>
 
 namespace Ui {
@@ -29,7 +30,7 @@ public slots:
     void iconSelected(QString icon);
     void setTag(TagNode *node);
     void save();
-    void onListItemSelect(QListWidgetItem* item);
+    void onListItemSelect(QString tag);
     void addToRelated(TagNode* node);
     void addToRequired(TagNode* node);
     void refreshLists();
@@ -45,6 +46,9 @@ private:
     IconDialog *iconDialog;
     TagNode *currentTag = nullptr;
     bool editModeEnabled = false;
+
+    TagListWidget *requiredList;
+    TagListWidget *relatedList;
 
     QString iconPath;
     QString description;

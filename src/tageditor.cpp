@@ -1,6 +1,5 @@
 #include "tageditor.h"
 #include "ui_tageditor.h"
-#include "taglistwidgetitem.h"
 #include <QFileInfo>
 
 TagEditor::TagEditor(QWidget *parent)
@@ -11,16 +10,21 @@ TagEditor::TagEditor(QWidget *parent)
     ui->iconButton->hide();
     ui->descriptionEditor->hide();
     iconDialog = new IconDialog(this);
+
+    this->relatedList = new TagListWidget("Related Tags");
+    this->requiredList = new TagListWidget("Required Tags");
+    ui->listLayout->addWidget(this->requiredList);
+    ui->listLayout->addWidget(this->relatedList);
     connect(iconDialog, &IconDialog::iconSelected, this, &TagEditor::iconSelected);
 
     connect(ui->editButton, &QPushButton::clicked, this, &TagEditor::toggleEditMode);
     connect(ui->saveButton, &QPushButton::clicked, this, &TagEditor::save);
     connect(ui->iconButton, &QToolButton::clicked, this, &TagEditor::selectIcon);
-    connect(ui->requiredList, &QListWidget::itemDoubleClicked, this, &TagEditor::onListItemSelect);
-    connect(ui->relatedList, &QListWidget::itemDoubleClicked, this, &TagEditor::onListItemSelect);
+    connect(this->requiredList, &TagListWidget::tagSelected, this, &TagEditor::onListItemSelect);
+    connect(this->relatedList, &TagListWidget::tagSelected, this, &TagEditor::onListItemSelect);
 
-    connect(this, &TagEditor::editModeChanged, ui->relatedList, &TagListWidget::setEditMode);
-    connect(this, &TagEditor::editModeChanged, ui->requiredList, &TagListWidget::setEditMode);
+    connect(this, &TagEditor::editModeChanged, this->relatedList, &TagListWidget::setEditMode);
+    connect(this, &TagEditor::editModeChanged, this->requiredList, &TagListWidget::setEditMode);
 }
 
 TagEditor::~TagEditor()
@@ -29,15 +33,15 @@ TagEditor::~TagEditor()
 }
 
 void TagEditor::linkTagTreeToLists(const TagTree* ptr) {
-    ui->requiredList->linkTagTree(ptr);
-    ui->relatedList->linkTagTree(ptr);
+    this->requiredList->linkTagTree(ptr);
+    this->relatedList->linkTagTree(ptr);
 }
 
 void TagEditor::setTag(TagNode *node) {
     currentTag = node;
     if (node == nullptr) {
-        ui->requiredList->clear();
-        ui->relatedList->clear();
+        this->requiredList->clear();
+        this->relatedList->clear();
         ui->editButton->setEnabled(false);
         ui->tagLabelEdit->setText("");
         ui->iconButton->setIcon(QIcon());
@@ -46,10 +50,10 @@ void TagEditor::setTag(TagNode *node) {
         return;
     }
 
-    ui->relatedList->setTag(node);
-    ui->requiredList->setTag(node);
-    ui->relatedList->setEnabled(node != nullptr);
-    ui->requiredList->setEnabled(node != nullptr);
+    this->relatedList->setTag(node);
+    this->requiredList->setTag(node);
+    this->relatedList->setEnabled(node != nullptr);
+    this->requiredList->setEnabled(node != nullptr);
     ui->editButton->setEnabled(true);
 
     QString ic = QString::fromStdString(node->getIcon());
@@ -92,8 +96,8 @@ void TagEditor::toggleEditMode() {
         ui->description->show();
         ui->iconButton->hide();
         ui->iconLabel->show();
-        ui->relatedList->clear();
-        ui->requiredList->clear();
+        this->relatedList->clear();
+        this->requiredList->clear();
 
         refreshLists();
     }
@@ -112,15 +116,15 @@ void TagEditor::iconSelected(QString icon) {
 }
 
 void TagEditor::refreshLists() {
-    ui->relatedList->clear();
-    ui->requiredList->clear();
+    this->relatedList->clear();
+    this->requiredList->clear();
 
     if (currentTag == nullptr) return;
 
     for (const std::string& t : currentTag->getRequired())
-        ui->requiredList->insertTag(QString::fromStdString(t));
+        this->requiredList->insertTag(QString::fromStdString(t));
     for (const std::string& t : currentTag->getRelated())
-        ui->relatedList->insertTag(QString::fromStdString(t));
+        this->relatedList->insertTag(QString::fromStdString(t));
 }
 
 void TagEditor::save() {
@@ -135,23 +139,23 @@ void TagEditor::save() {
     currentTag->setKey(ui->tagLabelEdit->text());
     currentTag->setDescription(updatedDescription);
     currentTag->setIcon(iconPath);
-    currentTag->setRelated(ui->relatedList->values());
-    currentTag->setRequired(ui->requiredList->values());
+    currentTag->setRelated(this->relatedList->values());
+    currentTag->setRequired(this->requiredList->values());
 
     emit tagSaved(currentTag, oldPath);
     toggleEditMode();
 }
 
-void TagEditor::onListItemSelect(QListWidgetItem *item) {
-    emit listItemSelected(static_cast<TagListWidgetItem*>(item)->getValue());
+void TagEditor::onListItemSelect(QString tag) {
+    emit listItemSelected(tag);
 }
 
 void TagEditor::addToRelated(TagNode *node) {
-    ui->relatedList->insertTag(node);
+    this->relatedList->insertTag(node);
 }
 
 void TagEditor::addToRequired(TagNode *node) {
-    ui->requiredList->insertTag(node);
+    this->requiredList->insertTag(node);
 }
 
 
