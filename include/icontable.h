@@ -16,8 +16,10 @@ public:
     void updateLayout(int cols);
     int columnCount() const;
 
+
 public slots:
     void setCurrentItem(IconPanel *panel);
+    void refresh();
 
 signals:
     void selectionChanged(IconPanel *panel);

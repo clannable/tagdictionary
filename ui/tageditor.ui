@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,2,2,0,0,0">
    <property name="topMargin">
     <number>0</number>
@@ -195,7 +198,7 @@ QToolButton:pressed {
       <bool>true</bool>
      </property>
      <property name="openLinks">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -208,6 +211,9 @@ QToolButton:pressed {
      </property>
      <property name="acceptDrops">
       <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
      <property name="acceptRichText">
       <bool>false</bool>

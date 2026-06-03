@@ -129,11 +129,14 @@ QPushButton:disabled, QToolButton:disabled {
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::ListAdd"/>
+         <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
         </property>
        </widget>
       </item>

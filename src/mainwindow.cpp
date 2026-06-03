@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "tagnode.h"
 #include "tagtreeitem.h"
+#include "globals.h"
 
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -16,14 +17,21 @@
 #include <QFileInfo>
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QDirIterator>
 
 using json = nlohmann::json;
+
+std::list<std::string>* ICON_LIST = new std::list<std::string>();
+std::string LAST_IMAGE_FOLDER_PATH = "/home";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    QSettings settings("MyApp","Tag Viewer");
+    if (settings.contains("geometry"))
+        this->restoreGeometry(settings.value("geometry").toByteArray());
 
     ui->tagEditor->linkTagTreeToLists(ui->tagTree);
     QMenu *fileMenu = ui->menuBar->addMenu("File");
@@ -44,10 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
     newTagAction = new QAction("Create New Tag", this);
 
     connect(newTagAction, &QAction::triggered, ui->tagTree, &TagTree::onCreateTag);
-    newTagAction->setEnabled(false);
-
     tagMenu->addAction(newTagAction);
-
 
     connect(ui->tagEditor, &TagEditor::editModeChanged, ui->tagTree, &TagTree::setEditMode);
     connect(ui->tagEditor, &TagEditor::editModeChanged, ui->mediaDisplay, &MediaDisplay::setEditMode);
@@ -62,7 +67,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->tagTree, &TagTree::addToRelated, ui->tagEditor, &TagEditor::addToRelated);
     connect(ui->tagTree, &TagTree::addToRequired, ui->tagEditor, &TagEditor::addToRequired);
     connect(ui->tagTree, &TagTree::tagsChanged, ui->tagEditor, &TagEditor::refreshLists);
-    QSettings settings("MyApp","Tag Viewer");
     jsonFilePath = settings.value("data/lastOpened", "").toString();
     if (!jsonFilePath.isEmpty() && !QFileInfo::exists(jsonFilePath)) {
         QMessageBox::critical(this, "Failed to load file", "ERROR: Failed to load dictionary file");
@@ -74,7 +78,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    QSettings settings("MyApp","Tag Viewer");
+    settings.setValue("geometry", this->saveGeometry());
     delete ui;
+    delete ICON_LIST;
 }
 
 /*---------  Tag Tree Slots ---------*/
@@ -204,9 +211,16 @@ void MainWindow::reloadJson() {
     ui->mediaDisplay->setFilesFromNode(nullptr);
     ui->tagEditor->setTag(nullptr);
 
-    std::cout << "Loading JSON file " << jsonFilePath.toStdString() << "\n" << std::flush;
-
     std::ifstream f(jsonFilePath.toStdString());
+    ICON_LIST->clear();
+
+    QDirIterator it(":/icons/", QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        QString path = it.next();
+        if (path.lastIndexOf(".") == -1) continue;
+        ICON_LIST->push_back(path.toStdString());
+    }
+
     json tags = json::parse(f);
     ui->tagTree->fromJson(tags);
     ui->tagTree->sortByColumn(0, Qt::AscendingOrder);

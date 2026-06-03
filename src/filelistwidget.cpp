@@ -1,6 +1,7 @@
 #include "filelistwidget.h"
 #include "ui_filelistwidget.h"
 #include <QFileDialog>
+#include "globals.h"
 
 FileListWidget::FileListWidget(QWidget *parent)
     : QWidget(parent)
@@ -65,9 +66,11 @@ void FileListWidget::onOpenFiles() {
     QStringList selected = QFileDialog::getOpenFileNames(
         this,
         "Select files to add",
-        "/home",
+        QString::fromStdString(LAST_IMAGE_FOLDER_PATH),
         "Media files (*.png *.jpg *.gif *.mp4 .mov)");
 
+    if (!selected.empty())
+        LAST_IMAGE_FOLDER_PATH = QFileInfo(selected.last()).absoluteDir().path().toStdString();
     for (const QString file : selected) {
         QString f = file;
         QListWidgetItem *item = new QListWidgetItem(f.replace("\\", "/"));

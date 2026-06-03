@@ -11,7 +11,10 @@ IconPanel::IconPanel(QString iconPath, QWidget *parent)
     ui->setupUi(this);
 
     ui->iconLabel->setPixmap(QIcon(icon).pixmap(QSize(20, 20)));
-    QString shortName = icon.right(icon.length() - (icon.lastIndexOf("/")+1));
+    shortName = icon.right(icon.length() - (icon.lastIndexOf("/")+1));
+    if (shortName.contains("."))
+        shortName = shortName.sliced(0, shortName.lastIndexOf("."));
+
     this->setToolTip(shortName);
 
     // baseStyleSheet = ui->frame->styleSheet();
@@ -21,6 +24,10 @@ IconPanel::IconPanel(QString iconPath, QWidget *parent)
 
 QString IconPanel::getIcon() {
     return icon;
+}
+
+QString IconPanel::getShortName() {
+    return shortName;
 }
 
 void IconPanel::mousePressEvent(QMouseEvent *event) {

@@ -24,7 +24,7 @@ void IconDialog::resizeEvent(QResizeEvent *event) {
 
 void IconDialog::showEvent(QShowEvent *event) {
     Q_UNUSED(event);
-
+    ui->iconTable->refresh();
     ui->iconTable->updateLayout(getAvailableColumns());
 }
 
@@ -40,6 +40,8 @@ void IconDialog::browseIcon() {
         "/home",
         "Icon files (*.png *ico *svg)"
     );
+    if (filePath.isNull()) return;
+
     filePath.replace("\\", "/");
     emit iconSelected(filePath);
     QDialog::accept();

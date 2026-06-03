@@ -56,12 +56,14 @@ void TagListWidget::insertTag(TagNode *node) {
     }
     this->list->addItem(new TagListWidgetItem(tagPath));
     this->list->sortItems();
+    this->show();
     updateTitle();
 }
 
 void TagListWidget::insertTag(QString tagPath) {
     this->list->addItem(new TagListWidgetItem(tagPath));
     this->list->sortItems();
+    this->show();
     updateTitle();
 }
 
@@ -76,6 +78,7 @@ void TagListWidget::setTag(TagNode* node) {
 void TagListWidget::clear() {
     this->list->clear();
     updateTitle();
+    if (!editModeEnabled) this->hide();
 }
 
 void TagListWidget::dropEvent(QDropEvent *event) {
@@ -116,6 +119,10 @@ void TagListWidget::mousePressEvent(QMouseEvent *event) {
 void TagListWidget::setEditMode(bool mode) {
     editModeEnabled = mode;
     this->list->setEditMode(mode);
+    if (editModeEnabled == false && this->list->count() == 0)
+        this->hide();
+    else if (editModeEnabled == true)
+        this->show();
     // setAcceptDrops(mode);
 }
 

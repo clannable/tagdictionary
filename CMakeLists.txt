@@ -25,6 +25,7 @@ FetchContent_MakeAvailable(json)
 set(app_icon_resource_windows "${CMAKE_CURRENT_SOURCE_DIR}/tagviewer.rc")
 
 set(PROJECT_SOURCES
+        include/globals.h
         src/main.cpp
         src/mainwindow.cpp
         include/mainwindow.h
@@ -62,6 +63,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         include/mediadisplay.h src/mediadisplay.cpp ui/mediadisplay.ui
         include/tageditor.h src/tageditor.cpp ui/tageditor.ui
         include/taglist.h src/taglist.cpp
+
 
 
     )

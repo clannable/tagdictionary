@@ -84,7 +84,7 @@ void VideoPlayer::updateVideoProgress(qint64 position) {
     QString progress = formatTime(position);
     ui->timerLabel->setText(progress + " / " + videoLength);
     if (!ui->progressSlider->isSliderDown()) {
-        ui->progressSlider->setValue(int(position / 500));
+        ui->progressSlider->setValue(int(position / 250));
     }
 }
 
@@ -92,17 +92,17 @@ void VideoPlayer::onDurationChange(qint64 duration) {
     ignoreHours = (duration/1000/60/60 == 0);
     videoLength = formatTime(duration);
 
-    ui->progressSlider->setMaximum(int(duration/500));
+    ui->progressSlider->setMaximum(int(duration/250));
 }
 
 void VideoPlayer::onProgressReleased() {
     if (sliderMove != -1) {
         ui->progressSlider->setValue(sliderMove);
-        player->setPosition(sliderMove*500);
+        player->setPosition(sliderMove*250);
         sliderMove = -1;
     }
     else {
-        ui->progressSlider->setValue(player->position() / 500);
+        ui->progressSlider->setValue(player->position() / 250);
     }
 }
 
@@ -111,15 +111,29 @@ void VideoPlayer::onProgressSliderMove(int position) {
 }
 
 void VideoPlayer::onProgressSliderAction(int action) {
+    int step = 0;
     switch(action) {
-    case QSlider::SliderPageStepAdd:
-    case QSlider::SliderPageStepSub:
     case QSlider::SliderSingleStepAdd:
+        step = ui->progressSlider->singleStep() * 250;
+        player->pause();
+        break;
     case QSlider::SliderSingleStepSub:
+        step = -ui->progressSlider->singleStep() * 250;
+        player->pause();
+        break;
+    case QSlider::SliderPageStepAdd:
+        step = ui->progressSlider->pageStep() * 250;
+        break;
+    case QSlider::SliderPageStepSub:
+        step = -ui->progressSlider->pageStep() * 250;
+        break;
     case QSlider::SliderToMaximum:
     case QSlider::SliderToMinimum:
-        ui->progressSlider->setSliderPosition(ui->progressSlider->value());
         break;
+    }
+    if (step != 0) {
+        ui->progressSlider->setSliderPosition(ui->progressSlider->value() + step);
+        player->setPosition(ui->progressSlider->value()*250);
     }
 }
 

@@ -3,6 +3,7 @@
 
 #include <QTreeWidget>
 #include <QMouseEvent>
+
 #include "tagnode.h"
 #include "tagtreeitem.h"
 #include <nlohmann/json.hpp>
@@ -45,8 +46,7 @@ signals:
 
 private:
     TagNode* rootNode;
-
-    TagTreeItem* menuItem;
+    TagTreeItem* menuItem = nullptr;
 
     TagTreeItem* dragItem;
     QPoint dragStartPosition;

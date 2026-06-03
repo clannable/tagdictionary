@@ -10,6 +10,7 @@
 #include <QMimeData>
 #include <QDesktopServices>
 #include <QFileInfo>
+#include "globals.h"
 
 MediaDisplay::MediaDisplay(QWidget *parent)
     : QWidget(parent)
@@ -130,11 +131,21 @@ void MediaDisplay::openFile() {
 }
 
 void MediaDisplay::addFile() {
-    bool ok{};
-    QString file = QInputDialog::getText(this, "Enter file path", "File path:", QLineEdit::Normal, "", &ok);
+    QStringList selected = QFileDialog::getOpenFileNames(
+        this,
+        "Select files to add",
+        QString::fromStdString(LAST_IMAGE_FOLDER_PATH),
+        "Media files (*.png *.jpg *.gif *.mp4 .mov)");
 
-    if (ok && !file.isEmpty()) {
-        insertFile(file);
+    if (!selected.empty())
+        LAST_IMAGE_FOLDER_PATH = QFileInfo(selected.last()).absoluteDir().path().toStdString();
+
+
+    for (const QString file : selected) {
+        QString f = file;
+        insertFile(f);
+        QListWidgetItem *item = new QListWidgetItem(f.replace("\\", "/"));
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
     }
 
 }

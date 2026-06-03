@@ -1,9 +1,10 @@
 #include "tagtree.h"
 #include "newtagdialog.h"
+#include "globals.h"
+
 #include <QApplication>
 #include <QDrag>
 #include <QMimeData>
-#include <iostream>
 #include <QMenu>
 #include <QCursor>
 #include <QMessageBox>
@@ -46,9 +47,13 @@ void TagTree::fromJson(nlohmann::json json) {
 
     for (auto& [key, node] : rootNode->getChildren()) {
         TagTreeItem *item = new TagTreeItem(node);
+        ICON_LIST->push_back(node->getIcon());
         addTopLevelItem(item);
         this->createChildren(item, node);
     }
+
+    ICON_LIST->sort();
+    ICON_LIST->unique();
 }
 
 json TagTree::toJson() {
@@ -71,6 +76,10 @@ void TagTree::onCreateTag() {
 
 void TagTree::onNewTag(TagNode *node) {
     TagTreeItem* tag = new TagTreeItem(node);
+
+    ICON_LIST->push_back(node->getIcon());
+    ICON_LIST->sort();
+    ICON_LIST->unique();
 
     if (menuItem != nullptr) {
         menuItem->getNode()->addChild(node);
@@ -122,6 +131,7 @@ void TagTree::expandTreeTo(QTreeWidgetItem* item) {
 void TagTree::createChildren(TagTreeItem* item, TagNode *node) {
     for (auto& [k, c] : node->getChildren()) {
         TagTreeItem *child = new TagTreeItem(c);
+        ICON_LIST->push_back(c->getIcon());
         item->addChild(child);
         this->createChildren(child, c);
     }

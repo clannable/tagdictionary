@@ -1,23 +1,18 @@
 #include "icontable.h"
+#include "globals.h"
 #include <QGridLayout>
 #include <QDiriterator>
-#include <iostream>
 
 IconTable::IconTable(QWidget *parent)
-    : QWidget(parent), current(nullptr), panels()
-{
-    QDirIterator it(":/icons/", QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        QString path = it.next();
-        if (path.lastIndexOf(".") != -1)
-            path = path.slice(0, path.lastIndexOf("."));
-        else continue;
-        icons.append(path);
-    }
-    icons.sort();
+    : QWidget(parent), current(nullptr), panels() {}
 
-    for (int i = 0; i < icons.length(); i++) {
-        QString icon = icons[i];
+void IconTable::refresh() {
+    while (!panels.empty()) {
+        IconPanel* panel = panels.takeFirst();
+        delete panel;
+    }
+    for (const std::string& gIcon : *ICON_LIST) {
+        QString icon = QString::fromStdString(gIcon);
         IconPanel *panel = new IconPanel(icon);
         panels.append(panel);
         connect(panel, &IconPanel::selected, this, &IconTable::setCurrentItem);

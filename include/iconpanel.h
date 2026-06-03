@@ -17,6 +17,8 @@ public:
 
     void setSelected(bool selected);
     QString getIcon();
+    QString getShortName();
+
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
@@ -26,6 +28,7 @@ signals:
 private:
     Ui::IconPanel *ui;
     QString icon;
+    QString shortName;
     bool isSelected;
     QString baseStyleSheet;
 };

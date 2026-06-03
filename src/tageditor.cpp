@@ -111,8 +111,10 @@ void TagEditor::selectIcon() {
 }
 
 void TagEditor::iconSelected(QString icon) {
-    iconPath = icon;
-    ui->iconButton->setIcon(QIcon(iconPath));
+    if (!icon.isEmpty()) {
+        iconPath = icon;
+        ui->iconButton->setIcon(QIcon(iconPath));
+    }
 }
 
 void TagEditor::refreshLists() {
