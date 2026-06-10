@@ -18,6 +18,8 @@ TagTreeItem::TagTreeItem(TagNode *node) : QTreeWidgetItem()
         setIcon(0, QIcon(icon));
     else
         setIcon(0, QIcon(":/icons/" + icon));
+
+    refreshFileIcons();
 }
 
 TagNode* TagTreeItem::getNode() const {
@@ -44,4 +46,8 @@ void TagTreeItem::jsonUpdated() {
 
 }
 
+void TagTreeItem::refreshFileIcons() {
+    this->setIcon(1, this->node->hasImages() ? QIcon::fromTheme(QIcon::ThemeIcon::CameraPhoto) : QIcon());
+    this->setIcon(2, this->node->hasVideos() ? QIcon::fromTheme(QIcon::ThemeIcon::CameraVideo) : QIcon());
+}
 

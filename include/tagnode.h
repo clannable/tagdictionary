@@ -11,6 +11,7 @@ using namespace std;
 typedef vector<pair<string, string>> PathChanges;
 class TagNode
 {
+
 public:
     TagNode();
     TagNode(json data, string key="", TagNode* parent=nullptr);
@@ -57,6 +58,9 @@ public:
     void removeChildAt(string key);
     void insertChildAt(string key, TagNode* child);
 
+    bool hasImages();
+    bool hasVideos();
+
     json toJson();
 
 private:
@@ -71,6 +75,11 @@ private:
     TagNode* parent = nullptr;
     TagNode* root = nullptr;
     map<string, TagNode*> children;
+
+    bool wImages = false;
+    bool wVideos = false;
+
+    void checkFiles();
 };
 
 #endif // TAGNODE_H

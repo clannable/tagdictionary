@@ -1,5 +1,5 @@
 #include "tagnode.h"
-
+#include <regex>
 
 TagNode::TagNode() {
     this->root = this;
@@ -20,8 +20,10 @@ TagNode::TagNode(json data, string key, TagNode* parent) {
         this->related = data["related"].get<list<string>>();
     if (data.contains("required") && !data["required"].empty())
         this->required = data["required"].get<list<string>>();
-    if (data.contains("files") && !data["files"].empty())
+    if (data.contains("files") && !data["files"].empty()) {
         this->files = data["files"].get<list<string>>();
+        this->checkFiles();
+    }
 
 
 }
@@ -78,8 +80,14 @@ void TagNode::setRequired(list<string> required) { this->required = required; }
 
 
 list<string> TagNode::getFiles() const { return this->files; }
-void TagNode::setFiles(list<string> files) { this->files = files; }
-void TagNode::addFile(string file) { this->files.push_back(file); }
+void TagNode::setFiles(list<string> files) {
+    this->files = files;
+    checkFiles();
+}
+void TagNode::addFile(string file) {
+    this->files.push_back(file);
+    checkFiles();
+}
 
 
 TagNode* TagNode::getParent() const { return this->parent; }
@@ -164,6 +172,13 @@ void TagNode::renameListEntries(PathChanges changes) {
         c->renameListEntries(changes);
 }
 
+bool TagNode::hasImages() {
+    return this->wImages;
+}
+
+bool TagNode::hasVideos() {
+    return this->wVideos;
+}
 
 json TagNode::toJson() {
     json ret = json({
@@ -181,5 +196,23 @@ json TagNode::toJson() {
         ret.emplace("children", childrenJson);
     }
     return ret;
+}
+
+void TagNode::checkFiles() {
+    bool images = false;
+    bool videos = false;
+
+    regex videoRegex("\\.(mov|mp4|wmv)$", regex_constants::icase);
+    regex imageRegex("\\.(jpeg|png|gif|jpg|bmp|jfif|webp)$", regex_constants::icase);
+    for (const string& file : this->files) {
+        if (!videos && regex_search(file, videoRegex))
+            videos = true;
+        if (!images && regex_search(file, imageRegex))
+            images = true;
+        if (images && videos)
+            break;
+    }
+    wImages = images;
+    wVideos = videos;
 }
 

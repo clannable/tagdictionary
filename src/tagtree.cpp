@@ -8,11 +8,18 @@
 #include <QMenu>
 #include <QCursor>
 #include <QMessageBox>
+#include <QHeaderView>
 
 TagTree::TagTree(QWidget* parent) :
     QTreeWidget(parent),
     editModeEnabled(false)
 {
+
+    this->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    this->header()->setSectionResizeMode(1, QHeaderView::Fixed);
+    this->header()->setSectionResizeMode(2, QHeaderView::Fixed);
+    this->header()->resizeSection(1, 20);
+    this->header()->resizeSection(2, 20);
     // connect(this, &QTreeWidget::itemClicked, this, &QTreeWidget::expandItem);
 }
 
@@ -54,6 +61,9 @@ void TagTree::fromJson(nlohmann::json json) {
 
     ICON_LIST->sort();
     ICON_LIST->unique();
+
+    this->header()->resizeSection(1, 24);
+    this->header()->resizeSection(2, 24);
 }
 
 json TagTree::toJson() {

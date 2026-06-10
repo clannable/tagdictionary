@@ -137,6 +137,7 @@ void MainWindow::onSave(TagNode* tag, std::string oldPath) {
 
     selectedItem->setText(0, QString::fromStdString(tag->getKey()));
     selectedItem->setIcon(0, QIcon(QString::fromStdString(tag->getIcon())));
+    selectedItem->refreshFileIcons();
 
     ui->mediaDisplay->setFilesFromNode(selectedItem->getNode());
     saveJson();
@@ -147,6 +148,7 @@ void MainWindow::onSave(TagNode* tag, std::string oldPath) {
 void MainWindow::onAddFile(QString filePath) {
     if (editModeEnabled) return; // Don't update json data if tag is still being edited
     selectedItem->getNode()->addFile(filePath.toStdString());
+    selectedItem->refreshFileIcons();
     saveJson();
 }
 

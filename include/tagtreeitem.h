@@ -17,6 +17,8 @@ public:
 
     void jsonUpdated();
 
+    void refreshFileIcons();
+
 private:
     TagNode* node;
 
