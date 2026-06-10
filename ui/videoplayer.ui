@@ -175,6 +175,9 @@ border-radius: 2px;
        <property name="focusPolicy">
         <enum>Qt::FocusPolicy::ClickFocus</enum>
        </property>
+       <property name="toolTip">
+        <string/>
+       </property>
        <property name="styleSheet">
         <string notr="true">QPushButton {
 	width: 40px;
@@ -258,6 +261,9 @@ QPushButton:pressed, QToolButton:pressed {
        <property name="focusPolicy">
         <enum>Qt::FocusPolicy::ClickFocus</enum>
        </property>
+       <property name="toolTip">
+        <string>Toggle playing video on loop</string>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -295,6 +301,9 @@ QPushButton:pressed, QToolButton:pressed {
        </property>
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string>Mute/unmute</string>
        </property>
        <property name="text">
         <string/>
