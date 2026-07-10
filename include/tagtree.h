@@ -27,6 +27,12 @@ public slots:
     void onRemoveTag();
 
     void expandTreeTo(QTreeWidgetItem* item);
+    void filterTree(QString search);
+
+    void onExpandSelected();
+    void onCollapseSelected();
+    void onExpandAll();
+    void onCollapseAll();
 
 protected:
 
@@ -55,6 +61,10 @@ private:
     // TagTreeItem* findTag(TagTreeItem* item, QString tagPath);
 
     void createChildren(TagTreeItem* item, TagNode *node);
+    bool filterTags(QString search, QTreeWidgetItem *node);
+    void resetTagVisibility();
+
+    void setExpandedRecursive(bool expanded, QTreeWidgetItem* root);
 
 private slots:
     void signalRelated();

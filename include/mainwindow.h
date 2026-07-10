@@ -6,6 +6,7 @@
 #include <QListWidgetItem>
 #include <QMap>
 #include <QSettings>
+#include <QTimer>
 
 #include "tagnode.h"
 #include "tagtreeitem.h"
@@ -32,6 +33,8 @@ public slots:
     void onTagSelect();
     void onTagListSelect(QString tagPath);
     void onTagDoubleClicked(QTreeWidgetItem* item, int column);
+    void onSearchChange();
+    void onSearchTimeout();
 
     void setEditMode(bool mode);
 
@@ -50,6 +53,7 @@ private:
     QAction* saveAction;
     QAction* openAction;
     QAction* newTagAction;
+    QTimer* searchDebounce;
 
     bool editModeEnabled = false;
 };

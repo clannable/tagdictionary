@@ -18,11 +18,13 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QDirIterator>
+#include <QLineEdit>
 
 using json = nlohmann::json;
 
 std::list<std::string>* ICON_LIST = new std::list<std::string>();
 std::string LAST_IMAGE_FOLDER_PATH = "/home";
+std::chrono::milliseconds DEBOUNCE_TIME = 250ms;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -60,6 +62,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onSave);
     connect(ui->tagEditor, &TagEditor::editModeChanged, this, &MainWindow::setEditMode);
     connect(ui->mediaDisplay, &MediaDisplay::fileAdded, this, &MainWindow::onAddFile);
+
+    searchDebounce = new QTimer(this);
+    searchDebounce->setSingleShot(true);
+
+    connect(ui->searchInput, &QLineEdit::textChanged, this, &MainWindow::onSearchChange);
+    connect(searchDebounce, &QTimer::timeout, this, &MainWindow::onSearchTimeout);
 
     connect(ui->tagTree, &QTreeWidget::itemDoubleClicked, this, &MainWindow::onTagDoubleClicked);
     connect(ui->tagTree, &QTreeWidget::itemSelectionChanged, this, &MainWindow::onTagSelect);
@@ -112,6 +120,14 @@ void MainWindow::onTagListSelect(QString tagPath) {
     selectedItem = tag;
     tag->setSelected(true);
     ui->tagTree->expandTreeTo(tag);
+}
+
+void MainWindow::onSearchChange() {
+    searchDebounce->start(DEBOUNCE_TIME);
+}
+
+void MainWindow::onSearchTimeout() {
+    ui->tagTree->filterTree(ui->searchInput->text());
 }
 
 /*--------- Tag Editor Slots ---------*/

@@ -1,7 +1,7 @@
 #include "tagtree.h"
 #include "newtagdialog.h"
 #include "globals.h"
-
+#include <iostream>
 #include <QApplication>
 #include <QDrag>
 #include <QMimeData>
@@ -138,12 +138,76 @@ void TagTree::expandTreeTo(QTreeWidgetItem* item) {
     this->scrollToItem(item);
 }
 
+void TagTree::filterTree(QString search) {
+    QTreeWidgetItemIterator it(this);
+    if (search.trimmed().isEmpty()) {
+        resetTagVisibility();
+    } else {
+        for (int i = 0; i < this->topLevelItemCount(); i++) {
+            filterTags(search, topLevelItem(i));
+        }
+    }
+}
+
+bool TagTree::filterTags(QString search, QTreeWidgetItem* node) {
+    bool match = node->text(0).contains(search, Qt::CaseInsensitive);
+
+    if (node->childCount() != 0) {
+        for (int i = 0; i < node->childCount(); i++) {
+            bool subMatch = filterTags(search, node->child(i));
+            match = match || subMatch;
+        }
+    }
+
+    node->setHidden(!match);
+    if (match)
+        node->setExpanded(true);
+    return match;
+}
+
+void TagTree::resetTagVisibility() {
+    QTreeWidgetItemIterator it(this);
+    while (*it) {
+        (*it)->setHidden(false);
+        ++it;
+    }
+}
+
 void TagTree::createChildren(TagTreeItem* item, TagNode *node) {
     for (auto& [k, c] : node->getChildren()) {
         TagTreeItem *child = new TagTreeItem(c);
         ICON_LIST->push_back(c->getIcon());
         item->addChild(child);
         this->createChildren(child, c);
+    }
+}
+
+
+void TagTree::onExpandSelected() {
+    setExpandedRecursive(true, menuItem);
+    menuItem = nullptr;
+}
+
+void TagTree::onCollapseSelected() {
+    setExpandedRecursive(false, menuItem);
+    menuItem = nullptr;
+}
+
+void TagTree::onExpandAll() {
+    setExpandedRecursive(true, invisibleRootItem());
+    menuItem = nullptr;
+}
+
+void TagTree::onCollapseAll() {
+    setExpandedRecursive(false, invisibleRootItem());
+    menuItem = nullptr;
+}
+
+void TagTree::setExpandedRecursive(bool expanded, QTreeWidgetItem* root) {
+    QTreeWidgetItemIterator it(root);
+    while(*it) {
+        (*it)->setExpanded(expanded);
+        ++it;
     }
 }
 
@@ -234,10 +298,11 @@ void TagTree::dragMoveEvent(QDragMoveEvent *event) {
 void TagTree::contextMenuEvent(QContextMenuEvent *event) {
     menuItem = static_cast<TagTreeItem*>(itemAt(event->pos()));
     QMenu *menu = new QMenu(this);
-    QAction *addAction = menu->addAction("Create New Tag");
+    QAction *addAction = menu->addAction("New Tag...");
     connect(addAction, &QAction::triggered, this, &TagTree::onCreateTag);
 
     if (menuItem != nullptr) {
+
         QString label = menuItem->text(0);
         if (!editModeEnabled) {
             QAction *removeAction = menu->addAction("Remove \"" + label + "\"");
@@ -250,6 +315,18 @@ void TagTree::contextMenuEvent(QContextMenuEvent *event) {
             connect(relatedAction, &QAction::triggered, this, &TagTree::signalRelated);
         }
     }
+    menu->addSeparator();
+
+    if (menuItem != nullptr) {
+        QAction *expandSelected = menu->addAction("Expand Selected Tag");
+        connect(expandSelected, &QAction::triggered, this, &TagTree::onExpandSelected);
+        QAction *collapseSelected = menu->addAction("Collapse Selected Tag Recursively");
+        connect(collapseSelected, &QAction::triggered, this, &TagTree::onCollapseSelected);
+    }
+    QAction *expandAll = menu->addAction("Expand Tree");
+    connect(expandAll, &QAction::triggered, this, &TagTree::onExpandAll);
+    QAction *collapseAll = menu->addAction("Collapse Tree");
+    connect(collapseAll, &QAction::triggered, this, &TagTree::onCollapseAll);
     menu->exec(QCursor::pos());
 }
 
