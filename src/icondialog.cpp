@@ -3,7 +3,7 @@
 #include "ui_icondialog.h"
 #include <QScrollBar>
 #include <QFileDialog>
-
+#include "globals.h"
 IconDialog::IconDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::IconDialog)
@@ -44,6 +44,9 @@ void IconDialog::browseIcon() {
 
     filePath.replace("\\", "/");
     emit iconSelected(filePath);
+    ICON_LIST->push_back(filePath.toStdString());
+    ICON_LIST->sort();
+    ICON_LIST->unique();
     QDialog::accept();
 }
 
