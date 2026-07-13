@@ -7,43 +7,16 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>539</height>
+    <height>540</height>
    </rect>
-  </property>
-  <property name="acceptDrops">
-   <bool>true</bool>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">QToolButton {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #d8d8d8, stop: 1 #c1c1c1);
-	border: 1px solid #5a5a5a;
-	color: #3c3c3c;
-	border-radius: 4px;
-	height: 25px;
-	width: 25px;
-}
-
-QToolButton:hover {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #c8c8c8, stop: 1 #b1b1b1);
-	border: 1px solid #717171;
-	color: #6a6a6a;
-}
-
-QToolButton:pressed {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #b6b6b6, stop: 1 #a1a1a1);
-	border-color: #898989;
-	color: #6a6a6a;
-}
-QToolButton:disabled {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eaeaea, stop: 1 #c5c5c5);
-	border-color: #bebebe;
-	color: #bebebe;
-}</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0">
+   <property name="leftMargin">
+    <number>9</number>
+   </property>
    <property name="topMargin">
     <number>0</number>
    </property>
@@ -65,18 +38,19 @@ QToolButton:disabled {
      </layout>
     </widget>
    </item>
-   <item alignment="Qt::AlignmentFlag::AlignBottom">
-    <widget class="Line" name="buttonLine">
+   <item>
+    <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
-   <item alignment="Qt::AlignmentFlag::AlignBottom">
+   <item>
     <widget class="QWidget" name="pageButtons" native="true">
      <property name="styleSheet">
       <string notr="true">QPushButton {
 	width: 40px;
+	height: 28px;
 }
 
 QToolButton {
@@ -89,7 +63,7 @@ QPushButton, QToolButton {
 	border: 1px solid #b9b9b9;
 	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f9f9f9, stop: 1 #e5e5e5);
 	color: #3a3a3a; 
-	height: 25px;
+
 }
 
 QPushButton:hover, QToolButton:hover {
@@ -116,21 +90,21 @@ QPushButton:disabled, QToolButton:disabled {
        <number>0</number>
       </property>
       <property name="topMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <item>
        <widget class="QToolButton" name="addFileButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="cursor">
          <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="toolTip">
+         <string>Import file</string>
         </property>
         <property name="text">
          <string/>
@@ -155,19 +129,16 @@ QPushButton:disabled, QToolButton:disabled {
       </item>
       <item>
        <widget class="QFrame" name="frame">
-        <property name="autoFillBackground">
-         <bool>true</bool>
-        </property>
         <property name="frameShape">
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Shadow::Raised</enum>
+         <enum>QFrame::Shadow::Plain</enum>
         </property>
         <property name="lineWidth">
-         <number>2</number>
+         <number>0</number>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -185,15 +156,6 @@ QPushButton:disabled, QToolButton:disabled {
          </property>
          <item>
           <widget class="QPushButton" name="prevButton">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="cursor">
             <cursorShape>PointingHandCursor</cursorShape>
            </property>
@@ -214,21 +176,15 @@ border-right: none;
            <property name="icon">
             <iconset theme="QIcon::ThemeIcon::GoPrevious"/>
            </property>
-           <property name="flat">
-            <bool>false</bool>
-           </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="openButton">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="cursor">
             <cursorShape>PointingHandCursor</cursorShape>
            </property>
            <property name="toolTip">
-            <string>Open file</string>
+            <string>Open file externally</string>
            </property>
            <property name="styleSheet">
             <string notr="true">border-radius: 0;</string>
@@ -239,28 +195,10 @@ border-right: none;
            <property name="icon">
             <iconset theme="QIcon::ThemeIcon::FolderOpen"/>
            </property>
-           <property name="iconSize">
-            <size>
-             <width>16</width>
-             <height>16</height>
-            </size>
-           </property>
-           <property name="flat">
-            <bool>false</bool>
-           </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="nextButton">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="cursor">
             <cursorShape>PointingHandCursor</cursorShape>
            </property>
@@ -281,9 +219,6 @@ border-left: none;
            <property name="icon">
             <iconset theme="QIcon::ThemeIcon::GoNext"/>
            </property>
-           <property name="flat">
-            <bool>false</bool>
-           </property>
           </widget>
          </item>
         </layout>
@@ -291,12 +226,6 @@ border-left: none;
       </item>
       <item>
        <widget class="QLabel" name="fileCounter">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
         <property name="text">
          <string/>
         </property>

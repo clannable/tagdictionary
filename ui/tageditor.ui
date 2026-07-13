@@ -234,86 +234,9 @@ QToolButton:pressed {
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="saveButton">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="toolTip">
-        <string>Save changes</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QPushButton {
-	width: 40px;
-	
-}
-
-QToolButton {
-	width: 25px;
-	height: 25px;
-}
-
-QPushButton, QToolButton {
-	border-radius: 4px;
-	border: 1px solid #b9b9b9;
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #247ccf, stop: 1 #1c62a3);
-	color: #c5c5c5; 
-	height: 25px;
-}
-
-QPushButton:hover, QToolButton:hover {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #1f6bb3, stop: 1 #18578d);
-    border-color: #8f8f8f;
-}
-
-QPushButton:pressed, QToolButton:pressed {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #18578d, stop: 1 #1f6bb3);
-    border-color: #8f8f8f;
-}
-
-QPushButton:disabled, QToolButton:disabled {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eaeaea, stop: 1 #c5c5c5);
-	border-color: #bebebe;
-	color: #bebebe;
-}</string>
-       </property>
-       <property name="text">
-        <string>Save Changes</string>
-       </property>
-       <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="editButton">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="toolTip">
-        <string>Edit tag</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QPushButton {
+    <widget class="QFrame" name="frame">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
 	width: 40px;
 }
 
@@ -327,7 +250,7 @@ QPushButton, QToolButton {
 	border: 1px solid #b9b9b9;
 	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f9f9f9, stop: 1 #e5e5e5);
 	color: #3a3a3a; 
-	height: 25px;
+	height: 28px;
 }
 
 QPushButton:hover, QToolButton:hover {
@@ -345,16 +268,98 @@ QPushButton:disabled, QToolButton:disabled {
 	border-color: #bebebe;
 	color: #bebebe;
 }</string>
-       </property>
-       <property name="text">
-        <string>Edit Tag</string>
-       </property>
-       <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::MailMessageNew"/>
-       </property>
-      </widget>
-     </item>
-    </layout>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="saveButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="toolTip">
+         <string>Save changes</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+	border: 1px solid #b9b9b9;
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #247ccf, stop: 1 #1c62a3);
+	color: #c5c5c5; 
+}
+
+QPushButton:hover, QToolButton:hover {
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #1f6bb3, stop: 1 #18578d);
+    border-color: #8f8f8f;
+}
+
+QPushButton:pressed, QToolButton:pressed {
+	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #18578d, stop: 1 #1f6bb3);
+    border-color: #8f8f8f;
+}
+
+QPushButton:disabled, QToolButton:disabled {
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eaeaea, stop: 1 #c5c5c5);
+	border-color: #bebebe;
+	color: #bebebe;
+}</string>
+        </property>
+        <property name="text">
+         <string>Apply Changes</string>
+        </property>
+        <property name="icon">
+         <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="editButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="toolTip">
+         <string>Edit tag</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>Edit Tag</string>
+        </property>
+        <property name="icon">
+         <iconset theme="QIcon::ThemeIcon::MailMessageNew"/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>
