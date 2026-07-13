@@ -40,6 +40,7 @@ public slots:
 
     void onSave(TagNode* tag, std::string oldPath);
     void onAddFile(QString filePath);
+    void onToggleAutoSave(bool checked);
     void saveJson();
     void openJson();
     void newJson();
@@ -53,8 +54,12 @@ private:
     QAction* saveAction;
     QAction* openAction;
     QAction* newTagAction;
+    QMenu* recentMenu;
     QTimer* searchDebounce;
 
     bool editModeEnabled = false;
+
+    void pushToRecent();
+    void setupRecentFileList();
 };
 #endif // MAINWINDOW_H
