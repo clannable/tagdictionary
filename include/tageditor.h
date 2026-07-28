@@ -39,6 +39,7 @@ public slots:
 signals:
     void editModeChanged(bool mode);
     void tagSaved(TagNode* tag, std::string oldPath);
+    void partialSave(TagNode* tag);
     void listItemSelected(QString tagPath);
 
 private:

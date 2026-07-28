@@ -69,14 +69,22 @@ MainWindow::MainWindow(QWidget *parent)
 
     QMenu *tagMenu = ui->menuBar->addMenu("Tags");
     newTagAction = new QAction("Create New Tag", this);
-
+    iconAction = new QAction("Modify Icon", this);
+    iconAction->setShortcut(QKeySequence(QKeyCombination(Qt::AltModifier, Qt::Key_I)));
     connect(newTagAction, &QAction::triggered, ui->tagTree, &TagTree::onCreateTag);
+    connect(iconAction, &QAction::triggered, ui->tagEditor, &TagEditor::selectIcon);
+    iconAction->setDisabled(true);
+
     tagMenu->addAction(newTagAction);
+    tagMenu->addSeparator();
+    tagMenu->addAction(iconAction);
+
 
     connect(ui->tagEditor, &TagEditor::editModeChanged, ui->tagTree, &TagTree::setEditMode);
     connect(ui->tagEditor, &TagEditor::editModeChanged, ui->mediaDisplay, &MediaDisplay::setEditMode);
     connect(ui->tagEditor, &TagEditor::listItemSelected, this, &MainWindow::onTagListSelect);
     connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onSave);
+    connect(ui->tagEditor, &TagEditor::partialSave, this, &MainWindow::onPartialSave);
     connect(ui->tagEditor, &TagEditor::editModeChanged, this, &MainWindow::setEditMode);
     connect(ui->mediaDisplay, &MediaDisplay::fileAdded, this, &MainWindow::onAddFile);
 
@@ -112,7 +120,11 @@ MainWindow::~MainWindow()
 /*---------  Tag Tree Slots ---------*/
 
 void MainWindow::onTagSelect() {
-    if (editModeEnabled || ui->tagTree->selectedItems().isEmpty()) return;
+    if (editModeEnabled || ui->tagTree->selectedItems().isEmpty()) {
+        iconAction->setDisabled(true);
+        return;
+    }
+    iconAction->setDisabled(false);
     selectedItem = static_cast<TagTreeItem*>(ui->tagTree->selectedItems().first());
 
     TagNode *node = selectedItem->getNode();
@@ -173,6 +185,14 @@ void MainWindow::onSave(TagNode* tag, std::string oldPath) {
     selectedItem->refreshFileIcons();
 
     ui->mediaDisplay->setFilesFromNode(selectedItem->getNode());
+
+    if (AUTOSAVE_ENABLED)
+        saveJson();
+}
+
+void MainWindow::onPartialSave(TagNode *tag) {
+    selectedItem->setText(0, QString::fromStdString(tag->getKey()));
+    selectedItem->setIcon(0, QIcon(QString::fromStdString(tag->getIcon())));
 
     if (AUTOSAVE_ENABLED)
         saveJson();

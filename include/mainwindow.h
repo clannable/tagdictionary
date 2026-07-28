@@ -39,6 +39,7 @@ public slots:
     void setEditMode(bool mode);
 
     void onSave(TagNode* tag, std::string oldPath);
+    void onPartialSave(TagNode* tag);
     void onAddFile(QString filePath);
     void onToggleAutoSave(bool checked);
     void saveJson();
@@ -54,6 +55,8 @@ private:
     QAction* saveAction;
     QAction* openAction;
     QAction* newTagAction;
+    QAction* iconAction;
+
     QMenu* recentMenu;
     QTimer* searchDebounce;
 

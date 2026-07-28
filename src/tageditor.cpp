@@ -113,7 +113,13 @@ void TagEditor::selectIcon() {
 void TagEditor::iconSelected(QString icon) {
     if (!icon.isEmpty()) {
         iconPath = icon;
-        ui->iconButton->setIcon(QIcon(iconPath));
+        QIcon ic = QIcon(iconPath);
+        ui->iconButton->setIcon(ic);
+        if (this->editModeEnabled == false) {
+            currentTag->setIcon(iconPath.toStdString());
+            ui->iconLabel->setPixmap(ic.pixmap(QSize(20,20)));
+            emit partialSave(currentTag);
+        }
     }
 }
 
