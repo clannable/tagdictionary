@@ -276,7 +276,11 @@ QScrollBar::handle:vertical {
      </widget>
     </item>
     <item>
-     <widget class="MediaDisplay" name="mediaDisplay" native="true"/>
+     <widget class="MediaDisplay" name="mediaDisplay" native="true">
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
