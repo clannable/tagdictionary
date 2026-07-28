@@ -37,12 +37,13 @@ void IconDialog::setSelected(QString value) {
 void IconDialog::browseIcon() {
     QString filePath = QFileDialog::getOpenFileName(this,
         "Select icon",
-        "/home",
+        QString::fromStdString(LAST_ICON_FOLDER_PATH),
         "Icon files (*.png *ico *svg)"
     );
     if (filePath.isNull()) return;
 
     filePath.replace("\\", "/");
+    LAST_ICON_FOLDER_PATH = QFileInfo(filePath).absoluteDir().path().toStdString();
     emit iconSelected(filePath);
     ICON_LIST->push_back(filePath.toStdString());
     ICON_LIST->sort();

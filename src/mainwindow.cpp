@@ -23,6 +23,7 @@ using json = nlohmann::json;
 
 std::list<std::string>* ICON_LIST = new std::list<std::string>();
 std::string LAST_IMAGE_FOLDER_PATH = "/home";
+std::string LAST_ICON_FOLDER_PATH = "/home";
 std::chrono::milliseconds DEBOUNCE_TIME = 250ms;
 bool AUTOSAVE_ENABLED = true;
 const int MAX_RECENT = 5;

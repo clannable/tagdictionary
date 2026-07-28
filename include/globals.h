@@ -7,6 +7,7 @@
 
 extern std::list<std::string>* ICON_LIST;
 extern std::string LAST_IMAGE_FOLDER_PATH;
+extern std::string LAST_ICON_FOLDER_PATH;
 
 extern bool AUTOSAVE_ENABLED;
 #endif // GLOBALS_H
