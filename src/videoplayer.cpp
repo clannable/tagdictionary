@@ -1,12 +1,29 @@
 #include "videoplayer.h"
 #include "ui_videoplayer.h"
 #include <QSettings>
+#include <QProxyStyle>
+
+class PlayerSlideStyle : public QProxyStyle
+{
+public:
+    int styleHint(
+        StyleHint         hint,
+        const QStyleOption     *option = nullptr,
+        const QWidget          *widget = nullptr,
+        QStyleHintReturn *returnData = nullptr) const override
+    {
+        if (hint == QStyle::SH_Slider_AbsoluteSetButtons)
+            return (Qt::LeftButton | Qt::MiddleButton | Qt::RightButton);
+        return QProxyStyle::styleHint(hint, option, widget, returnData);
+    }
+};
 
 VideoPlayer::VideoPlayer(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::VideoPlayer), ignoreHours(false), repeat(false)
 {
     ui->setupUi(this);
+    ui->progressSlider->setStyle(new PlayerSlideStyle());
     player = new QMediaPlayer;
     audio = new QAudioOutput;
     sliderMove = -1;
@@ -20,7 +37,7 @@ VideoPlayer::VideoPlayer(QWidget *parent)
     connect(player, &QMediaPlayer::playbackStateChanged, this, &VideoPlayer::onPlaybackStateChanged);
     connect(ui->progressSlider, &QSlider::sliderReleased, this, &VideoPlayer::onProgressReleased);
     connect(ui->progressSlider, &QSlider::sliderMoved, this, &VideoPlayer::onProgressSliderMove);
-    connect(ui->progressSlider, &QSlider::actionTriggered, this, &VideoPlayer::onProgressSliderAction);
+    connect(ui->progressSlider, &QSlider::valueChanged, this, &VideoPlayer::onProgressSliderMove);
     connect(ui->repeatButton, &QPushButton::clicked, this, &VideoPlayer::toggleRepeat);
     QSettings settings("MyApp","Tag Viewer");
     settings.beginGroup("video");
@@ -108,33 +125,6 @@ void VideoPlayer::onProgressReleased() {
 
 void VideoPlayer::onProgressSliderMove(int position) {
     sliderMove = position;
-}
-
-void VideoPlayer::onProgressSliderAction(int action) {
-    int step = 0;
-    switch(action) {
-    case QSlider::SliderSingleStepAdd:
-        step = ui->progressSlider->singleStep() * 250;
-        player->pause();
-        break;
-    case QSlider::SliderSingleStepSub:
-        step = -ui->progressSlider->singleStep() * 250;
-        player->pause();
-        break;
-    case QSlider::SliderPageStepAdd:
-        step = ui->progressSlider->pageStep() * 250;
-        break;
-    case QSlider::SliderPageStepSub:
-        step = -ui->progressSlider->pageStep() * 250;
-        break;
-    case QSlider::SliderToMaximum:
-    case QSlider::SliderToMinimum:
-        break;
-    }
-    if (step != 0) {
-        ui->progressSlider->setSliderPosition(ui->progressSlider->value() + step);
-        player->setPosition(ui->progressSlider->value()*250);
-    }
 }
 
 void VideoPlayer::onTogglePlay() {
