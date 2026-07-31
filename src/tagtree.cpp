@@ -213,22 +213,32 @@ void TagTree::setExpandedRecursive(bool expanded, QTreeWidgetItem* root) {
 
 void TagTree::dropEvent(QDropEvent *event) {
     if (event->source() != this) return;
-    TagTreeItem* item = static_cast<TagTreeItem*>(currentItem());
-    std::string oldPath = item->getNode()->getFullPath();
+
+
+    QTreeWidgetItem* dest = itemAt(event->position().toPoint());
+    QTreeWidgetItem* item = currentItem();
+
+    // if (dest == oldParent || dest == item)
+    //     event->ignore();
+    // else
+    //     event->acceptProposedAction();
+
     QTreeWidget::dropEvent(event);
+
     if (event->isAccepted()) {
-        if (item->parent() != nullptr) {
-            TagTreeItem* parent = static_cast<TagTreeItem*>(item->parent());
-            item->getNode()->setParent(parent->getNode());
+        TagNode* node = static_cast<TagTreeItem*>(item)->getNode();
+
+        if (dest == nullptr) {
+            node->setParent(rootNode);
         } else {
-            item->getNode()->setParent(rootNode);
+            node->setParent(static_cast<TagTreeItem*>(dest)->getNode());
         }
-        std::string newPath = item->getNode()->getFullPath();
-        // item->setData(0, Qt::UserRole, QString::fromStdString(item->getNode()->getFullPath()));
-        // std::cout << item->text(0).toStdString() << "\n" << std::flush;
+
         sortItems(0, Qt::AscendingOrder);
         emit tagsChanged();
     }
+
+
 }
 
 // void TagTree::mousePressEvent(QMouseEvent *event) {
@@ -269,30 +279,22 @@ void TagTree::dropEvent(QDropEvent *event) {
 // }
 
 void TagTree::dragMoveEvent(QDragMoveEvent *event) {
-    this->setDropIndicatorShown(true);
     QTreeWidget::dragMoveEvent(event);
     if (event->source() != this) event->ignore();
 
-    QTreeWidgetItem *item = this->itemAt(event->position().toPoint());
+    QTreeWidgetItem *hoverItem = this->itemAt(event->position().toPoint());
     QTreeWidgetItem *selected = this->selectedItems().first();
 
-    switch(this->dropIndicatorPosition()) {
-    case QAbstractItemView::AboveItem:
-    case QAbstractItemView::BelowItem:
-        if (item->parent() == selected->parent()) {
-            event->ignore();
-            this->setDropIndicatorShown(false);
-        }
-        break;
-    case QAbstractItemView::OnViewport:
-        if (selected->parent() == nullptr) {
-            event->ignore();
-            this->setDropIndicatorShown(false);
-        }
-        break;
-    case QAbstractItemView::OnItem:
-        break;
-    }
+    event->accept();
+
+    if (dropIndicatorPosition() == QAbstractItemView::OnViewport && hoverItem == nullptr && selected->parent() == nullptr)
+        event->ignore();
+
+    if (hoverItem == selected->parent() || hoverItem == selected)
+        event->ignore();
+
+
+
 }
 
 void TagTree::contextMenuEvent(QContextMenuEvent *event) {

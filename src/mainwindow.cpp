@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->tagTree, &QTreeWidget::itemDoubleClicked, this, &MainWindow::onTagDoubleClicked);
     connect(ui->tagTree, &QTreeWidget::itemSelectionChanged, this, &MainWindow::onTagSelect);
-    connect(ui->tagTree, &TagTree::tagsChanged, this, &MainWindow::saveJson);
+    connect(ui->tagTree, &TagTree::tagsChanged, this, &MainWindow::onTagChange);
     connect(ui->tagTree, &TagTree::addToRelated, ui->tagEditor, &TagEditor::addToRelated);
     connect(ui->tagTree, &TagTree::addToRequired, ui->tagEditor, &TagEditor::addToRequired);
     connect(ui->tagTree, &TagTree::tagsChanged, ui->tagEditor, &TagEditor::refreshLists);
@@ -150,6 +150,11 @@ void MainWindow::onTagListSelect(QString tagPath) {
     selectedItem = tag;
     tag->setSelected(true);
     ui->tagTree->expandTreeTo(tag);
+}
+
+void MainWindow::onTagChange() {
+    if (AUTOSAVE_ENABLED)
+        saveJson();
 }
 
 void MainWindow::onSearchChange() {
@@ -283,6 +288,10 @@ void MainWindow::reloadJson() {
         }
 
         json tags = json::parse(*f);
+        if (!tags.contains("version") && !tags.contains("tags")) {
+            // Convert from first version of dictionary structure
+
+        }
         ui->tagTree->fromJson(tags);
         ui->tagTree->sortByColumn(0, Qt::AscendingOrder);
     } catch (std::exception e) {
