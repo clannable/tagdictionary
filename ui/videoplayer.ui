@@ -54,20 +54,7 @@ height: 5px;
 border-radius: 2px;
 }</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,18,1,0">
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Orientation::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="18,0">
    <item>
     <widget class="QFrame" name="frame">
      <property name="styleSheet">
@@ -104,19 +91,6 @@ border-radius: 2px;
       </item>
      </layout>
     </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Orientation::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

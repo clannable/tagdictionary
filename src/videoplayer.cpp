@@ -24,6 +24,7 @@ VideoPlayer::VideoPlayer(QWidget *parent)
 {
     ui->setupUi(this);
     ui->progressSlider->setStyle(new PlayerSlideStyle());
+    ui->volumeSlider->setStyle(new PlayerSlideStyle());
     player = new QMediaPlayer;
     audio = new QAudioOutput;
     sliderMove = -1;
