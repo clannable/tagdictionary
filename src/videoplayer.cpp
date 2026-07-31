@@ -106,7 +106,7 @@ void VideoPlayer::updateVideoProgress(qint64 position) {
 }
 
 void VideoPlayer::onDurationChange(qint64 duration) {
-    ignoreHours = (duration/1000/60/60 == 0);
+    ignoreHours = (duration/3600000 == 0);
     videoLength = formatTime(duration);
 
     ui->progressSlider->setMaximum(int(duration/250));
@@ -156,12 +156,9 @@ void VideoPlayer::setVideo(QString filePath) {
 }
 
 QString VideoPlayer::formatTime(qint64 millis) {
-    int seconds = millis / 1000;
-    int minutes = seconds / 60;
-    int hours = minutes / 60;
-    QString ret = QString::number(minutes%60).rightJustified(2, '0') + ':' + QString::number(seconds%60).rightJustified(2, '0');
+    QString ret = QString::number((millis/60000)%60).rightJustified(2, '0') + ':' + QString::number((millis/1000)%60).rightJustified(2, '0');
     if (!ignoreHours)
-        ret = QString::number(hours) + ':' + ret;
+        ret = QString::number(millis/3600000) + ':' + ret;
     return ret;
 }
 
