@@ -27,25 +27,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
-
-public slots:
-    void onTagSelect();
-    void onTagListSelect(QString tagPath);
-    void onTagDoubleClicked(QTreeWidgetItem* item, int column);
-    void onSearchChange();
-    void onSearchTimeout();
-
-    void setEditMode(bool mode);
-
-    void onSave(TagNode* tag, std::string oldPath);
-    void onPartialSave(TagNode* tag);
-    void onAddFile(QString filePath);
-    void onToggleAutoSave(bool checked);
-    void saveJson();
-    void openJson();
-    void newJson();
-    void reloadJson();
+    ~MainWindow();  
 
 private:
     Ui::MainWindow *ui;
@@ -64,5 +46,24 @@ private:
 
     void pushToRecent();
     void setupRecentFileList();
+
+private slots:
+    void onTagSelect();
+    void onTagChange();
+    void onTagListSelect(QString tagPath);
+    void onTagDoubleClicked(QTreeWidgetItem* item, int column);
+    void onSearchChange();
+    void onSearchTimeout();
+
+    void setEditMode(bool mode);
+
+    void onSave(TagNode* tag, std::string oldPath);
+    void onPartialSave(TagNode* tag);
+    void onAddFile(QString filePath);
+    void onToggleAutoSave(bool checked);
+    void saveJson();
+    void openJson();
+    void newJson();
+    void reloadJson();
 };
 #endif // MAINWINDOW_H
