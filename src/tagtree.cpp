@@ -61,6 +61,10 @@ void TagTree::fromJson(nlohmann::json json) {
 
     this->header()->resizeSection(1, 24);
     this->header()->resizeSection(2, 24);
+
+    if (CONVERT_RELATED_FLAG == true) {
+        rootNode->convertSublistsToId();
+    }
     rootItem->setExpanded(true);
 }
 

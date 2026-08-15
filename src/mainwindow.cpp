@@ -24,8 +24,12 @@ using json = nlohmann::json;
 std::list<std::string>* ICON_LIST = new std::list<std::string>();
 std::string LAST_IMAGE_FOLDER_PATH = "/home";
 std::string LAST_ICON_FOLDER_PATH = "/home";
+int NEXT_TAG_ID = 0;
+std::map<int, TagNode*> TAG_MAP = {};
+std::map<std::string, int> TAG_PATH_MAP = {};
 std::chrono::milliseconds DEBOUNCE_TIME = 250ms;
 bool AUTOSAVE_ENABLED = true;
+bool CONVERT_RELATED_FLAG = false;
 const int MAX_RECENT = 5;
 
 

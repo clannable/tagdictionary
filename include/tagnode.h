@@ -23,6 +23,8 @@ public:
     TagNode* getRoot() const;
     bool isRoot() const;
 
+    int getId() const;
+
     string getDescription() const;
     void setDescription(string description);
     void setDescription(QString description);
@@ -39,11 +41,11 @@ public:
     void setFiles(list<string> files);
     void addFile(string file);
 
-    list<string> getRelated() const;
-    void setRelated(list<string> related);
+    json getRelated() const;
+    void setRelated(json related);
 
-    list<string> getRequired() const;
-    void setRequired(list<string> required);
+    json getRequired() const;
+    void setRequired(json required);
 
     void renameListEntries(PathChanges changes);
 
@@ -62,15 +64,18 @@ public:
     bool hasImages();
     bool hasVideos();
 
+    void convertSublistsToId();
+
     json toJson();
 
 private:
+    int id;
     string key = "";
     string description = "";
     string icon = "";
     list<string> files;
-    list<string> related;
-    list<string> required;
+    json related;
+    json required;
     string fullPath = "";
 
     TagNode* parent = nullptr;
