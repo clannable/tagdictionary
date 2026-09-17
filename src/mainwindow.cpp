@@ -186,10 +186,12 @@ void MainWindow::onSave(TagNode* tag, std::string oldPath) {
         fileList.push_back(f.toStdString());
     tag->setFiles(fileList);
 
+    QString oldKey = selectedItem->text(0);
     selectedItem->setText(0, QString::fromStdString(tag->getKey()));
     selectedItem->setIcon(0, QIcon(QString::fromStdString(tag->getIcon())));
     selectedItem->refreshFileIcons();
-
+    if (oldKey != tag->getKey())
+        ui->tagTree->sortItems(0, Qt::AscendingOrder);
     ui->mediaDisplay->setFilesFromNode(selectedItem->getNode());
 
     if (AUTOSAVE_ENABLED)
@@ -254,15 +256,19 @@ void MainWindow::saveJson() {
 }
 
 void MainWindow::openJson() {
-    jsonFilePath = QFileDialog::getOpenFileName(
+    QString filePath = QFileDialog::getOpenFileName(
         this,
         "Select JSON file",
         jsonFilePath.isEmpty() ? "" : QFileInfo(jsonFilePath).dir().absolutePath(),
         "Tag Dictionary (*.json)");
-    QSettings settings("MyApp","Tag Viewer");
-    settings.setValue("data/lastOpened", jsonFilePath);
-    pushToRecent();
-    reloadJson();
+    if (!filePath.isEmpty()) {
+        jsonFilePath = filePath;
+        QSettings settings("MyApp","Tag Viewer");
+        settings.setValue("data/lastOpened", jsonFilePath);
+
+        pushToRecent();
+        reloadJson();
+    }
 }
 
 void MainWindow::reloadJson() {
@@ -340,8 +346,9 @@ void MainWindow::setupRecentFileList() {
         fileAction->setToolTip(jsonFilePath);
         recentMenu->addAction(fileAction);
         connect(fileAction, &QAction::triggered, this, [filePath, this]() {
-            std::cout << "Triggered recent file action for " << filePath.toStdString() << "\n" << std::flush;
             this->jsonFilePath = filePath;
+            QSettings settings("MyApp","Tag Viewer");
+            settings.setValue("data/lastOpened", jsonFilePath);
             this->pushToRecent();
             this->reloadJson();
         });
