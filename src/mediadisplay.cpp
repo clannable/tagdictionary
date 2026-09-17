@@ -86,28 +86,30 @@ void MediaDisplay::showFile(int index) {
 
     } else {
         QString filePath = files[currentPage];
-        if (!QFileInfo::exists(filePath)) {
+        QMimeDatabase db;
+        QString mimeType = db.mimeTypeForFile(filePath).name();
+        ui->openButton->setEnabled(true);
+        try {
+            if (mimeType.startsWith("image")) {
+                isImage = true;
+                PixmapLabel* image = new PixmapLabel();
+                image->setImage(filePath, mimeType.endsWith("gif"));
+                currentWidget = image;
+            } else if (mimeType.startsWith("video")) {
+                isImage = false;
+                VideoPlayer* video = new VideoPlayer();
+                video->setVideo(filePath);
+                video->play();
+                currentWidget = video;
+            }
+        } catch (...) {
             isImage = false;
             QLabel* error = new QLabel();
             error->setText("Failed to load file");
             error->setAlignment(Qt::AlignCenter);
+            currentWidget = error;
+        }
 
-        }
-        QMimeDatabase db;
-        QString mimeType = db.mimeTypeForFile(filePath).name();
-        ui->openButton->setEnabled(true);
-        if (mimeType.startsWith("image")) {
-            isImage = true;
-            PixmapLabel* image = new PixmapLabel();
-            image->setImage(filePath, mimeType.endsWith("gif"));
-            currentWidget = image;
-        } else if (mimeType.startsWith("video")) {
-            isImage = false;
-            VideoPlayer* video = new VideoPlayer();
-            video->setVideo(filePath);
-            video->play();
-            currentWidget = video;
-        }
         ui->fileCounter->setText(QString::number(currentPage+1) + " / " + QString::number(files.length()));
         ui->prevButton->setEnabled(currentPage > 0);
         ui->nextButton->setEnabled(currentPage < files.length()-1);
@@ -177,7 +179,7 @@ void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
     if (node == nullptr || event->source() != nullptr) {
         event->ignore();
     } else if (data->hasUrls()) {
-        QString filePath = data->urls()[0].toString(QUrl::DecodeReserved);
+        QString filePath = data->urls()[0].toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
         QString mimeType = db.mimeTypeForFile(filePath).name();
         if (mimeType.startsWith("image") || mimeType.startsWith("video")) {
             event->setDropAction(Qt::CopyAction);

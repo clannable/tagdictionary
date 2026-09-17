@@ -29,6 +29,9 @@ void PixmapLabel::setImage(const QString& filePath, bool animated=false)
 
 
     QPixmap pm(filePath);
+    if (pm.isNull())
+        throw nullptr;
+
     if (animated) {
 
         m_cols = pm.width();
