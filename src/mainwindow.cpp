@@ -87,6 +87,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onSave);
     connect(ui->tagEditor, &TagEditor::partialSave, this, &MainWindow::onPartialSave);
     connect(ui->tagEditor, &TagEditor::editModeChanged, this, &MainWindow::setEditMode);
+    connect(ui->tagEditor, &TagEditor::displayLinkClicked, ui->mediaDisplay, &MediaDisplay::setFile);
     connect(ui->mediaDisplay, &MediaDisplay::fileAdded, this, &MainWindow::onAddFile);
 
     searchDebounce = new QTimer(this);
