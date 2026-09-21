@@ -22,7 +22,7 @@ TagEditor::TagEditor(QWidget *parent)
     connect(ui->iconButton, &QToolButton::clicked, this, &TagEditor::selectIcon);
     connect(this->requiredList, &TagListWidget::tagSelected, this, &TagEditor::onListItemSelect);
     connect(this->relatedList, &TagListWidget::tagSelected, this, &TagEditor::onListItemSelect);
-
+    connect(ui->description, &QTextBrowser::anchorClicked, this, &TagEditor::onAnchorClick);
     connect(this, &TagEditor::editModeChanged, this->relatedList, &TagListWidget::setEditMode);
     connect(this, &TagEditor::editModeChanged, this->requiredList, &TagListWidget::setEditMode);
 }
@@ -152,6 +152,15 @@ void TagEditor::save() {
 
     emit tagSaved(currentTag, oldPath);
     toggleEditMode();
+}
+
+void TagEditor::onAnchorClick(const QUrl &link) {
+    QString path = link.toString();
+    if (path.startsWith("#$")) {
+        emit displayLinkClicked(path.slice(2).toInt()-1);
+    } else {
+        ui->description->scrollToAnchor(path.slice(1));
+    }
 }
 
 void TagEditor::onListItemSelect(QString tag) {

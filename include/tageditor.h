@@ -35,12 +35,15 @@ public slots:
     void addToRequired(TagNode* node);
     void refreshLists();
 
+private slots:
+    void onAnchorClick(const QUrl &link);
 
 signals:
     void editModeChanged(bool mode);
     void tagSaved(TagNode* tag, std::string oldPath);
     void partialSave(TagNode* tag);
     void listItemSelected(QString tagPath);
+    void displayLinkClicked(int index);
 
 private:
     Ui::TagEditor *ui;

@@ -85,11 +85,11 @@ void MediaDisplay::showFile(int index) {
         disableControls();
 
     } else {
-        QString filePath = files[currentPage];
-        QMimeDatabase db;
-        QString mimeType = db.mimeTypeForFile(filePath).name();
-        ui->openButton->setEnabled(true);
         try {
+            QString filePath = files[currentPage];
+            QMimeDatabase db;
+            QString mimeType = db.mimeTypeForFile(filePath).name();
+            ui->openButton->setEnabled(true);
             if (mimeType.startsWith("image")) {
                 isImage = true;
                 PixmapLabel* image = new PixmapLabel();
@@ -118,6 +118,10 @@ void MediaDisplay::showFile(int index) {
         ui->viewportLayout->insertWidget(0, currentWidget, 1);
     if (isImage)
         resizeImage();
+}
+
+void MediaDisplay::setFile(int index) {
+    showFile(index);
 }
 
 void MediaDisplay::prevFile() {

@@ -29,6 +29,7 @@ public slots:
     void prevFile();
     void nextFile();
     void openFile();
+    void setFile(int index);
 
     void addFile();
 
