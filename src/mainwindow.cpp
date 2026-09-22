@@ -137,6 +137,7 @@ void MainWindow::onTagSelect() {
 void MainWindow::onTagDoubleClicked(QTreeWidgetItem *item, int column) {
     Q_UNUSED(column);
     if (editModeEnabled) return;
+    if (static_cast<TagTreeItem*>(item)->getNode()->isRoot()) return;
     if (item != selectedItem)
         selectedItem = static_cast<TagTreeItem*>(item);
 

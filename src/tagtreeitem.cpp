@@ -10,16 +10,29 @@ TagTreeItem::TagTreeItem(TagNode *node) : QTreeWidgetItem()
 
     if (this->node == nullptr) return;
 
-    setText(0, QString::fromStdString(this->node->getKey()));
-    setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
+    if (node->isRoot()) {
+        QFont font = this->font(0);
+        font.setBold(true);
+        font.setPointSize(12);
+        setFont(0, font);
+        setText(0, "Tags");
+        setData(0, Qt::UserRole, "/");
+        setFlags(Qt::ItemIsSelectable | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled);
+        setExpanded(true);
 
-    QString icon = QString::fromStdString(this->node->getIcon());
-    if (QFileInfo::exists(icon) || icon.startsWith(":/icons/"))
-        setIcon(0, QIcon(icon));
-    else
-        setIcon(0, QIcon(":/icons/" + icon));
+    } else {
 
-    refreshFileIcons();
+        setText(0, QString::fromStdString(this->node->getKey()));
+        setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
+
+        QString icon = QString::fromStdString(this->node->getIcon());
+        if (QFileInfo::exists(icon) || icon.startsWith(":/icons/"))
+            setIcon(0, QIcon(icon));
+        else
+            setIcon(0, QIcon(":/icons/" + icon));
+
+        refreshFileIcons();
+    }
 }
 
 TagNode* TagTreeItem::getNode() const {

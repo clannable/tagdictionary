@@ -21,6 +21,7 @@ public:
     ~TagNode();
 
     TagNode* getRoot() const;
+    bool isRoot() const;
 
     string getDescription() const;
     void setDescription(string description);

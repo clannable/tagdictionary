@@ -36,6 +36,9 @@ TagNode* TagNode::createRoot(json data) {
     return root;
 }
 
+bool TagNode::isRoot() const {
+    return parent == nullptr;
+}
 
 TagNode::~TagNode() {
 

@@ -49,7 +49,21 @@ void TagEditor::setTag(TagNode *node) {
         ui->description->setMarkdown("");
         return;
     }
-
+    if (node->isRoot()) {
+        this->requiredList->hide();
+        this->relatedList->hide();
+        ui->editButton->hide();
+        ui->description->setMarkdown("");
+        ui->iconLabel->hide();
+        ui->tagLabelEdit->setText("");
+        ui->saveButton->hide();
+        return;
+    }
+    this->requiredList->show();
+    this->relatedList->show();
+    ui->iconLabel->show();
+    ui->editButton->show();
+    ui->saveButton->show();
     this->relatedList->setTag(node);
     this->requiredList->setTag(node);
     this->relatedList->setEnabled(node != nullptr);

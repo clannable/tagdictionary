@@ -52,6 +52,7 @@ signals:
 
 private:
     TagNode* rootNode;
+    TagTreeItem* rootItem = nullptr;
     TagTreeItem* menuItem = nullptr;
 
     TagTreeItem* dragItem;
