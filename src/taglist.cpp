@@ -24,5 +24,5 @@ void TagList::onRemoveTag() {
 
 void TagList::setEditMode(bool mode) {
     this->editModeEnabled = mode;
+    this->setDragDropMode(this->editModeEnabled ? DragDropMode::InternalMove : DragDropMode::NoDragDrop);
 }
-

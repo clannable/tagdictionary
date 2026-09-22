@@ -36,6 +36,9 @@
         <property name="focusPolicy">
          <enum>Qt::FocusPolicy::StrongFocus</enum>
         </property>
+        <property name="acceptRichText">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item row="3" column="0">

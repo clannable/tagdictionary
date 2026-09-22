@@ -53,7 +53,7 @@ private:
     QLabel *countLabel;
     QWidget *header;
     QPushButton *expandToggle;
-    bool expanded = false;
+    bool expanded = true;
     QString title;
     TagNode* currentTag = nullptr;
     void onRemoveTag();

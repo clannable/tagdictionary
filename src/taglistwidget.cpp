@@ -30,7 +30,7 @@ TagListWidget::TagListWidget(QString title, QWidget *parent) :
     expandToggle->setIconSize(QSize(16, 16));
     expandToggle->setCursor(Qt::PointingHandCursor);
     headerLayout->addWidget(expandToggle, 0, Qt::AlignRight);
-    expandToggle->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::ListAdd));
+    expandToggle->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove));
     expandToggle->setFlat(true);
     this->list = new TagList(f);
     this->list->setMaximumHeight(200);
@@ -38,7 +38,7 @@ TagListWidget::TagListWidget(QString title, QWidget *parent) :
     layout->addWidget(header);
     layout->addWidget(this->list);
 
-    this->list->hide();
+    // this->list->hide();
 
     this->setAcceptDrops(true);
 
@@ -55,14 +55,14 @@ void TagListWidget::insertTag(TagNode *node) {
 
     }
     this->list->addItem(new TagListWidgetItem(tagPath));
-    this->list->sortItems();
+    // this->list->sortItems();
     this->show();
     updateTitle();
 }
 
 void TagListWidget::insertTag(QString tagPath) {
     this->list->addItem(new TagListWidgetItem(tagPath));
-    this->list->sortItems();
+    // this->list->sortItems();
     this->show();
     updateTitle();
 }
@@ -103,7 +103,6 @@ void TagListWidget::dragEnterEvent(QDragEnterEvent *event) {
             event->setDropAction(Qt::IgnoreAction);
             event->ignore();
         }
-    } else {
         event->setDropAction(Qt::IgnoreAction);
         event->ignore();
     }
