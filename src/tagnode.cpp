@@ -184,19 +184,29 @@ bool TagNode::hasVideos() {
 }
 
 json TagNode::toJson() {
-    json ret = json({
-        { "description", this->description },
-        { "icon", this->icon },
-        { "related", this->related },
-        { "required", this->required },
-        { "files", this->files }
-    });
+    json ret;
+    if (isRoot()) {
+        ret = json();
+        if (!children.empty()) {
+            for (auto& [k, c] : children)
+                ret.emplace(k, c->toJson());
+        }
+    }
+    else {
+        ret = json({
+            { "description", this->description },
+            { "icon", this->icon },
+            { "related", this->related },
+            { "required", this->required },
+            { "files", this->files }
+        });
 
-    if (!children.empty()) {
-        json childrenJson = json();
-        for (auto& [k, c] : children)
-            childrenJson.emplace(k, c->toJson());
-        ret.emplace("children", childrenJson);
+        if (!children.empty()) {
+            json childrenJson = json();
+            for (auto& [k, c] : children)
+                childrenJson.emplace(k, c->toJson());
+            ret.emplace("children", childrenJson);
+        }
     }
     return ret;
 }

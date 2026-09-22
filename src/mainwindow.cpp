@@ -296,14 +296,10 @@ void MainWindow::reloadJson() {
         }
 
         json tags = json::parse(*f);
-        if (!tags.contains("version") && !tags.contains("tags")) {
-            // Convert from first version of dictionary structure
-
-        }
         ui->tagTree->fromJson(tags);
         ui->tagTree->sortByColumn(0, Qt::AscendingOrder);
     } catch (std::exception e) {
-        QMessageBox::critical(this, "An error has occurred", "Error loading dictionary: \n" + QString::fromStdString(e.what()));
+        QMessageBox::critical(this, "An error has occurred", "Error loading dictionary");
         ui->tagTree->clear();
     }
 
