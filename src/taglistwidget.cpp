@@ -103,8 +103,6 @@ void TagListWidget::dragEnterEvent(QDragEnterEvent *event) {
             event->setDropAction(Qt::IgnoreAction);
             event->ignore();
         }
-        event->setDropAction(Qt::IgnoreAction);
-        event->ignore();
     }
 }
 
