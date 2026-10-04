@@ -16,14 +16,14 @@ TagTreeItem::TagTreeItem(TagNode *node) : QTreeWidgetItem()
         font.setPointSize(12);
         setFont(0, font);
         setText(0, "Tags");
-        setData(0, Qt::UserRole, "/");
+        setData(0, Qt::UserRole, 0);
         setFlags(Qt::ItemIsSelectable | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled);
         setExpanded(true);
 
     } else {
 
         setText(0, QString::fromStdString(this->node->getKey()));
-        setData(0, Qt::UserRole, QString::fromStdString(node->getFullPath()));
+        setData(0, Qt::UserRole, node->getId());
 
         QString icon = QString::fromStdString(this->node->getIcon());
         if (QFileInfo::exists(icon) || icon.startsWith(":/icons/"))

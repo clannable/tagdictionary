@@ -21,22 +21,21 @@ class TagListWidget : public QWidget
 public:
     TagListWidget(QString title, QWidget *parent=nullptr);
 
-    bool contains(json tag);
-    std::list<std::string> values();
+    std::list<int> values();
 
     void linkTagTree(const TagTree* ptr);
 
 public slots:
     void setEditMode(bool mode);
     void insertTag(TagNode* node);
-    void insertTag(QString tagPath);
+    void insertTag(int tagId);
     void setTag(TagNode* node);
     void onItemSelected(QListWidgetItem* item);
     void clear();
     void toggleExpanded();
     void updateTitle();
 signals:
-    void tagSelected(QString tag);
+    void tagSelected(int tagId);
 
 protected:
     virtual void dropEvent(QDropEvent *event) override;

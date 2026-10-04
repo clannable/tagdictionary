@@ -15,7 +15,7 @@ class TagTree : public QTreeWidget
 public:
     TagTree(QWidget* parent);
     ~TagTree();
-    QTreeWidgetItem* findTag(QString tagPath, QTreeWidgetItem* root=nullptr);
+    QTreeWidgetItem* findTag(int tagId);
 
     void fromJson(nlohmann::json json);
     json toJson();

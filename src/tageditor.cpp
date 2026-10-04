@@ -143,10 +143,10 @@ void TagEditor::refreshLists() {
 
     if (currentTag == nullptr) return;
 
-    for (const std::string& t : currentTag->getRequired())
-        this->requiredList->insertTag(QString::fromStdString(t));
-    for (const std::string& t : currentTag->getRelated())
-        this->relatedList->insertTag(QString::fromStdString(t));
+    for (const int& t : currentTag->getRequired())
+        this->requiredList->insertTag(t);
+    for (const int& t : currentTag->getRelated())
+        this->relatedList->insertTag(t);
 }
 
 void TagEditor::save() {
@@ -177,8 +177,8 @@ void TagEditor::onAnchorClick(const QUrl &link) {
     }
 }
 
-void TagEditor::onListItemSelect(QString tag) {
-    emit listItemSelected(tag);
+void TagEditor::onListItemSelect(int tagId) {
+    emit listItemSelected(tagId);
 }
 
 void TagEditor::addToRelated(TagNode *node) {

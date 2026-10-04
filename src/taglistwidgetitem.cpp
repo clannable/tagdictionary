@@ -1,14 +1,24 @@
 #include "taglistwidgetitem.h"
+#include "globals.h"
 
-TagListWidgetItem::TagListWidgetItem(QString tagPath, QListWidget* parent) :
+TagListWidgetItem::TagListWidgetItem(QVariant value, QListWidget* parent) :
     QListWidgetItem(parent),
-    value(tagPath)
+    value(value)
 {
-    int rstart = tagPath.lastIndexOf("/");
-    setText(rstart == -1 ? tagPath : tagPath.right(tagPath.size() - (rstart+1)));
-    setToolTip(value);
+    this->tag = TAG_MAP[value.toInt()];
+    setData(Qt::UserRole, value.toInt());
+    setText(QString::fromStdString(tag->getKey()));
 }
 
-QString TagListWidgetItem::getValue() {
+TagListWidgetItem::TagListWidgetItem(TagNode* node, QListWidget* parent) :
+    QListWidgetItem(parent),
+    tag(node),
+    value(node->getId())
+{
+    setData(Qt::UserRole, value.toInt());
+    setText(QString::fromStdString(tag->getKey()));
+}
+
+QVariant TagListWidgetItem::getValue() const {
     return value;
 }

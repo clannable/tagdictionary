@@ -27,26 +27,15 @@ TagTree::~TagTree() {
     delete rootNode;
 }
 
-QTreeWidgetItem* TagTree::findTag(QString tagPath, QTreeWidgetItem* root) {
-    int ix = tagPath.indexOf("/");
-    int c = root == nullptr ? topLevelItemCount() : root->childCount();
+QTreeWidgetItem* TagTree::findTag(int tagId) {
+    QTreeWidgetItemIterator it(this);
 
-    QString search = tagPath.left(ix);
-
-    for (int x = 0; x < c; x++) {
-        QTreeWidgetItem* item;
-        if (root == nullptr)
-            item = rootItem;
-        else
-            item = root->child(x);
-        if (item->text(0) == search) {
-            if (ix == -1)
-                return item;
-            else
-                return findTag(tagPath.sliced(ix+1), item);
-        }
+    while (*it) {
+        if ((*it)->data(0, Qt::UserRole) == tagId)
+            return *it;
+        ++it;
     }
-    return nullptr;
+    return rootItem;
 }
 
 void TagTree::fromJson(nlohmann::json json) {
@@ -61,6 +50,10 @@ void TagTree::fromJson(nlohmann::json json) {
 
     this->header()->resizeSection(1, 24);
     this->header()->resizeSection(2, 24);
+
+    if (CONVERT_RELATED_FLAG == true) {
+        rootNode->convertSublistsToId();
+    }
     rootItem->setExpanded(true);
 }
 
@@ -116,17 +109,10 @@ void TagTree::onRemoveTag() {
         QString::fromStdString(menuItem->getNode()->getKey()) +
         "\"? This will also remove all sub-tags inside this tag.") == QMessageBox::Yes)
     {
-        PathChanges changes;
-        QTreeWidgetItemIterator it(menuItem);
-        while (*it) {
-            changes.push_back({ static_cast<TagTreeItem*>(*it)->getNode()->getFullPath(), ""});
-            ++it;
-        }
-
         TagNode* node = menuItem->getNode();
+        TAG_MAP.erase(node->getId());
         node->getParent()->removeChildAt(node->getKey());
         delete menuItem;
-        rootNode->renameListEntries(changes);
         emit tagsChanged();
     }
 }
@@ -140,7 +126,6 @@ void TagTree::expandTreeTo(QTreeWidgetItem* item) {
 }
 
 void TagTree::filterTree(QString search) {
-    QTreeWidgetItemIterator it(this);
     if (search.trimmed().isEmpty()) {
         resetTagVisibility();
     } else {

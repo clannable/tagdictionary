@@ -1,30 +1,41 @@
 #include "tagnode.h"
 #include <regex>
+#include "globals.h"
 
-TagNode::TagNode() {
-    this->root = this;
-}
+TagNode::TagNode() {}
+
 TagNode::TagNode(json data, string key, TagNode* parent) {
     this->parent = parent;
+    if (data.contains("id") && !isRoot()) {
+        this->id = data["id"].get<int>();
+        if (this->id >= NEXT_TAG_ID)
+            NEXT_TAG_ID = this->id+1;
+    } else if (!isRoot()) {
+        this->id = NEXT_TAG_ID;
+        NEXT_TAG_ID++;
+    }
+    TAG_MAP[this->id] = this;
     this->key = key;
-    this->updateFullPath();
+
+    updateFullPath();
+
     this->description = data.value("description", "");
     this->icon = data.value("icon", "");
-    if (this->parent != nullptr)
-        this->root = this->parent->getRoot();
+
     if (data.contains("children") && !data["children"].empty()) {
         for (auto& ch : data["children"].items())
             children[ch.key()] = new TagNode(ch.value(), ch.key(), this);
     }
     if (data.contains("related") && !data["related"].empty())
-        this->related = data["related"].get<list<string>>();
+        this->related = data["related"];
     if (data.contains("required") && !data["required"].empty())
-        this->required = data["required"].get<list<string>>();
+        this->required = data["required"];
+    if (this->related.is_array() && this->related[0].is_string())
+        CONVERT_RELATED_FLAG = true;
     if (data.contains("files") && !data["files"].empty()) {
         this->files = data["files"].get<list<string>>();
         this->checkFiles();
     }
-
 
 }
 
@@ -36,9 +47,9 @@ TagNode* TagNode::createRoot(json data) {
     return root;
 }
 
-bool TagNode::isRoot() const {
-    return parent == nullptr;
-}
+int TagNode::getId() const { return this->id; }
+
+bool TagNode::isRoot() const { return parent == nullptr; }
 
 TagNode::~TagNode() {
 
@@ -53,16 +64,9 @@ void TagNode::setKey(string key) {
         this->parent->removeChildAt(this->key);
         this->parent->insertChildAt(key, this);
     }
-    bool changed = key != this->key;
     this->key = key;
-    if (changed)
-        this->updateFullPath();
-
-
 }
 void TagNode::setKey(QString key) { this->setKey(key.toStdString()); }
-
-TagNode* TagNode::getRoot() const { return this->root; }
 
 string TagNode::getIcon() const { return this->icon; }
 void TagNode::setIcon(string icon) { this->icon = icon; }
@@ -74,12 +78,12 @@ void TagNode::setDescription(string description) { this->description = descripti
 void TagNode::setDescription(QString description) { this->description = description.toStdString(); }
 
 
-list<string> TagNode::getRelated() const { return this->related; }
-void TagNode::setRelated(list<string> related) { this->related = related; }
+json TagNode::getRelated() const { return this->related; }
+void TagNode::setRelated(json related) { this->related = related; }
 
 
-list<string> TagNode::getRequired() const { return this->required; }
-void TagNode::setRequired(list<string> required) { this->required = required; }
+json TagNode::getRequired() const { return this->required; }
+void TagNode::setRequired(json required) { this->required = required; }
 
 
 list<string> TagNode::getFiles() const { return this->files; }
@@ -105,26 +109,18 @@ void TagNode::setParent(TagNode* parent) {
 }
 
 string TagNode::getFullPath() const { return this->fullPath; }
-void TagNode::updateFullPath(PathChanges* changes) {
-    string path = "";
-    bool rootChange = changes == nullptr;
-    if (rootChange)
-        changes = new PathChanges();
 
-    if (this->parent != nullptr)
+void TagNode::updateFullPath() {
+    string path = "";
+
+    if (!isRoot())
         path = this->parent->getFullPath();
     if (!path.empty())
         path += "/";
     path += this->key;
-    if (path != this->fullPath && !this->fullPath.empty())
-        changes->push_back({this->fullPath, path});
+
     this->fullPath = path;
-
-    for (auto& [k, c] : this->children)
-        c->updateFullPath(changes);
-
-    if (rootChange && !changes->empty())
-        this->root->renameListEntries(*changes);
+    TAG_PATH_MAP[this->fullPath] = this->id;
 }
 
 
@@ -146,35 +142,6 @@ void TagNode::insertChildAt(string index, TagNode* child) {
     children[index] = child;
 }
 
-void TagNode::renameListEntries(PathChanges changes) {
-    if (!related.empty()) {
-        for (auto ci = changes.begin(); ci != changes.end(); ++ci) {
-            auto [oldPath, newPath] = *ci;
-            auto it = find(related.begin(), related.end(), oldPath);
-            if (it != related.end()) {
-                related.erase(it);
-                if (!newPath.empty())
-                    related.push_back(newPath);
-            }
-        }
-
-    }
-    if (!required.empty()) {
-        for (auto ci = changes.begin(); ci != changes.end(); ++ci) {
-            auto [oldPath, newPath] = *ci;
-            auto it = find(required.begin(), required.end(), oldPath);
-            if (it != required.end()) {
-                required.erase(it);
-                if (!newPath.empty())
-                    required.push_back(newPath);
-            }
-        }
-    }
-
-    for (const auto& [k, c] : children)
-        c->renameListEntries(changes);
-}
-
 bool TagNode::hasImages() {
     return this->wImages;
 }
@@ -194,6 +161,7 @@ json TagNode::toJson() {
     }
     else {
         ret = json({
+            { "id", this->id },
             { "description", this->description },
             { "icon", this->icon },
             { "related", this->related },
@@ -227,5 +195,26 @@ void TagNode::checkFiles() {
     }
     wImages = images;
     wVideos = videos;
+}
+
+void TagNode::convertSublistsToId() {
+    if (!isRoot()) {
+
+        std::list<int> related_ids = {};
+        std::list<int> required_ids = {};
+
+        for (json& el : this->related) {
+            related_ids.push_back(TAG_PATH_MAP[el.get<string>()]);
+        }
+        for (json& el : this->required) {
+            required_ids.push_back(TAG_PATH_MAP[el.get<string>()]);
+        }
+
+        this->related = related_ids;
+        this->required = required_ids;
+    }
+
+    for (auto& [k, c] : children)
+        c->convertSublistsToId();
 }
 

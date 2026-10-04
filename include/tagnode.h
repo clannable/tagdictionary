@@ -20,8 +20,9 @@ public:
 
     ~TagNode();
 
-    TagNode* getRoot() const;
     bool isRoot() const;
+
+    int getId() const;
 
     string getDescription() const;
     void setDescription(string description);
@@ -39,20 +40,18 @@ public:
     void setFiles(list<string> files);
     void addFile(string file);
 
-    list<string> getRelated() const;
-    void setRelated(list<string> related);
+    json getRelated() const;
+    void setRelated(json related);
 
-    list<string> getRequired() const;
-    void setRequired(list<string> required);
-
-    void renameListEntries(PathChanges changes);
+    json getRequired() const;
+    void setRequired(json required);
 
     map<string, TagNode*> getChildren();
     TagNode* getParent() const;
     void setParent(TagNode* parent);
 
     string getFullPath() const;
-    void updateFullPath(PathChanges* changes = nullptr);
+    void updateFullPath();
 
     void addChild(TagNode* node);
     bool hasChild(string key);
@@ -62,15 +61,18 @@ public:
     bool hasImages();
     bool hasVideos();
 
+    void convertSublistsToId();
+
     json toJson();
 
 private:
+    int id = 0;
     string key = "";
     string description = "";
     string icon = "";
     list<string> files;
-    list<string> related;
-    list<string> required;
+    json related;
+    json required;
     string fullPath = "";
 
     TagNode* parent = nullptr;
