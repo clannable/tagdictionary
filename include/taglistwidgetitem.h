@@ -2,15 +2,19 @@
 #define TAGLISTWIDGETITEM_H
 
 #include <QListWidgetItem>
+#include "tagnode.h"
 
 class TagListWidgetItem : public QListWidgetItem
 {
 public:
-    TagListWidgetItem(QString tagPath, QListWidget* parent=nullptr);
+    TagListWidgetItem(QVariant tagPath, QListWidget* parent=nullptr);
+    TagListWidgetItem(TagNode* node, QListWidget* parent=nullptr);
 
-    QString getValue();
+    QVariant getValue() const;
+
 private:
-    QString value;
+    QVariant value;
+    TagNode* tag;
 };
 
 #endif // TAGLISTWIDGETITEM_H

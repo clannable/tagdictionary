@@ -24,7 +24,7 @@ using json = nlohmann::json;
 std::list<std::string>* ICON_LIST = new std::list<std::string>();
 std::string LAST_IMAGE_FOLDER_PATH = "/home";
 std::string LAST_ICON_FOLDER_PATH = "/home";
-int NEXT_TAG_ID = 0;
+int NEXT_TAG_ID = 1;
 std::map<int, TagNode*> TAG_MAP = {};
 std::map<std::string, int> TAG_PATH_MAP = {};
 std::chrono::milliseconds DEBOUNCE_TIME = 250ms;
@@ -148,10 +148,10 @@ void MainWindow::onTagDoubleClicked(QTreeWidgetItem *item, int column) {
     ui->tagEditor->toggleEditMode();
 }
 
-void MainWindow::onTagListSelect(QString tagPath) {
+void MainWindow::onTagListSelect(int tagId) {
     if (editModeEnabled == true) return;
 
-    TagTreeItem *tag = static_cast<TagTreeItem*>(ui->tagTree->findTag(tagPath));
+    TagTreeItem *tag = static_cast<TagTreeItem*>(ui->tagTree->findTag(tagId));
     selectedItem->setSelected(false);
     selectedItem = tag;
     tag->setSelected(true);

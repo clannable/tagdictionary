@@ -48,20 +48,19 @@ TagListWidget::TagListWidget(QString title, QWidget *parent) :
 }
 
 void TagListWidget::insertTag(TagNode *node) {
-    QString tagPath = QString::fromStdString(node->getFullPath());
     for (int i = 0; i < this->list->count(); i++) {
-        if (static_cast<TagListWidgetItem*>(this->list->item(i))->getValue() == tagPath)
+        if (this->list->item(i)->data(Qt::UserRole) == node->getId())
             return;
 
     }
-    this->list->addItem(new TagListWidgetItem(tagPath));
+    this->list->addItem(new TagListWidgetItem(node));
     // this->list->sortItems();
     this->show();
     updateTitle();
 }
 
-void TagListWidget::insertTag(QString tagPath) {
-    this->list->addItem(new TagListWidgetItem(tagPath));
+void TagListWidget::insertTag(int tagId) {
+    this->list->addItem(new TagListWidgetItem(tagId));
     // this->list->sortItems();
     this->show();
     updateTitle();
@@ -85,11 +84,10 @@ void TagListWidget::dropEvent(QDropEvent *event) {
     if (!editModeEnabled) return;
     TagNode* node = static_cast<TagTreeItem*>(tagTree->currentItem())->getNode();
     if (node == this->currentTag) return;
-    QString tagPath = QString::fromStdString(static_cast<TagTreeItem*>(tagTree->currentItem())->getNode()->getFullPath());
     for (int i = 0; i < this->list->count(); i++)
-        if ((static_cast<TagListWidgetItem*>(this->list->item(i)))->getValue() == tagPath) return;
+        if (this->list->item(i)->data(Qt::UserRole) == node->getId()) return;
 
-    insertTag(tagPath);
+    insertTag(node);
 }
 
 void TagListWidget::dragEnterEvent(QDragEnterEvent *event) {
@@ -139,14 +137,13 @@ void TagListWidget::toggleExpanded() {
 }
 
 void TagListWidget::onItemSelected(QListWidgetItem *item) {
-    emit tagSelected(static_cast<TagListWidgetItem*>(item)->getValue());
+    emit tagSelected(item->data(Qt::UserRole).toInt());
 }
 
-std::list<std::string> TagListWidget::values() {
-    std::list<std::string> list;
+std::list<int> TagListWidget::values() {
+    std::list<int> list;
     for (int i = 0; i < this->list->count(); i++) {
-        TagListWidgetItem *item = static_cast<TagListWidgetItem*>(this->list->item(i));
-        list.push_back(item->getValue().toStdString());
+        list.push_back(this->list->item(i)->data(Qt::UserRole).toInt());
     }
     return list;
 }

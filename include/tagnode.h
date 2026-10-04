@@ -20,7 +20,6 @@ public:
 
     ~TagNode();
 
-    TagNode* getRoot() const;
     bool isRoot() const;
 
     int getId() const;
@@ -47,14 +46,12 @@ public:
     json getRequired() const;
     void setRequired(json required);
 
-    void renameListEntries(PathChanges changes);
-
     map<string, TagNode*> getChildren();
     TagNode* getParent() const;
     void setParent(TagNode* parent);
 
     string getFullPath() const;
-    void updateFullPath(PathChanges* changes = nullptr);
+    void updateFullPath();
 
     void addChild(TagNode* node);
     bool hasChild(string key);
@@ -69,7 +66,7 @@ public:
     json toJson();
 
 private:
-    int id;
+    int id = 0;
     string key = "";
     string description = "";
     string icon = "";

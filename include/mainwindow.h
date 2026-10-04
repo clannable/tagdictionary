@@ -50,7 +50,7 @@ private:
 private slots:
     void onTagSelect();
     void onTagChange();
-    void onTagListSelect(QString tagPath);
+    void onTagListSelect(int tagId);
     void onTagDoubleClicked(QTreeWidgetItem* item, int column);
     void onSearchChange();
     void onSearchTimeout();

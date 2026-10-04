@@ -2,27 +2,26 @@
 #include <regex>
 #include "globals.h"
 
-TagNode::TagNode() {
-    this->root = this;
-}
+TagNode::TagNode() {}
+
 TagNode::TagNode(json data, string key, TagNode* parent) {
     this->parent = parent;
     if (data.contains("id") && !isRoot()) {
         this->id = data["id"].get<int>();
         if (this->id >= NEXT_TAG_ID)
             NEXT_TAG_ID = this->id+1;
-    } else {
+    } else if (!isRoot()) {
         this->id = NEXT_TAG_ID;
         NEXT_TAG_ID++;
     }
     TAG_MAP[this->id] = this;
     this->key = key;
 
+    updateFullPath();
 
     this->description = data.value("description", "");
     this->icon = data.value("icon", "");
-    if (this->parent != nullptr)
-        this->root = this->parent->getRoot();
+
     if (data.contains("children") && !data["children"].empty()) {
         for (auto& ch : data["children"].items())
             children[ch.key()] = new TagNode(ch.value(), ch.key(), this);
@@ -37,7 +36,7 @@ TagNode::TagNode(json data, string key, TagNode* parent) {
         this->files = data["files"].get<list<string>>();
         this->checkFiles();
     }
-    this->updateFullPath();
+
 }
 
 TagNode* TagNode::createRoot(json data) {
@@ -48,9 +47,9 @@ TagNode* TagNode::createRoot(json data) {
     return root;
 }
 
-bool TagNode::isRoot() const {
-    return parent == nullptr;
-}
+int TagNode::getId() const { return this->id; }
+
+bool TagNode::isRoot() const { return parent == nullptr; }
 
 TagNode::~TagNode() {
 
@@ -65,16 +64,9 @@ void TagNode::setKey(string key) {
         this->parent->removeChildAt(this->key);
         this->parent->insertChildAt(key, this);
     }
-    bool changed = key != this->key;
     this->key = key;
-    if (changed)
-        this->updateFullPath();
-
-
 }
 void TagNode::setKey(QString key) { this->setKey(key.toStdString()); }
-
-TagNode* TagNode::getRoot() const { return this->root; }
 
 string TagNode::getIcon() const { return this->icon; }
 void TagNode::setIcon(string icon) { this->icon = icon; }
@@ -117,29 +109,18 @@ void TagNode::setParent(TagNode* parent) {
 }
 
 string TagNode::getFullPath() const { return this->fullPath; }
-void TagNode::updateFullPath(PathChanges* changes) {
-    string path = "";
-    bool rootChange = changes == nullptr;
-    if (rootChange)
-        changes = new PathChanges();
 
-    if (this->parent != nullptr)
+void TagNode::updateFullPath() {
+    string path = "";
+
+    if (!isRoot())
         path = this->parent->getFullPath();
     if (!path.empty())
         path += "/";
     path += this->key;
-    if (path != this->fullPath && !this->fullPath.empty()) {
-        changes->push_back({this->fullPath, path});    
-        TAG_PATH_MAP.erase(TAG_PATH_MAP.find(this->fullPath));
-    }
+
     this->fullPath = path;
     TAG_PATH_MAP[this->fullPath] = this->id;
-
-    for (auto& [k, c] : this->children)
-        c->updateFullPath(changes);
-
-    if (rootChange && !changes->empty())
-        this->root->renameListEntries(*changes);
 }
 
 
@@ -159,35 +140,6 @@ void TagNode::removeChildAt(string index) {
 
 void TagNode::insertChildAt(string index, TagNode* child) {
     children[index] = child;
-}
-
-void TagNode::renameListEntries(PathChanges changes) {
-    if (!related.empty()) {
-        for (auto ci = changes.begin(); ci != changes.end(); ++ci) {
-            auto [oldPath, newPath] = *ci;
-            auto it = find(related.begin(), related.end(), oldPath);
-            if (it != related.end()) {
-                related.erase(it);
-                if (!newPath.empty())
-                    related.push_back(newPath);
-            }
-        }
-
-    }
-    if (!required.empty()) {
-        for (auto ci = changes.begin(); ci != changes.end(); ++ci) {
-            auto [oldPath, newPath] = *ci;
-            auto it = find(required.begin(), required.end(), oldPath);
-            if (it != required.end()) {
-                required.erase(it);
-                if (!newPath.empty())
-                    required.push_back(newPath);
-            }
-        }
-    }
-
-    for (const auto& [k, c] : children)
-        c->renameListEntries(changes);
 }
 
 bool TagNode::hasImages() {
@@ -251,10 +203,10 @@ void TagNode::convertSublistsToId() {
         std::list<int> related_ids = {};
         std::list<int> required_ids = {};
 
-        for (auto& el : this->related) {
+        for (json& el : this->related) {
             related_ids.push_back(TAG_PATH_MAP[el.get<string>()]);
         }
-        for (auto& el : this->required) {
+        for (json& el : this->required) {
             required_ids.push_back(TAG_PATH_MAP[el.get<string>()]);
         }
 

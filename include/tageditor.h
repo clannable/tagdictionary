@@ -30,7 +30,7 @@ public slots:
     void iconSelected(QString icon);
     void setTag(TagNode *node);
     void save();
-    void onListItemSelect(QString tag);
+    void onListItemSelect(int tagId);
     void addToRelated(TagNode* node);
     void addToRequired(TagNode* node);
     void refreshLists();
@@ -42,7 +42,7 @@ signals:
     void editModeChanged(bool mode);
     void tagSaved(TagNode* tag, std::string oldPath);
     void partialSave(TagNode* tag);
-    void listItemSelected(QString tagPath);
+    void listItemSelected(int tagId);
     void displayLinkClicked(int index);
 
 private:
