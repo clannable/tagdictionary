@@ -110,11 +110,26 @@ void TagTree::onRemoveTag() {
         "\"? This will also remove all sub-tags inside this tag.") == QMessageBox::Yes)
     {
         TagNode* node = menuItem->getNode();
-        TAG_MAP.erase(node->getId());
-        node->getParent()->removeChildAt(node->getKey());
+        deleteNode(node);
+
+        for (const auto& [key, value] : TAG_MAP) {
+            value->cleanSublists();
+        }
         delete menuItem;
         emit tagsChanged();
     }
+}
+
+void TagTree::deleteNode(TagNode* node) {
+    int id = node->getId();
+
+    for (const auto& [k, c] : node->getChildren())
+        deleteNode(c);
+
+    TAG_MAP.erase(id);
+
+    if (id == NEXT_TAG_ID - 1)
+        NEXT_TAG_ID = id;
 }
 
 void TagTree::expandTreeTo(QTreeWidgetItem* item) {

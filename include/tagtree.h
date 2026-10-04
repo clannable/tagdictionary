@@ -58,6 +58,8 @@ private:
     TagTreeItem* dragItem;
     QPoint dragStartPosition;
 
+    void deleteNode(TagNode* node);
+
     bool editModeEnabled;
     // TagTreeItem* findTag(TagTreeItem* item, QString tagPath);
 

@@ -197,6 +197,17 @@ void TagNode::checkFiles() {
     wVideos = videos;
 }
 
+void TagNode::cleanSublists() {
+    for (auto itr = this->related.begin(); itr != this->related.end(); itr++) {
+        if (TAG_MAP.find(itr->get<int>()) == TAG_MAP.end())
+            this->related.erase(itr--);
+    }
+    for (auto itr = this->required.begin(); itr != this->required.end(); itr++) {
+        if (TAG_MAP.find(itr->get<int>()) == TAG_MAP.end())
+            this->required.erase(itr--);
+    }
+}
+
 void TagNode::convertSublistsToId() {
     if (!isRoot()) {
 

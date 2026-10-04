@@ -46,6 +46,8 @@ public:
     json getRequired() const;
     void setRequired(json required);
 
+    void cleanSublists();
+
     map<string, TagNode*> getChildren();
     TagNode* getParent() const;
     void setParent(TagNode* parent);
