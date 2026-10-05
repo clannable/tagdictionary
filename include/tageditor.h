@@ -53,6 +53,7 @@ private:
 
     TagListWidget *requiredList;
     TagListWidget *relatedList;
+    TagListWidget *frequentList;
 
     QString iconPath;
     QString description;

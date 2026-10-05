@@ -46,6 +46,9 @@ public:
     json getRequired() const;
     void setRequired(json required);
 
+    json getFrequent() const;
+    void setFrequent(json frequent);
+
     void cleanSublists();
 
     map<string, TagNode*> getChildren();
@@ -73,12 +76,13 @@ private:
     string description = "";
     string icon = "";
     list<string> files;
-    json related;
-    json required;
+    json related = json::array();
+    json required = json::array();
+    json frequent = json::array();
     string fullPath = "";
 
     TagNode* parent = nullptr;
-    TagNode* root = nullptr;
+
     map<string, TagNode*> children;
 
     bool wImages = false;

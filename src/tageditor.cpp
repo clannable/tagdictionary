@@ -13,8 +13,12 @@ TagEditor::TagEditor(QWidget *parent)
 
     this->relatedList = new TagListWidget("Related Tags");
     this->requiredList = new TagListWidget("Required Tags");
+    this->frequentList = new TagListWidget("Frequently Tagged With");
+
     ui->listLayout->addWidget(this->requiredList);
+    ui->listLayout->addWidget(this->frequentList);
     ui->listLayout->addWidget(this->relatedList);
+
     connect(iconDialog, &IconDialog::iconSelected, this, &TagEditor::iconSelected);
 
     connect(ui->editButton, &QPushButton::clicked, this, &TagEditor::toggleEditMode);
@@ -22,6 +26,7 @@ TagEditor::TagEditor(QWidget *parent)
     connect(ui->iconButton, &QToolButton::clicked, this, &TagEditor::selectIcon);
     connect(this->requiredList, &TagListWidget::tagSelected, this, &TagEditor::onListItemSelect);
     connect(this->relatedList, &TagListWidget::tagSelected, this, &TagEditor::onListItemSelect);
+    connect(this->frequentList, &TagListWidget::tagSelected, this, &TagEditor::onListItemSelect);
     connect(ui->description, &QTextBrowser::anchorClicked, this, &TagEditor::onAnchorClick);
     connect(this, &TagEditor::editModeChanged, this->relatedList, &TagListWidget::setEditMode);
     connect(this, &TagEditor::editModeChanged, this->requiredList, &TagListWidget::setEditMode);
@@ -35,6 +40,7 @@ TagEditor::~TagEditor()
 void TagEditor::linkTagTreeToLists(const TagTree* ptr) {
     this->requiredList->linkTagTree(ptr);
     this->relatedList->linkTagTree(ptr);
+    this->frequentList->linkTagTree(ptr);
 }
 
 void TagEditor::setTag(TagNode *node) {
@@ -42,6 +48,7 @@ void TagEditor::setTag(TagNode *node) {
     if (node == nullptr) {
         this->requiredList->clear();
         this->relatedList->clear();
+        this->frequentList->clear();
         ui->editButton->setEnabled(false);
         ui->tagLabelEdit->setText("");
         ui->iconButton->setIcon(QIcon());
@@ -52,6 +59,7 @@ void TagEditor::setTag(TagNode *node) {
     if (node->isRoot()) {
         this->requiredList->hide();
         this->relatedList->hide();
+        this->frequentList->hide();
         ui->editButton->hide();
         ui->description->setMarkdown("");
         ui->iconLabel->hide();
@@ -61,13 +69,16 @@ void TagEditor::setTag(TagNode *node) {
     }
     this->requiredList->show();
     this->relatedList->show();
+    this->frequentList->show();
     ui->iconLabel->show();
     ui->editButton->show();
     ui->saveButton->show();
     this->relatedList->setTag(node);
     this->requiredList->setTag(node);
+    this->frequentList->setTag(node);
     this->relatedList->setEnabled(node != nullptr);
     this->requiredList->setEnabled(node != nullptr);
+    this->frequentList->setEnabled(node != nullptr);
     ui->editButton->setEnabled(true);
 
     QString ic = QString::fromStdString(node->getIcon());
@@ -112,6 +123,7 @@ void TagEditor::toggleEditMode() {
         ui->iconLabel->show();
         this->relatedList->clear();
         this->requiredList->clear();
+        this->frequentList->clear();
 
         refreshLists();
     }
@@ -140,6 +152,7 @@ void TagEditor::iconSelected(QString icon) {
 void TagEditor::refreshLists() {
     this->relatedList->clear();
     this->requiredList->clear();
+    this->frequentList->clear();
 
     if (currentTag == nullptr) return;
 
@@ -147,6 +160,8 @@ void TagEditor::refreshLists() {
         this->requiredList->insertTag(t);
     for (const int& t : currentTag->getRelated())
         this->relatedList->insertTag(t);
+    for (const int& t : currentTag->getFrequent())
+        this->frequentList->insertTag(t);
 }
 
 void TagEditor::save() {

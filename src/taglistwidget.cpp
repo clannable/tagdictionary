@@ -33,7 +33,7 @@ TagListWidget::TagListWidget(QString title, QWidget *parent) :
     expandToggle->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove));
     expandToggle->setFlat(true);
     this->list = new TagList(f);
-    this->list->setMaximumHeight(200);
+    this->list->setMaximumHeight(95);
     this->list->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     layout->addWidget(header);
     layout->addWidget(this->list);

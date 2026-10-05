@@ -1,7 +1,6 @@
 #include "tagtree.h"
 #include "newtagdialog.h"
 #include "globals.h"
-#include <iostream>
 #include <QApplication>
 #include <QDrag>
 #include <QMimeData>
@@ -39,7 +38,15 @@ QTreeWidgetItem* TagTree::findTag(int tagId) {
 }
 
 void TagTree::fromJson(nlohmann::json json) {
+    if (rootNode != nullptr)
+        delete rootNode;
+
     rootNode = TagNode::createRoot(json);
+
+    if (topLevelItemCount() != 0) {
+        removeItemWidget(rootItem, 0);
+    }
+
     rootItem = new TagTreeItem(rootNode);
     addTopLevelItem(rootItem);
 
@@ -51,9 +58,6 @@ void TagTree::fromJson(nlohmann::json json) {
     this->header()->resizeSection(1, 24);
     this->header()->resizeSection(2, 24);
 
-    if (CONVERT_RELATED_FLAG == true) {
-        rootNode->convertSublistsToId();
-    }
     rootItem->setExpanded(true);
 }
 
