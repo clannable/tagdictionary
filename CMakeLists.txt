@@ -63,6 +63,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         include/mediadisplay.h src/mediadisplay.cpp ui/mediadisplay.ui
         include/tageditor.h src/tageditor.cpp ui/tageditor.ui
         include/taglist.h src/taglist.cpp
+        include/upgradedict.h src/upgradedict.cpp
+
 
 
 

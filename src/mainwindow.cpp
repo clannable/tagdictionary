@@ -18,6 +18,7 @@
 #include <QMessageBox>
 #include <QDirIterator>
 #include <QLineEdit>
+#include "upgradedict.h"
 
 using json = nlohmann::json;
 
@@ -299,8 +300,8 @@ void MainWindow::reloadJson() {
             ICON_LIST->push_back(path.toStdString());
         }
 
-        json tags = json::parse(*f);
-        ui->tagTree->fromJson(tags);
+        json dict = dict_upgrade::upgradeDict(json::parse(*f));
+        ui->tagTree->fromJson(dict["tags"]);
         ui->tagTree->sortByColumn(0, Qt::AscendingOrder);
     } catch (std::exception e) {
         QMessageBox::critical(this, "An error has occurred", "Error loading dictionary");
