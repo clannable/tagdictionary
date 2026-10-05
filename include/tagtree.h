@@ -51,7 +51,7 @@ signals:
     void listsUpdated();
 
 private:
-    TagNode* rootNode;
+    TagNode* rootNode = nullptr;
     TagTreeItem* rootItem = nullptr;
     TagTreeItem* menuItem = nullptr;
 
