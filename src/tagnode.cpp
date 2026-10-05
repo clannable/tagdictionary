@@ -30,8 +30,8 @@ TagNode::TagNode(json data, string key, TagNode* parent) {
         this->related = data["related"];
     if (data.contains("required") && !data["required"].empty())
         this->required = data["required"];
-    if (this->related.is_array() && this->related[0].is_string())
-        CONVERT_RELATED_FLAG = true;
+    if (data.contains("frequent") && !data["frequent"].empty())
+        this->required = data["frequent"];
     if (data.contains("files") && !data["files"].empty()) {
         this->files = data["files"].get<list<string>>();
         this->checkFiles();
@@ -85,6 +85,8 @@ void TagNode::setRelated(json related) { this->related = related; }
 json TagNode::getRequired() const { return this->required; }
 void TagNode::setRequired(json required) { this->required = required; }
 
+json TagNode::getFrequent() const { return this->frequent; }
+void TagNode::setFrequent(json frequent) { this->frequent = frequent; }
 
 list<string> TagNode::getFiles() const { return this->files; }
 void TagNode::setFiles(list<string> files) {
@@ -166,6 +168,7 @@ json TagNode::toJson() {
             { "icon", this->icon },
             { "related", this->related },
             { "required", this->required },
+            { "frequent", this->frequent },
             { "files", this->files }
         });
 
@@ -205,6 +208,10 @@ void TagNode::cleanSublists() {
     for (auto itr = this->required.begin(); itr != this->required.end(); itr++) {
         if (TAG_MAP.find(itr->get<int>()) == TAG_MAP.end())
             this->required.erase(itr--);
+    }
+    for (auto itr = this->frequent.begin(); itr != this->frequent.end(); itr++) {
+        if (TAG_MAP.find(itr->get<int>()) == TAG_MAP.end())
+            this->frequent.erase(itr--);
     }
 }
 
