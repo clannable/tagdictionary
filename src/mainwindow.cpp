@@ -156,6 +156,7 @@ void MainWindow::onTagListSelect(int tagId) {
     selectedItem = tag;
     tag->setSelected(true);
     ui->tagTree->expandTreeTo(tag);
+    onTagSelect();
 }
 
 void MainWindow::onTagChange() {
@@ -180,7 +181,7 @@ void MainWindow::setEditMode(bool mode) {
     font.setWeight(mode ? QFont::DemiBold : QFont::Normal);
     selectedItem->setFont(0, font);
 
-    ui->tagTree->setCurrentItem(selectedItem);
+    // ui->tagTree->setCurrentItem(selectedItem);
 }
 
 void MainWindow::onSave(TagNode* tag, std::string oldPath) {
