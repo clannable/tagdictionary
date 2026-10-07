@@ -23,6 +23,7 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
 
 void TagList::onRemoveTag() {
     delete menuItem;
+    menuItem = nullptr;
 }
 
 void TagList::setEditMode(bool mode) {

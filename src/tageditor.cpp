@@ -45,34 +45,39 @@ void TagEditor::linkTagTreeToLists(const TagTree* ptr) {
 }
 
 void TagEditor::setTag(TagNode *node) {
-    currentTag = node;
+
     if (node == nullptr) {
-        for (QWidget* child : ui->listContainer->findChildren<QWidget*>())
-            child->hide();
+        this->relatedList->hide();
+        this->requiredList->hide();
+        this->frequentList->hide();
         ui->editButton->setEnabled(false);
         ui->tagLabelEdit->setText("");
         ui->iconButton->setIcon(QIcon());
         ui->iconLabel->setPixmap(QPixmap());
         ui->description->setMarkdown("");
         ui->description->show();
+        currentTag = node;
         return;
     }
-    if (node->isRoot()) {
-        for (QWidget* child : ui->listContainer->findChildren<QWidget*>())
-            child->hide();
+    else if (node->isRoot()) {
+        this->relatedList->hide();
+        this->requiredList->hide();
+        this->frequentList->hide();
         ui->editButton->setEnabled(false);
         ui->description->setMarkdown("");
         ui->description->show();
         ui->iconLabel->hide();
         ui->tagLabelEdit->setText("");
         ui->saveButton->setEnabled(false);
+        currentTag = node;
         return;
     }
-    for (QWidget* child : ui->listContainer->findChildren<QWidget*>())
-        child->show();
     ui->iconLabel->show();
     ui->editButton->show();
     ui->saveButton->show();
+    this->relatedList->show();
+    this->requiredList->show();
+    this->frequentList->show();
     this->relatedList->setTag(node);
     this->requiredList->setTag(node);
     this->frequentList->setTag(node);
@@ -96,6 +101,7 @@ void TagEditor::setTag(TagNode *node) {
     ui->tagLabelEdit->setText(QString::fromStdString(node->getKey()));
     ui->iconButton->setIcon(QIcon(iconPath));
 
+    currentTag = node;
     refreshLists();
 }
 
