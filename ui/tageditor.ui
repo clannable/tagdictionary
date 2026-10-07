@@ -179,7 +179,7 @@ QToolButton:pressed {
     <widget class="QWidget" name="listContainer" native="true">
      <layout class="QVBoxLayout" name="listLayout" stretch="1,1">
       <property name="spacing">
-       <number>0</number>
+       <number>2</number>
       </property>
       <property name="leftMargin">
        <number>0</number>

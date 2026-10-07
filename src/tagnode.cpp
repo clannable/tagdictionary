@@ -31,7 +31,7 @@ TagNode::TagNode(json data, string key, TagNode* parent) {
     if (data.contains("required") && !data["required"].empty())
         this->required = data["required"];
     if (data.contains("frequent") && !data["frequent"].empty())
-        this->required = data["frequent"];
+        this->frequent = data["frequent"];
     if (data.contains("files") && !data["files"].empty()) {
         this->files = data["files"].get<list<string>>();
         this->checkFiles();
