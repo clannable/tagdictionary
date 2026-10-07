@@ -41,7 +41,7 @@ protected:
     virtual void dropEvent(QDropEvent *event) override;
     virtual void dragEnterEvent(QDragEnterEvent *event) override;
     // virtual void contextMenuEvent(QContextMenuEvent *event) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
+    // virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
     const TagTree* tagTree = nullptr;

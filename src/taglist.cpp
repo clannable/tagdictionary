@@ -1,7 +1,11 @@
 #include "taglist.h"
 #include <QMenu>
 
-TagList::TagList(QWidget* parent) : QListWidget(parent) {}
+
+TagList::TagList(QWidget* parent) : QListWidget(parent) {
+    setFixedHeight(95);
+    setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+}
 
 void TagList::contextMenuEvent(QContextMenuEvent *event) {
     if (!editModeEnabled) return;
@@ -19,7 +23,6 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
 
 void TagList::onRemoveTag() {
     delete menuItem;
-    emit tagRemoved();
 }
 
 void TagList::setEditMode(bool mode) {

@@ -8,34 +8,32 @@
 TagListWidget::TagListWidget(QString title, QWidget *parent) :
     QWidget(parent), title(title) {
     QFrame *f = new QFrame(this);
-    f->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-    f->setStyleSheet(".QFrame { border: 1px solid #cacaca; border-radius: 4px;}");
-    QVBoxLayout* layout = new QVBoxLayout(f);
-    QVBoxLayout* l = new QVBoxLayout();
-    l->setContentsMargins(0,0,0,0);
-    l->addWidget(f);
-    this->setLayout(l);
-    layout->setContentsMargins(2,2,2,2);
-    layout->setSpacing(0);
-    header = new QWidget(f);
-    header->setCursor(Qt::PointingHandCursor);
-    QHBoxLayout* headerLayout = new QHBoxLayout(header);
-    headerLayout->setContentsMargins(0,0,0,2);
-    headerLayout->addWidget(new QLabel(title), 1, Qt::AlignLeft);
-    countLabel = new QLabel();
-    countLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    headerLayout->addWidget(countLabel, 0, Qt::AlignRight);
-    expandToggle = new QPushButton();
-    expandToggle->setIconSize(QSize(16, 16));
-    expandToggle->setCursor(Qt::PointingHandCursor);
-    headerLayout->addWidget(expandToggle, 0, Qt::AlignRight);
-    expandToggle->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove));
-    expandToggle->setFlat(true);
+    f->setFrameShape(QFrame::HLine);
+    // f->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+    // this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+    // f->setStyleSheet(".QFrame { border: 1px solid #cacaca; border-radius: 4px;}");
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0,0,0,0);
+    layout->setSpacing(2);
+    // header = new QWidget(f);
+    // header->setCursor(Qt::PointingHandCursor);
+    // QHBoxLayout* headerLayout = new QHBoxLayout(header);
+    // headerLayout->setContentsMargins(0,0,0,2);
+    // headerLayout->addWidget();
+    // countLabel = new QLabel();
+    // countLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    // headerLayout->addWidget(countLabel, 0, Qt::AlignRight);
+    // expandToggle = new QPushButton();
+    // expandToggle->setIconSize(QSize(16, 16));
+    // expandToggle->setCursor(Qt::PointingHandCursor);
+    // headerLayout->addWidget(expandToggle, 0, Qt::AlignRight);
+    // expandToggle->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove));
+    // expandToggle->setFlat(true);
     this->list = new TagList(f);
-    this->list->setMaximumHeight(95);
-    this->list->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-    layout->addWidget(header);
+
+    layout->addWidget(f);
+    layout->addWidget(new QLabel(title), Qt::AlignLeft);
+    // layout->addWidget(header);
     layout->addWidget(this->list);
 
     // this->list->hide();
@@ -43,8 +41,8 @@ TagListWidget::TagListWidget(QString title, QWidget *parent) :
     this->setAcceptDrops(true);
 
     connect(this->list, &QListWidget::itemDoubleClicked, this, &TagListWidget::onItemSelected);
-    connect(this->list, &TagList::tagRemoved, this, &TagListWidget::updateTitle);
-    connect(this->expandToggle, &QPushButton::clicked, this, &TagListWidget::toggleExpanded);
+    // connect(this->list, &TagList::tagRemoved, this, &TagListWidget::updateTitle);
+    // connect(this->expandToggle, &QPushButton::clicked, this, &TagListWidget::toggleExpanded);
 }
 
 void TagListWidget::insertTag(TagNode *node) {
@@ -56,14 +54,14 @@ void TagListWidget::insertTag(TagNode *node) {
     this->list->addItem(new TagListWidgetItem(node));
     // this->list->sortItems();
     this->show();
-    updateTitle();
+    // updateTitle();
 }
 
 void TagListWidget::insertTag(int tagId) {
     this->list->addItem(new TagListWidgetItem(tagId));
     // this->list->sortItems();
     this->show();
-    updateTitle();
+    // updateTitle();
 }
 
 void TagListWidget::linkTagTree(const TagTree* ptr) {
@@ -72,12 +70,14 @@ void TagListWidget::linkTagTree(const TagTree* ptr) {
 
 void TagListWidget::setTag(TagNode* node) {
     this->currentTag = node;
+    setEnabled(node != nullptr);
+    this->list->scrollToTop();
 }
 
 void TagListWidget::clear() {
     this->list->clear();
-    updateTitle();
-    if (!editModeEnabled) this->hide();
+    // updateTitle();
+    // if (!editModeEnabled) this->hide();
 }
 
 void TagListWidget::dropEvent(QDropEvent *event) {
@@ -91,7 +91,6 @@ void TagListWidget::dropEvent(QDropEvent *event) {
 }
 
 void TagListWidget::dragEnterEvent(QDragEnterEvent *event) {
-    // std::cout << event->source()->objectName().toStdString() << "\n" <<std::flush;
     if (editModeEnabled && event->source() == tagTree) {
         TagNode* node = static_cast<TagTreeItem*>(tagTree->currentItem())->getNode();
         if (node != this->currentTag) {
@@ -101,23 +100,26 @@ void TagListWidget::dragEnterEvent(QDragEnterEvent *event) {
             event->setDropAction(Qt::IgnoreAction);
             event->ignore();
         }
+    } else {
+        event->setDropAction(Qt::IgnoreAction);
+        event->ignore();
     }
 }
 
-void TagListWidget::mousePressEvent(QMouseEvent *event) {
-    if (event->buttons() & Qt::LeftButton && header->underMouse())
-        toggleExpanded();
-    else
-        QWidget::mousePressEvent(event);
-}
+// void TagListWidget::mousePressEvent(QMouseEvent *event) {
+//     if (event->buttons() & Qt::LeftButton && header->underMouse())
+//         toggleExpanded();
+//     else
+//         QWidget::mousePressEvent(event);
+// }
 
 void TagListWidget::setEditMode(bool mode) {
     editModeEnabled = mode;
     this->list->setEditMode(mode);
-    if (editModeEnabled == false && this->list->count() == 0)
-        this->hide();
-    else if (editModeEnabled == true)
-        this->show();
+    // if (editModeEnabled == false && this->list->count() == 0)
+    //     this->hide();
+    // else if (editModeEnabled == true)
+    //     this->show();
     // setAcceptDrops(mode);
 }
 

@@ -15,9 +15,9 @@ TagEditor::TagEditor(QWidget *parent)
     this->requiredList = new TagListWidget("Required Tags");
     this->frequentList = new TagListWidget("Frequently Tagged With");
 
-    ui->listLayout->addWidget(this->requiredList);
-    ui->listLayout->addWidget(this->frequentList);
-    ui->listLayout->addWidget(this->relatedList);
+    ui->listContainer->layout()->addWidget(this->requiredList);
+    ui->listContainer->layout()->addWidget(this->frequentList);
+    ui->listContainer->layout()->addWidget(this->relatedList);
 
     connect(iconDialog, &IconDialog::iconSelected, this, &TagEditor::iconSelected);
 
@@ -47,40 +47,39 @@ void TagEditor::linkTagTreeToLists(const TagTree* ptr) {
 void TagEditor::setTag(TagNode *node) {
     currentTag = node;
     if (node == nullptr) {
-        this->requiredList->clear();
-        this->relatedList->clear();
-        this->frequentList->clear();
+        for (QWidget* child : ui->listContainer->findChildren<QWidget*>())
+            child->hide();
         ui->editButton->setEnabled(false);
         ui->tagLabelEdit->setText("");
         ui->iconButton->setIcon(QIcon());
         ui->iconLabel->setPixmap(QPixmap());
         ui->description->setMarkdown("");
+        ui->description->show();
         return;
     }
     if (node->isRoot()) {
-        this->requiredList->hide();
-        this->relatedList->hide();
-        this->frequentList->hide();
-        ui->editButton->hide();
+        for (QWidget* child : ui->listContainer->findChildren<QWidget*>())
+            child->hide();
+        ui->editButton->setEnabled(false);
         ui->description->setMarkdown("");
+        ui->description->show();
         ui->iconLabel->hide();
         ui->tagLabelEdit->setText("");
-        ui->saveButton->hide();
+        ui->saveButton->setEnabled(false);
         return;
     }
-    this->requiredList->show();
-    this->relatedList->show();
-    this->frequentList->show();
+    for (QWidget* child : ui->listContainer->findChildren<QWidget*>())
+        child->show();
     ui->iconLabel->show();
     ui->editButton->show();
     ui->saveButton->show();
     this->relatedList->setTag(node);
     this->requiredList->setTag(node);
     this->frequentList->setTag(node);
-    this->relatedList->setEnabled(node != nullptr);
-    this->requiredList->setEnabled(node != nullptr);
-    this->frequentList->setEnabled(node != nullptr);
+
     ui->editButton->setEnabled(true);
+    ui->description->show();
+    ui->descriptionEditor->hide();
 
     QString ic = QString::fromStdString(node->getIcon());
     if (QFileInfo::exists(ic) || ic.startsWith(":/icons/")) {
@@ -122,9 +121,6 @@ void TagEditor::toggleEditMode() {
         ui->description->show();
         ui->iconButton->hide();
         ui->iconLabel->show();
-        this->relatedList->clear();
-        this->requiredList->clear();
-        this->frequentList->clear();
 
         refreshLists();
     }

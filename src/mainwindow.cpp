@@ -101,7 +101,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(searchDebounce, &QTimer::timeout, this, &MainWindow::onSearchTimeout);
 
     connect(ui->tagTree, &QTreeWidget::itemDoubleClicked, this, &MainWindow::onTagDoubleClicked);
-    connect(ui->tagTree, &QTreeWidget::itemSelectionChanged, this, &MainWindow::onTagSelect);
+    connect(ui->tagTree, &QTreeWidget::itemClicked, this, &MainWindow::onTagSelect);
     connect(ui->tagTree, &TagTree::tagsChanged, this, &MainWindow::onTagChange);
     connect(ui->tagTree, &TagTree::addToRelated, ui->tagEditor, &TagEditor::addToRelated);
     connect(ui->tagTree, &TagTree::addToRequired, ui->tagEditor, &TagEditor::addToRequired);
