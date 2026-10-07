@@ -15,6 +15,7 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
     menuItem = item;
 
     QMenu *menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
     QAction *removeTag = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove), "Remove \""+item->text()+"\"");
     menu->addAction(removeTag);
     connect(removeTag, &QAction::triggered, this, &TagList::onRemoveTag);

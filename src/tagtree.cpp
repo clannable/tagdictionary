@@ -299,6 +299,7 @@ void TagTree::dragMoveEvent(QDragMoveEvent *event) {
 void TagTree::contextMenuEvent(QContextMenuEvent *event) {
     menuItem = static_cast<TagTreeItem*>(itemAt(event->pos()));
     QMenu *menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
     QAction *addAction = menu->addAction("New Tag...");
     connect(addAction, &QAction::triggered, this, &TagTree::onCreateTag);
 
