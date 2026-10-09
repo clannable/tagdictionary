@@ -25,19 +25,12 @@ public slots:
     void iconSelected(QString icon);
     void setTag(TagNode *tag);
     void save();
-    // void onListItemSelect(int tagId);
-    // void addToRelated(TagNode* node);
-    // void addToRequired(TagNode* node);
-    // void refreshLists();
 
 private slots:
     void onAnchorClick(const QUrl &link);
 
 signals:
-    // void editModeChanged(bool mode);
     void tagSaved(TagNode* tag);
-    // void partialSave(TagNode* tag);
-    // void listItemSelected(int tagId);
     void displayLinkClicked(int index);
 
 private:

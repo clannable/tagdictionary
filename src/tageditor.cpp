@@ -172,17 +172,3 @@ QFrame* TagEditor::createHLine() {
     frame->setFrameShape(QFrame::HLine);
     return frame;
 }
-// void TagEditor::onListItemSelect(int tagId) {
-//     emit listItemSelected(tagId);
-// }
-
-// void TagEditor::addToRelated(TagNode *node) {
-//     u_relatedList->insertTag(node);
-// }
-
-// void TagEditor::addToRequired(TagNode *node) {
-//     u_requiredList->insertTag(node);
-// }
-
-
-

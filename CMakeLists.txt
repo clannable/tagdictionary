@@ -49,7 +49,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         resources/icons.qrc
 
         include/pixmaplabel.h src/pixmaplabel.cpp
-        include/taglistwidgetitem.h src/taglistwidgetitem.cpp
+
 
         include/tagtreeitem.h src/tagtreeitem.cpp
         include/videoplayer.h src/videoplayer.cpp ui/videoplayer.ui

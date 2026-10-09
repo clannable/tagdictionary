@@ -18,7 +18,6 @@ TagTree::TagTree(QWidget* parent) : QTreeWidget(parent) {
     connect(this, &QTreeWidget::currentItemChanged, this, &TagTree::onItemSelected);
     connect(this, &QTreeWidget::itemDoubleClicked, this, &TagTree::onItemDoubleClicked);
     connect(APP_STATE, &AppState::editModeChanged, this, &TagTree::onEditModeChanged);
-    // connect(this, &QTreeWidget::itemClicked, this, &QTreeWidget::expandItem);
 }
 
 QTreeWidgetItem* TagTree::findTag(int tagId) {
@@ -151,23 +150,6 @@ void TagTree::resetTagVisibility() {
     }
 }
 
-// void TagTree::onExpandSelected(QTreeWidgetItem* item) {
-//     setExpandedRecursive(true, item);
-// }
-
-// void TagTree::onCollapseSelected() { setExpandedRecursive(false, item);
-// }
-
-// void TagTree::onExpandAll() {
-//     setExpandedRecursive(true, rootItem);
-//     menuItem = nullptr;
-// }
-
-// void TagTree::onCollapseAll() {
-//     setExpandedRecursive(false, rootItem);
-//     menuItem = nullptr;
-// }
-
 void TagTree::setExpandedRecursive(bool expanded, QTreeWidgetItem* item) {
     QTreeWidgetItemIterator it(item);
     while(*it) {
@@ -201,10 +183,6 @@ void TagTree::onEditModeChanged(bool editModeEnabled) {
 void TagTree::dropEvent(QDropEvent *event) {
     if (event->source() != this) return;
 
-    // if (dest == oldParent || dest == item)
-    //     event->ignore();
-    // else
-    //     event->acceptProposedAction();
     QTreeWidgetItem* dest = itemAt(event->position().toPoint());
     int id = QVariant(event->mimeData()->data("application/x-tag-id")).toInt();
     TagNode* tag = TAGS[id];
@@ -233,42 +211,6 @@ QStringList TagTree::mimeTypes() const {
     ret.push_back("application/x-tag-id");
     return ret;
 }
-// void TagTree::mousePressEvent(QMouseEvent *event) {
-//     QTreeWidget::mousePressEvent(event);
-//     QTreeWidgetItem *item = this->itemAt(event->pos());
-//     this->expandItem(item);
-//     if (dragEnabled()) {
-//         QTreeWidgetItem *item = this->itemAt(event->pos());
-//         if (item != nullptr) {
-//             dragItem = static_cast<TagTreeItem*>(item);
-//             dragStartPosition = event->pos();
-//         }
-//     }
-// }
-
-// void TagTree::mouseMoveEvent(QMouseEvent *event) {
-//     if (!editModeEnabled)
-//         QTreeWidget::mouseMoveEvent(event);
-//     if (!this->dragEnabled() || !(event->buttons() & Qt::LeftButton) || dragItem == nullptr) return;
-
-//     if ((event->pos() - dragStartPosition).manhattanLength() < QApplication::startDragDistance()) return;
-
-//     QDrag *drag = new QDrag(this);
-//     QMimeData *mimeData = new QMimeData;
-
-//     mimeData->setText(QString::fromStdString(dragItem->getNode()->getFullPath()));
-//     drag->setMimeData(mimeData);
-
-//     Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
-//     dragItem = nullptr;
-//     dragStartPosition = QPoint();
-// }
-
-// void TagTree::mouseReleaseEvent(QMouseEvent *event) {
-//     dragItem = nullptr;
-//     dragStartPosition = QPoint();
-//     QTreeWidget::mouseReleaseEvent(event);
-// }
 
 void TagTree::dragMoveEvent(QDragMoveEvent *event) {
     QTreeWidget::dragMoveEvent(event);
@@ -297,17 +239,10 @@ void TagTree::contextMenuEvent(QContextMenuEvent *event) {
 
     bool validTagSelected = item != nullptr && item != m_rootItem;
     if (validTagSelected) {
-
         QString label = item->text(0);
         if (!APP_STATE->editModeEnabled()) {
             QAction *removeAction = menu->addAction("Remove \"" + label + "\"");
             connect(removeAction, &QAction::triggered, this, [item, this] { onRemoveTag(item); });
-        } else {
-            // menu->addSeparator();
-            // QAction *requiredAction = menu->addAction("Add \"" + label + "\" to Required Tags");
-            // connect(requiredAction, &QAction::triggered, this, &TagTree::signalRequired);
-            // QAction *relatedAction = menu->addAction("Add \"" + label + "\" to Related Tags");
-            // connect(relatedAction, &QAction::triggered, this, &TagTree::signalRelated);
         }
     }
     menu->addSeparator();
@@ -324,19 +259,3 @@ void TagTree::contextMenuEvent(QContextMenuEvent *event) {
     connect(collapseAll, &QAction::triggered, this, [this] { setExpandedRecursive(false, m_rootItem); });
     menu->exec(QCursor::pos());
 }
-
-// void TagTree::signalRelated() {
-//     emit addToRelated(menuItem->getNode());
-//     menuItem = nullptr;
-// }
-
-// void TagTree::signalRequired() {
-//     emit addToRequired(menuItem->getNode());
-//     menuItem = nullptr;
-// }
-
-// void TagTree::setEditMode(bool mode) {
-//     editModeEnabled = mode;
-// }
-
-

@@ -29,22 +29,12 @@ public slots:
     void expandTreeTo(QTreeWidgetItem* item);
     void filterTree(QString search);
 
-    // void onExpandSelected();
-    // void onCollapseSelected();
-    // void onExpandAll();
-    // void onCollapseAll();
-
 protected:
-
-    // virtual void mouseMoveEvent(QMouseEvent *event) override;
-    // virtual void mousePressEvent(QMouseEvent *event) override;
-    // virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent* event) override;
     virtual void dropEvent(QDropEvent *event) override;
     virtual void dragMoveEvent(QDragMoveEvent *event) override;
     virtual QMimeData* mimeData(const QList<QTreeWidgetItem*> &items) const override;
     virtual QStringList mimeTypes() const override;
-    // virtual void dragEnterEvent(QDragEnterEvent *event) override;
 
 signals:
     void addToRelated(TagNode *node);
@@ -56,10 +46,6 @@ private:
     TagNode* m_rootNode = nullptr;
     TagTreeItem* m_rootItem = nullptr;
 
-    // TagTreeItem* dragItem;
-    // QPoint dragStartPosition;
-    // TagTreeItem* findTag(TagTreeItem* item, QString tagPath);
-
     void createChildren(TagTreeItem* item, TagNode *node);
     bool filterTags(QString search, QTreeWidgetItem *node);
     void resetTagVisibility();
@@ -67,11 +53,7 @@ private:
     void setExpandedRecursive(bool expanded, QTreeWidgetItem* root);
 
 private slots:
-    // void signalRelated();
-    // void signalRequired();
-
     void onEditModeChanged(bool editModeEnabled);
-    // void onSelectedTagChanged(TagNode* tag);
 
     void onItemDoubleClicked(QTreeWidgetItem* item, int column);
     void onItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* previous);

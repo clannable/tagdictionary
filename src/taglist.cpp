@@ -54,7 +54,7 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
 
 void TagList::onEditModeChanged(bool editModeEnabled) {
     this->setStyleSheet(editModeEnabled
-        ? "TagList { background-color: #dddddd; border: 1px solid #777777; border-radius: 4px; }"
+        ? "TagList { background-color: #eeeeee; border: 1px solid #777777; border-radius: 4px; }"
         : "TagList { background: transparent; border: none; font: 350 10pt 'Segoe UI'}");
     this->setAcceptDrops(editModeEnabled);
     this->setDragEnabled(editModeEnabled);

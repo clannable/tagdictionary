@@ -40,7 +40,6 @@ MainWindow::MainWindow(QWidget *parent)
     if (settings.contains("geometry"))
         this->restoreGeometry(settings.value("geometry").toByteArray());
 
-    // ui->tagEditor->linkTagTreeToLists(ui->tagTree);
     QMenu* fileMenu = ui->menuBar->addMenu("File");
     QAction* newAction = new QAction("New Dictionary", this);
 
@@ -96,8 +95,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_searchDebounce, &QTimer::timeout, this, &MainWindow::onSearchTimeout);
 
     connect(ui->tagTree, &TagTree::tagsChanged, this, &MainWindow::onTagTreeChange);
-    // connect(ui->tagTree, &TagTree::addToRelated, ui->tagEditor, &TagEditor::addToRelated);
-    // connect(ui->tagTree, &TagTree::addToRequired, ui->tagEditor, &TagEditor::addToRequired);
 
     m_jsonFilePath = settings.value("data/lastOpened", "").toString();
     if (!m_jsonFilePath.isEmpty() && !QFileInfo::exists(m_jsonFilePath)) {

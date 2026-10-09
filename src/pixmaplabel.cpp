@@ -6,15 +6,7 @@
 PixmapLabel::PixmapLabel(QWidget* parent) :
     QLabel(parent),
     m_cols(0),
-    m_rows(0)
-{
-    // setMinimumSize(sizeHint());
-    // setAlignment(Qt::AlignCenter);
-    // set borders on the QLabel
-    // setScaledContents(true);
-
-    // setStyleSheet("QLabel{border: 1px solid black; background: gray;}");
-}
+    m_rows(0) {}
 
 PixmapLabel::~PixmapLabel() {
     if (m_movie != nullptr)
@@ -64,14 +56,9 @@ void PixmapLabel::onMovieUpdate() {
 
 /* virtual */ QSize PixmapLabel::sizeHint() const
 {
-    // return QSize(parentWidget()->width(), parentWidget()->height());
-    // // if (movie() != nullptr)
-    // //     return movie()->scaledSize();
     if (m_cols != 0)
     {
         int width = this->parentWidget()->width();
-        // if (width > this->width())
-        //     width = this->width();
         return QSize(width, heightForWidth(width));
     }
     else
