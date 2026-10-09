@@ -1,6 +1,8 @@
 #include "tageditor.h"
 #include "ui_tageditor.h"
 #include <QFileInfo>
+#include "globals.h"
+#include "icondialog.h"
 
 TagEditor::TagEditor(QWidget *parent)
     : QWidget(parent)
@@ -9,28 +11,29 @@ TagEditor::TagEditor(QWidget *parent)
     ui->setupUi(this);
     ui->iconButton->hide();
     ui->descriptionEditor->hide();
-    iconDialog = new IconDialog(this);
+    ui->tagLabelEdit->setText("");
 
-    this->relatedList = new TagListWidget("Related Tags");
-    this->requiredList = new TagListWidget("Required Tags");
-    this->frequentList = new TagListWidget("Frequently Tagged With");
 
-    ui->listContainer->layout()->addWidget(this->requiredList);
-    ui->listContainer->layout()->addWidget(this->frequentList);
-    ui->listContainer->layout()->addWidget(this->relatedList);
+    u_relatedList = new TagList();
+    u_requiredList = new TagList();
+    u_frequentList = new TagList();
 
-    connect(iconDialog, &IconDialog::iconSelected, this, &TagEditor::iconSelected);
+    ui->listContainer->layout()->addWidget(createHLine());
+    ui->listContainer->layout()->addWidget(new QLabel("Required Tags"));
+    ui->listContainer->layout()->addWidget(u_requiredList);
+    ui->listContainer->layout()->addWidget(createHLine());
+    ui->listContainer->layout()->addWidget(new QLabel("Frequently Tagged With"));
+    ui->listContainer->layout()->addWidget(u_frequentList);
+    ui->listContainer->layout()->addWidget(createHLine());
+    ui->listContainer->layout()->addWidget(new QLabel("Related Tags"));
+    ui->listContainer->layout()->addWidget(u_relatedList);
 
-    connect(ui->editButton, &QPushButton::clicked, this, &TagEditor::toggleEditMode);
+    connect(ui->editButton, &QPushButton::clicked, this, [] { APP_STATE->toggleEditMode(); });
     connect(ui->saveButton, &QPushButton::clicked, this, &TagEditor::save);
     connect(ui->iconButton, &QToolButton::clicked, this, &TagEditor::selectIcon);
-    connect(this->requiredList, &TagListWidget::tagSelected, this, &TagEditor::onListItemSelect);
-    connect(this->relatedList, &TagListWidget::tagSelected, this, &TagEditor::onListItemSelect);
-    connect(this->frequentList, &TagListWidget::tagSelected, this, &TagEditor::onListItemSelect);
     connect(ui->description, &QTextBrowser::anchorClicked, this, &TagEditor::onAnchorClick);
-    connect(this, &TagEditor::editModeChanged, this->relatedList, &TagListWidget::setEditMode);
-    connect(this, &TagEditor::editModeChanged, this->requiredList, &TagListWidget::setEditMode);
-    connect(this, &TagEditor::editModeChanged, this->frequentList, &TagListWidget::setEditMode);
+    connect(APP_STATE, &AppState::editModeChanged, this, &TagEditor::onEditModeChange);
+    connect(APP_STATE, &AppState::selectedTagChanged, this, &TagEditor::setTag);
 }
 
 TagEditor::~TagEditor()
@@ -38,76 +41,58 @@ TagEditor::~TagEditor()
     delete ui;
 }
 
-void TagEditor::linkTagTreeToLists(const TagTree* ptr) {
-    this->requiredList->linkTagTree(ptr);
-    this->relatedList->linkTagTree(ptr);
-    this->frequentList->linkTagTree(ptr);
-}
+void TagEditor::setTag(TagNode *tag) {
 
-void TagEditor::setTag(TagNode *node) {
-
-    if (node == nullptr) {
-        this->relatedList->hide();
-        this->requiredList->hide();
-        this->frequentList->hide();
+    if (tag == nullptr) {
+        ui->listContainer->hide();
         ui->editButton->setEnabled(false);
         ui->tagLabelEdit->setText("");
         ui->iconButton->setIcon(QIcon());
         ui->iconLabel->setPixmap(QPixmap());
         ui->description->setMarkdown("");
         ui->description->show();
-        currentTag = node;
         return;
     }
-    else if (node->isRoot()) {
-        this->relatedList->hide();
-        this->requiredList->hide();
-        this->frequentList->hide();
+    else if (tag->isRoot()) {
+        ui->listContainer->hide();
+        ui->tagLabelEdit->setText("");
         ui->editButton->setEnabled(false);
         ui->description->setMarkdown("");
         ui->description->show();
         ui->iconLabel->hide();
         ui->tagLabelEdit->setText("");
         ui->saveButton->setEnabled(false);
-        currentTag = node;
         return;
     }
     ui->iconLabel->show();
     ui->editButton->show();
     ui->saveButton->show();
-    this->relatedList->show();
-    this->requiredList->show();
-    this->frequentList->show();
-    this->relatedList->setTag(node);
-    this->requiredList->setTag(node);
-    this->frequentList->setTag(node);
+    u_relatedList->setValues(tag->related());
+    u_requiredList->setValues(tag->required());
+    u_frequentList->setValues(tag->frequent());
 
+    ui->listContainer->show();
     ui->editButton->setEnabled(true);
     ui->description->show();
     ui->descriptionEditor->hide();
 
-    QString ic = QString::fromStdString(node->getIcon());
-    if (QFileInfo::exists(ic) || ic.startsWith(":/icons/")) {
-        iconPath = ic;
-    } else if (!ic.startsWith(":/icons/")) {
-        iconPath = ":/icons/" + ic;
-    }
-    QIcon icon = QIcon(iconPath);
-    description = QString::fromStdString(node->getDescription());
+    QString ic = QString::fromStdString(tag->icon());
+    if (QFileInfo::exists(ic) || ic.startsWith(":/icons/"))
+        m_iconPath = ic;
+    else if (!ic.startsWith(":/icons/"))
+        m_iconPath = ":/icons/" + ic;
+
+    QIcon icon = QIcon(m_iconPath);
+    QString description = QString::fromStdString(tag->description());
 
     ui->iconLabel->setPixmap(icon.pixmap(QSize(20, 20)));
     ui->description->setMarkdown(description);
     ui->descriptionEditor->setText(description);
-    ui->tagLabelEdit->setText(QString::fromStdString(node->getKey()));
-    ui->iconButton->setIcon(QIcon(iconPath));
-
-    currentTag = node;
-    refreshLists();
+    ui->tagLabelEdit->setText(QString::fromStdString(tag->key()));
+    ui->iconButton->setIcon(QIcon(m_iconPath));
 }
 
-void TagEditor::toggleEditMode() {
-    editModeEnabled = !editModeEnabled;
-
+void TagEditor::onEditModeChange(bool editModeEnabled) {
     ui->tagLabelEdit->setEnabled(editModeEnabled);
     ui->saveButton->setEnabled(editModeEnabled);
     ui->editButton->setIcon(QIcon::fromTheme(editModeEnabled
@@ -117,7 +102,7 @@ void TagEditor::toggleEditMode() {
     ui->editButton->setText(editModeEnabled ? "Cancel" : "Edit Tag");
     if (editModeEnabled) {
         ui->description->hide();
-        ui->descriptionEditor->setText(description);
+        ui->descriptionEditor->setText(QString::fromStdString(APP_STATE->selectedTag()->description()));
         ui->descriptionEditor->show();
         ui->iconButton->show();
         ui->iconLabel->hide();
@@ -127,86 +112,77 @@ void TagEditor::toggleEditMode() {
         ui->description->show();
         ui->iconButton->hide();
         ui->iconLabel->show();
-
-        refreshLists();
+        u_relatedList->setValues(APP_STATE->selectedTag()->related());
+        u_requiredList->setValues(APP_STATE->selectedTag()->required());
+        u_frequentList->setValues(APP_STATE->selectedTag()->frequent());
     }
-
-    emit editModeChanged(editModeEnabled);
 }
 
 void TagEditor::selectIcon() {
-    iconDialog->setSelected(iconPath);
-    iconDialog->exec();
+    if (!APP_STATE->isSelectedTagEditable()) return;
+    IconDialog* dialog = new IconDialog(this);
+
+    dialog->setSelected(m_iconPath);
+    connect(dialog, &IconDialog::iconSelected, this, &TagEditor::iconSelected);
+    dialog->exec();
 }
 
 void TagEditor::iconSelected(QString icon) {
+    if (icon == m_iconPath) return;
     if (!icon.isEmpty()) {
-        iconPath = icon;
-        QIcon ic = QIcon(iconPath);
+        m_iconPath = icon;
+        QIcon ic = QIcon(m_iconPath);
         ui->iconButton->setIcon(ic);
-        if (this->editModeEnabled == false) {
-            currentTag->setIcon(iconPath.toStdString());
+        if (!APP_STATE->editModeEnabled()) {
+            APP_STATE->selectedTag()->setIcon(m_iconPath.toStdString());
             ui->iconLabel->setPixmap(ic.pixmap(QSize(20,20)));
-            emit partialSave(currentTag);
+            APP_STATE->signalSelectedTagUpdated();
         }
     }
 }
 
-void TagEditor::refreshLists() {
-    this->relatedList->clear();
-    this->requiredList->clear();
-    this->frequentList->clear();
-
-    if (currentTag == nullptr) return;
-
-    for (const int& t : currentTag->getRequired())
-        this->requiredList->insertTag(t);
-    for (const int& t : currentTag->getRelated())
-        this->relatedList->insertTag(t);
-    for (const int& t : currentTag->getFrequent())
-        this->frequentList->insertTag(t);
-}
-
 void TagEditor::save() {
-    QIcon icon = QIcon(iconPath);
+    QIcon icon = QIcon(m_iconPath);
     ui->iconLabel->setPixmap(icon.pixmap(QSize(20,20)));
     QString updatedDescription = ui->descriptionEditor->toPlainText();
-    description = updatedDescription;
     ui->description->setMarkdown(updatedDescription);
 
-    std::string oldPath = currentTag->getFullPath();
+    TagNode* tag = APP_STATE->selectedTag();
 
-    currentTag->setKey(ui->tagLabelEdit->text());
-    currentTag->setDescription(updatedDescription);
-    currentTag->setIcon(iconPath);
-    currentTag->setRelated(this->relatedList->values());
-    currentTag->setRequired(this->requiredList->values());
-    currentTag->setFrequent(this->frequentList->values());
+    tag->setKey(ui->tagLabelEdit->text());
+    tag->setDescription(updatedDescription);
+    tag->setIcon(m_iconPath);
+    tag->setRelated(json(u_relatedList->values()));
+    tag->setRequired(json(u_requiredList->values()));
+    tag->setFrequent(json(u_frequentList->values()));
 
-    emit tagSaved(currentTag, oldPath);
-    toggleEditMode();
+    emit tagSaved(tag);
 }
 
 void TagEditor::onAnchorClick(const QUrl &link) {
     QString path = link.toString();
-    if (path.startsWith("#$")) {
+    if (path.startsWith("#$"))
         emit displayLinkClicked(path.slice(2).toInt()-1);
-    } else {
+    else
         ui->description->scrollToAnchor(path.slice(1));
-    }
 }
 
-void TagEditor::onListItemSelect(int tagId) {
-    emit listItemSelected(tagId);
+QFrame* TagEditor::createHLine() {
+    QFrame* frame = new QFrame();
+    frame->setFrameShape(QFrame::HLine);
+    return frame;
 }
+// void TagEditor::onListItemSelect(int tagId) {
+//     emit listItemSelected(tagId);
+// }
 
-void TagEditor::addToRelated(TagNode *node) {
-    this->relatedList->insertTag(node);
-}
+// void TagEditor::addToRelated(TagNode *node) {
+//     u_relatedList->insertTag(node);
+// }
 
-void TagEditor::addToRequired(TagNode *node) {
-    this->requiredList->insertTag(node);
-}
+// void TagEditor::addToRequired(TagNode *node) {
+//     u_requiredList->insertTag(node);
+// }
 
 
 

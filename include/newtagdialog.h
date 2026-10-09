@@ -1,9 +1,9 @@
 #ifndef NEWTAGDIALOG_H
 #define NEWTAGDIALOG_H
-
 #include <QDialog>
 #include "./tagnode.h"
 #include "./icondialog.h"
+
 namespace Ui {
 class NewTagDialog;
 }
@@ -16,7 +16,7 @@ public:
     explicit NewTagDialog(QWidget *parent = nullptr);
     ~NewTagDialog();
 
-    void setParentNode(TagNode* node);
+    void setTag(TagNode* node);
 
 public slots:
     void onNameChange(QString text);
@@ -31,9 +31,9 @@ signals:
 
 private:
     Ui::NewTagDialog *ui;
-    TagNode* parentNode;
     IconDialog* iconDialog;
     QString iconPath;
+    QStringList invalidNames;
 };
 
 #endif // NEWTAGDIALOG_H

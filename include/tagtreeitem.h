@@ -8,24 +8,22 @@
 class TagTreeItem : public QTreeWidgetItem
 {
 public:
-    TagTreeItem(TagNode* node);
+    TagTreeItem(TagNode* tag);
 
-    TagNode* getNode() const;
-
-    void setNode(TagNode* node);
-    void setKey(QString str);
-
-    void jsonUpdated();
+    TagNode* tag() const { return m_tag; }
+    void setTag(TagNode* tag);
 
     void refreshFileIcons();
 
 private:
-    TagNode* node;
+    TagNode* m_tag;
 
     bool operator<(const TagTreeItem &other)const {
         int column = treeWidget()->sortColumn();
         return text(column).toLower() < other.text(column).toLower();
     }
+
+
 };
 
 #endif // TAGTREEITEM_H

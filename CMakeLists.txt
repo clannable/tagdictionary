@@ -16,6 +16,7 @@ find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 find_package(Qt6 REQUIRED COMPONENTS MultimediaWidgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 include(FetchContent)
 
@@ -25,11 +26,16 @@ FetchContent_MakeAvailable(json)
 set(app_icon_resource_windows "${CMAKE_CURRENT_SOURCE_DIR}/tagviewer.rc")
 
 set(PROJECT_SOURCES
+        include/tagnode.h
+        src/tagnode.cpp
         include/globals.h
+        include/appstate.h
+        src/appstate.cpp
         src/main.cpp
         src/mainwindow.cpp
         include/mainwindow.h
         ui/mainwindow.ui
+
 )
 
 
@@ -48,10 +54,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         include/tagtreeitem.h src/tagtreeitem.cpp
         include/videoplayer.h src/videoplayer.cpp ui/videoplayer.ui
 
-        include/taglistwidget.h src/taglistwidget.cpp
         include/filelistwidget.h src/filelistwidget.cpp ui/filelistwidget.ui
 
-        include/tagnode.h src/tagnode.cpp
+
         src/tagtree.cpp include/tagtree.h
 
         include/icondialog.h src/icondialog.cpp ui/icondialog.ui
@@ -63,6 +68,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         include/mediadisplay.h src/mediadisplay.cpp ui/mediadisplay.ui
         include/tageditor.h src/tageditor.cpp ui/tageditor.ui
         include/taglist.h src/taglist.cpp
+
 
 
 
@@ -78,6 +84,7 @@ target_link_libraries(tagviewer PRIVATE
     nlohmann_json::nlohmann_json
 )
 target_link_libraries(tagviewer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(tagviewer PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.

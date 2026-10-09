@@ -16,21 +16,21 @@ public:
     ~IconPanel();
 
     void setSelected(bool selected);
-    QString getIcon();
-    QString getShortName();
+    QString icon() const { return m_icon; }
+    QString shortName() const { return m_shortName; }
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
+
 signals:
-    void selected(IconPanel *panel);
+    void clicked(IconPanel *panel);
 
 private:
     Ui::IconPanel *ui;
-    QString icon;
-    QString shortName;
-    bool isSelected;
-    QString baseStyleSheet;
+    QString m_icon;
+    QString m_shortName;
+    bool m_selected = false;
 };
 
 #endif // ICONPANEL_H

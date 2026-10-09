@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "tagnode.h"
-#include "tagtreeitem.h"
 #include "globals.h"
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -25,13 +24,12 @@ std::list<std::string>* ICON_LIST = new std::list<std::string>();
 std::string LAST_IMAGE_FOLDER_PATH = "/home";
 std::string LAST_ICON_FOLDER_PATH = "/home";
 int NEXT_TAG_ID = 1;
-std::map<int, TagNode*> TAG_MAP = {};
+std::map<int, TagNode*> TAGS = {};
 std::map<std::string, int> TAG_PATH_MAP = {};
 std::chrono::milliseconds DEBOUNCE_TIME = 250ms;
 bool AUTOSAVE_ENABLED = true;
-bool CONVERT_RELATED_FLAG = false;
 const int MAX_RECENT = 5;
-
+AppState* APP_STATE = new AppState();
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -42,76 +40,71 @@ MainWindow::MainWindow(QWidget *parent)
     if (settings.contains("geometry"))
         this->restoreGeometry(settings.value("geometry").toByteArray());
 
-    ui->tagEditor->linkTagTreeToLists(ui->tagTree);
-    QMenu *fileMenu = ui->menuBar->addMenu("File");
-    QAction *newAction = new QAction("New Dictionary", this);
+    // ui->tagEditor->linkTagTreeToLists(ui->tagTree);
+    QMenu* fileMenu = ui->menuBar->addMenu("File");
+    QAction* newAction = new QAction("New Dictionary", this);
 
-    openAction = new QAction("Open Dictionary...", this);
-    recentMenu = new QMenu("Open Recent File", this);
-    saveAction = new QAction("Save Dictionary", this);
+    a_open = new QAction("Open Dictionary...", this);
+    a_save = new QAction("Save Dictionary", this);
+    u_recent = new QMenu("Open Recent File", this);
 
     newAction->setShortcuts(QKeySequence::New);
-    openAction->setShortcuts(QKeySequence::Open);
-    saveAction->setShortcuts(QKeySequence::Save);
+    a_open->setShortcuts(QKeySequence::Open);
+    a_save->setShortcuts(QKeySequence::Save);
+
     QAction *autoSaveAction = new QAction("Automatically Save Changes", this);
     autoSaveAction->setCheckable(true);
+
     AUTOSAVE_ENABLED = settings.value("autosave", true).toBool();
     autoSaveAction->setChecked(AUTOSAVE_ENABLED);
     autoSaveAction->setToolTip("Automatically save changes to the current dictionary file whenever tags are updated or files are dropped in.");
+
     connect(autoSaveAction, &QAction::toggled, this, &MainWindow::onToggleAutoSave);
 
     connect(newAction, &QAction::triggered, this, &MainWindow::newJson);
-    connect(saveAction, &QAction::triggered, this, &MainWindow::saveJson);
-    connect(openAction, &QAction::triggered, this, &MainWindow::openJson);
+    connect(a_save, &QAction::triggered, this, &MainWindow::saveJson);
+    connect(a_open, &QAction::triggered, this, &MainWindow::openJson);
     fileMenu->addAction(newAction);
     fileMenu->addSeparator();
-    fileMenu->addAction(openAction);
-    fileMenu->addMenu(recentMenu);
+    fileMenu->addAction(a_open);
+    fileMenu->addMenu(u_recent);
     fileMenu->addSeparator();
-    fileMenu->addAction(saveAction);
+    fileMenu->addAction(a_save);
     fileMenu->addAction(autoSaveAction);
     setupRecentFileList();
 
     QMenu *tagMenu = ui->menuBar->addMenu("Tags");
-    newTagAction = new QAction("Create New Tag", this);
-    iconAction = new QAction("Modify Icon", this);
-    iconAction->setShortcut(QKeySequence(QKeyCombination(Qt::AltModifier, Qt::Key_I)));
-    connect(newTagAction, &QAction::triggered, ui->tagTree, &TagTree::onCreateTag);
-    connect(iconAction, &QAction::triggered, ui->tagEditor, &TagEditor::selectIcon);
-    iconAction->setDisabled(true);
+    a_newTag = new QAction("Create New Tag", this);
+    a_icon = new QAction("Modify Icon", this);
+    a_icon->setShortcut(QKeySequence(QKeyCombination(Qt::AltModifier, Qt::Key_I)));
+    connect(a_newTag, &QAction::triggered, ui->tagTree, [this] { ui->tagTree->onCreateTag(nullptr); });
+    connect(a_icon, &QAction::triggered, ui->tagEditor, &TagEditor::selectIcon);
+    a_icon->setDisabled(true);
 
-    tagMenu->addAction(newTagAction);
+    tagMenu->addAction(a_newTag);
     tagMenu->addSeparator();
-    tagMenu->addAction(iconAction);
+    tagMenu->addAction(a_icon);
 
-
-    connect(ui->tagEditor, &TagEditor::editModeChanged, ui->tagTree, &TagTree::setEditMode);
-    connect(ui->tagEditor, &TagEditor::editModeChanged, ui->mediaDisplay, &MediaDisplay::setEditMode);
-    connect(ui->tagEditor, &TagEditor::listItemSelected, this, &MainWindow::onTagListSelect);
-    connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onSave);
-    connect(ui->tagEditor, &TagEditor::partialSave, this, &MainWindow::onPartialSave);
-    connect(ui->tagEditor, &TagEditor::editModeChanged, this, &MainWindow::setEditMode);
+    connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onEditorSave);
+    connect(APP_STATE, &AppState::selectedTagUpdated, this, &MainWindow::onTagUpdate);
     connect(ui->tagEditor, &TagEditor::displayLinkClicked, ui->mediaDisplay, &MediaDisplay::setFile);
-    connect(ui->mediaDisplay, &MediaDisplay::fileAdded, this, &MainWindow::onAddFile);
 
-    searchDebounce = new QTimer(this);
-    searchDebounce->setSingleShot(true);
+    m_searchDebounce = new QTimer(this);
+    m_searchDebounce->setSingleShot(true);
 
     connect(ui->searchInput, &QLineEdit::textChanged, this, &MainWindow::onSearchChange);
-    connect(searchDebounce, &QTimer::timeout, this, &MainWindow::onSearchTimeout);
+    connect(m_searchDebounce, &QTimer::timeout, this, &MainWindow::onSearchTimeout);
 
-    connect(ui->tagTree, &QTreeWidget::itemDoubleClicked, this, &MainWindow::onTagDoubleClicked);
-    connect(ui->tagTree, &QTreeWidget::itemClicked, this, &MainWindow::onTagSelect);
-    connect(ui->tagTree, &TagTree::tagsChanged, this, &MainWindow::onTagChange);
-    connect(ui->tagTree, &TagTree::addToRelated, ui->tagEditor, &TagEditor::addToRelated);
-    connect(ui->tagTree, &TagTree::addToRequired, ui->tagEditor, &TagEditor::addToRequired);
-    connect(ui->tagTree, &TagTree::tagsChanged, ui->tagEditor, &TagEditor::refreshLists);
-    jsonFilePath = settings.value("data/lastOpened", "").toString();
-    if (!jsonFilePath.isEmpty() && !QFileInfo::exists(jsonFilePath)) {
-        QMessageBox::critical(this, "Failed to load file", "ERROR: Failed to load dictionary file");
-        jsonFilePath = "";
+    connect(ui->tagTree, &TagTree::tagsChanged, this, &MainWindow::onTagTreeChange);
+    // connect(ui->tagTree, &TagTree::addToRelated, ui->tagEditor, &TagEditor::addToRelated);
+    // connect(ui->tagTree, &TagTree::addToRequired, ui->tagEditor, &TagEditor::addToRequired);
+
+    m_jsonFilePath = settings.value("data/lastOpened", "").toString();
+    if (!m_jsonFilePath.isEmpty() && !QFileInfo::exists(m_jsonFilePath)) {
+        QMessageBox::critical(this, "Failed to load file", "ERROR: Failed to load dictionary file: \n\tFile not found");
+        m_jsonFilePath = "";
     }
-    saveAction->setEnabled(!jsonFilePath.isEmpty());
+    a_save->setEnabled(!m_jsonFilePath.isEmpty());
     reloadJson();
 }
 
@@ -125,47 +118,13 @@ MainWindow::~MainWindow()
 
 /*---------  Tag Tree Slots ---------*/
 
-void MainWindow::onTagSelect() {
-    if (editModeEnabled || ui->tagTree->selectedItems().isEmpty()) {
-        iconAction->setDisabled(true);
-        return;
-    }
-    iconAction->setDisabled(false);
-    selectedItem = static_cast<TagTreeItem*>(ui->tagTree->selectedItems().first());
-
-    TagNode *node = selectedItem->getNode();
-    ui->tagEditor->setTag(node);
-    ui->mediaDisplay->setFilesFromNode(node);
-}
-
-void MainWindow::onTagDoubleClicked(QTreeWidgetItem *item, int column) {
-    Q_UNUSED(column);
-    if (editModeEnabled) return;
-    if (static_cast<TagTreeItem*>(item)->getNode()->isRoot()) return;
-    if (item != selectedItem)
-        selectedItem = static_cast<TagTreeItem*>(item);
-
-    ui->tagEditor->toggleEditMode();
-}
-
-void MainWindow::onTagListSelect(int tagId) {
-    if (editModeEnabled == true) return;
-
-    TagTreeItem *tag = static_cast<TagTreeItem*>(ui->tagTree->findTag(tagId));
-    selectedItem->setSelected(false);
-    selectedItem = tag;
-    tag->setSelected(true);
-    ui->tagTree->expandTreeTo(tag);
-    onTagSelect();
-}
-
-void MainWindow::onTagChange() {
+void MainWindow::onTagTreeChange() {
     if (AUTOSAVE_ENABLED)
         saveJson();
 }
 
 void MainWindow::onSearchChange() {
-    searchDebounce->start(DEBOUNCE_TIME);
+    m_searchDebounce->start(DEBOUNCE_TIME);
 }
 
 void MainWindow::onSearchTimeout() {
@@ -174,86 +133,53 @@ void MainWindow::onSearchTimeout() {
 
 /*--------- Tag Editor Slots ---------*/
 
-void MainWindow::setEditMode(bool mode) {
-    editModeEnabled = mode;
-
-    QFont font = selectedItem->font(0);
-    font.setWeight(mode ? QFont::DemiBold : QFont::Normal);
-    selectedItem->setFont(0, font);
-
-    // ui->tagTree->setCurrentItem(selectedItem);
-}
-
-void MainWindow::onSave(TagNode* tag, std::string oldPath) {
-
+void MainWindow::onEditorSave() {
     ui->mediaDisplay->save();
-    QStringList files = ui->mediaDisplay->getFiles();
-    std::list<std::string> fileList;
-    for (const auto& f : files)
-        fileList.push_back(f.toStdString());
-    tag->setFiles(fileList);
+    QStringList files = ui->mediaDisplay->files();
+    APP_STATE->selectedTag()->setFiles(files);
 
-    QString oldKey = selectedItem->text(0);
-    selectedItem->setText(0, QString::fromStdString(tag->getKey()));
-    selectedItem->setIcon(0, QIcon(QString::fromStdString(tag->getIcon())));
-    selectedItem->refreshFileIcons();
-    if (oldKey != tag->getKey())
-        ui->tagTree->sortItems(0, Qt::AscendingOrder);
-    ui->mediaDisplay->setFilesFromNode(selectedItem->getNode());
+    ui->tagTree->sortItems(0, Qt::AscendingOrder);
+    // ui->mediaDisplay->setFilesFromNode(tag);
+    ui->tagTree->setCurrentItem(APP_STATE->selectedTag()->leaf());
+    APP_STATE->signalSelectedTagUpdated();
+    APP_STATE->setEditModeEnabled(false);
+}
 
+void MainWindow::onTagUpdate() {
     if (AUTOSAVE_ENABLED)
         saveJson();
 }
-
-void MainWindow::onPartialSave(TagNode *tag) {
-    selectedItem->setText(0, QString::fromStdString(tag->getKey()));
-    selectedItem->setIcon(0, QIcon(QString::fromStdString(tag->getIcon())));
-
-    if (AUTOSAVE_ENABLED)
-        saveJson();
-}
-
-/*--------- Media Display Slots ---------*/
-
-void MainWindow::onAddFile(QString filePath) {
-    if (editModeEnabled) return; // Don't update json data if tag is still being edited
-    selectedItem->getNode()->addFile(filePath.toStdString());
-    selectedItem->refreshFileIcons();
-    if (AUTOSAVE_ENABLED)
-        saveJson();
-}
-
 
 /*--------- JSON Functions ---------*/
 
 void MainWindow::newJson() {
-    jsonFilePath = QFileDialog::getSaveFileName(
+    m_jsonFilePath = QFileDialog::getSaveFileName(
         this,
         "Select where to save JSON file",
-        jsonFilePath.isEmpty() ? "" : QFileInfo(jsonFilePath).dir().absolutePath(),
+        m_jsonFilePath.isEmpty() ? "" : QFileInfo(m_jsonFilePath).dir().absolutePath(),
         "Tag Dictionary (*.json)"
     );
-    if (!jsonFilePath.isEmpty()) {
-        std::ofstream of(jsonFilePath.toStdString());
+    if (!m_jsonFilePath.isEmpty()) {
+        std::ofstream of(m_jsonFilePath.toStdString());
         if (!of.is_open()) {
-            std::cout << "Failed to open output file\n" << std::flush;
-            saveAction->setEnabled(false);
+            // std::cout << "Failed to open output file\n" << std::flush;
+            a_save->setEnabled(false);
         } else {
             of << json({}).dump(2);
             of.close();
             QSettings settings("MyApp","Tag Viewer");
-            settings.setValue("data/lastOpened", jsonFilePath);
+            settings.setValue("data/lastOpened", m_jsonFilePath);
             pushToRecent();
             reloadJson();
-            saveAction->setEnabled(!jsonFilePath.isEmpty());
+            a_save->setEnabled(!m_jsonFilePath.isEmpty());
         }
     }
 }
 
 void MainWindow::saveJson() {
-    if (jsonFilePath.isNull() || jsonFilePath.isEmpty()) return;
+    if (m_jsonFilePath.isNull() || m_jsonFilePath.isEmpty()) return;
     json tags = ui->tagTree->toJson();
-    std::ofstream of(jsonFilePath.toStdString());
+    std::ofstream of(m_jsonFilePath.toStdString());
     if (!of.is_open()) {
         std::cout << "Failed to open output file\n" << std::flush;
     } else {
@@ -266,12 +192,12 @@ void MainWindow::openJson() {
     QString filePath = QFileDialog::getOpenFileName(
         this,
         "Select JSON file",
-        jsonFilePath.isEmpty() ? "" : QFileInfo(jsonFilePath).dir().absolutePath(),
+        m_jsonFilePath.isEmpty() ? "" : QFileInfo(m_jsonFilePath).dir().absolutePath(),
         "Tag Dictionary (*.json)");
     if (!filePath.isEmpty()) {
-        jsonFilePath = filePath;
+        m_jsonFilePath = filePath;
         QSettings settings("MyApp","Tag Viewer");
-        settings.setValue("data/lastOpened", jsonFilePath);
+        settings.setValue("data/lastOpened", m_jsonFilePath);
 
         pushToRecent();
         reloadJson();
@@ -279,18 +205,14 @@ void MainWindow::openJson() {
 }
 
 void MainWindow::reloadJson() {
-    if (jsonFilePath.isNull() || jsonFilePath.isEmpty()) return;
+    if (m_jsonFilePath.isNull() || m_jsonFilePath.isEmpty()) return;
+    APP_STATE->setEditModeEnabled(false);
+    APP_STATE->setSelectedTag(nullptr);
     ui->tagTree->clear();
-    editModeEnabled = false;
-
-    selectedItem = nullptr;
-
-    ui->mediaDisplay->setFilesFromNode(nullptr);
-    ui->tagEditor->setTag(nullptr);
     std::ifstream* f;
 
     try {
-        f = new std::ifstream(jsonFilePath.toStdString());
+        f = new std::ifstream(m_jsonFilePath.toStdString());
         ICON_LIST->clear();
 
         QDirIterator it(":/icons/", QDirIterator::Subdirectories);
@@ -322,36 +244,36 @@ void MainWindow::pushToRecent() {
     QSettings settings("MyApp", "Tag Viewer");
     QStringList recentFiles = settings.value("recentFiles").value<QStringList>();
 
-    if (recentFiles.contains(jsonFilePath)) {
-        int index = recentFiles.indexOf(jsonFilePath);
+    if (recentFiles.contains(m_jsonFilePath)) {
+        int index = recentFiles.indexOf(m_jsonFilePath);
         recentFiles.removeAt(index);
     } else if (recentFiles.size() == MAX_RECENT) {
         recentFiles.removeLast();
     }
 
-    recentFiles.push_front(jsonFilePath);
+    recentFiles.push_front(m_jsonFilePath);
     settings.setValue("recentFiles", recentFiles);
 
     setupRecentFileList();
 }
 
 void MainWindow::setupRecentFileList() {
-    recentMenu->clear();
+    u_recent->clear();
     QSettings settings("MyApp", "Tag Viewer");
     QStringList recentFiles = settings.value("recentFiles").value<QStringList>();
 
-    recentMenu->menuAction()->setEnabled(!recentFiles.isEmpty());
+    u_recent->menuAction()->setEnabled(!recentFiles.isEmpty());
 
     for (int i = 0; i < recentFiles.length(); i++) {
         QString filePath = recentFiles.at(i);
         QString label = QString::number(i+1) + ". \t\t" + QFileInfo(filePath).fileName();
         QAction* fileAction = new QAction(label, this);
-        fileAction->setToolTip(jsonFilePath);
-        recentMenu->addAction(fileAction);
+        fileAction->setToolTip(m_jsonFilePath);
+        u_recent->addAction(fileAction);
         connect(fileAction, &QAction::triggered, this, [filePath, this]() {
-            this->jsonFilePath = filePath;
+            m_jsonFilePath = filePath;
             QSettings settings("MyApp","Tag Viewer");
-            settings.setValue("data/lastOpened", jsonFilePath);
+            settings.setValue("data/lastOpened", m_jsonFilePath);
             this->pushToRecent();
             this->reloadJson();
         });

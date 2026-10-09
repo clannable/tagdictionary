@@ -3,11 +3,8 @@
 
 #include <QWidget>
 #include <QListWidgetItem>
-
 #include "tagnode.h"
-#include "icondialog.h"
-#include "tagtree.h"
-#include "taglistwidget.h"
+#include "taglist.h"
 #include <nlohmann/json.hpp>
 
 namespace Ui {
@@ -22,41 +19,37 @@ public:
     explicit TagEditor(QWidget *parent = nullptr);
     ~TagEditor();
 
-    void linkTagTreeToLists(const TagTree* tree);
-
 public slots:
-    void toggleEditMode();
+    void onEditModeChange(bool editModeEnabled);
     void selectIcon();
     void iconSelected(QString icon);
-    void setTag(TagNode *node);
+    void setTag(TagNode *tag);
     void save();
-    void onListItemSelect(int tagId);
-    void addToRelated(TagNode* node);
-    void addToRequired(TagNode* node);
-    void refreshLists();
+    // void onListItemSelect(int tagId);
+    // void addToRelated(TagNode* node);
+    // void addToRequired(TagNode* node);
+    // void refreshLists();
 
 private slots:
     void onAnchorClick(const QUrl &link);
 
 signals:
-    void editModeChanged(bool mode);
-    void tagSaved(TagNode* tag, std::string oldPath);
-    void partialSave(TagNode* tag);
-    void listItemSelected(int tagId);
+    // void editModeChanged(bool mode);
+    void tagSaved(TagNode* tag);
+    // void partialSave(TagNode* tag);
+    // void listItemSelected(int tagId);
     void displayLinkClicked(int index);
 
 private:
     Ui::TagEditor *ui;
-    IconDialog *iconDialog;
-    TagNode *currentTag = nullptr;
-    bool editModeEnabled = false;
 
-    TagListWidget *requiredList;
-    TagListWidget *relatedList;
-    TagListWidget *frequentList;
+    TagList* u_requiredList;
+    TagList* u_relatedList;
+    TagList* u_frequentList;
 
-    QString iconPath;
-    QString description;
+    QString m_iconPath;
+
+    static QFrame* createHLine();
 };
 
 #endif // TAGEDITOR_H

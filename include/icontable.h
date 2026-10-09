@@ -9,8 +9,7 @@ class IconTable : public QWidget
     Q_OBJECT
 public:
     explicit IconTable(QWidget *parent = nullptr);
-    IconPanel* currentItem() const;
-
+    IconPanel* currentPanel() const { return u_currentPanel; }
     IconPanel* item(QString icon);
 
     void updateLayout(int cols);
@@ -18,18 +17,17 @@ public:
 
 
 public slots:
-    void setCurrentItem(IconPanel *panel);
+    void setCurrentItem(IconPanel* panel);
     void refresh();
 
 signals:
-    void selectionChanged(IconPanel *panel);
+    void selectionChanged(IconPanel* panel);
     void columnsChanged(int columns);
 
 private:
-    QStringList icons;
-    QList<IconPanel*> panels;
-    IconPanel* current;
-
+    QStringList m_icons;
+    QList<IconPanel*> u_panels;
+    IconPanel* u_currentPanel = nullptr;
 };
 
 #endif // ICONTABLE_H

@@ -8,13 +8,12 @@ class TagListWidgetItem : public QListWidgetItem
 {
 public:
     TagListWidgetItem(QVariant tagPath, QListWidget* parent=nullptr);
-    TagListWidgetItem(TagNode* node, QListWidget* parent=nullptr);
+    TagListWidgetItem(TagNode* tag, QListWidget* parent=nullptr);
 
-    QVariant getValue() const;
+    QVariant value() const { return m_value; }
 
 private:
-    QVariant value;
-    TagNode* tag;
+    QVariant m_value;
 };
 
 #endif // TAGLISTWIDGETITEM_H

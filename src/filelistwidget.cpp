@@ -20,22 +20,22 @@ FileListWidget::~FileListWidget()
     delete ui;
 }
 
-QList<std::string> FileListWidget::getFiles() {
-    QList<std::string> ret;
+QStringList FileListWidget::values() {
+    QStringList ret;
     for (int i = 0; i < ui->fileList->count(); i++) {
-        QListWidgetItem *item = ui->fileList->item(i);
+        QListWidgetItem* item = ui->fileList->item(i);
         QString str = item->text();
         str.replace("\\", "/");
         if (!str.trimmed().isEmpty())
-            ret.append(str.trimmed().toStdString());
+            ret.push_back(str.trimmed());
     }
     return ret;
 }
 
-void FileListWidget::setFiles(QStringList files) {
+void FileListWidget::setFiles(std::list<std::string> files) {
     clear();
-    for (const QString& f : files) {
-        QListWidgetItem *item = new QListWidgetItem(f);
+    for (const std::string &f : files) {
+        QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(f));
         item->setFlags(item->flags() | Qt::ItemIsEditable);
         ui->fileList->addItem(item);
     }
@@ -71,6 +71,7 @@ void FileListWidget::onOpenFiles() {
 
     if (!selected.empty())
         LAST_IMAGE_FOLDER_PATH = QFileInfo(selected.last()).absoluteDir().path().toStdString();
+
     for (const QString file : selected) {
         QString f = file;
         QListWidgetItem *item = new QListWidgetItem(f.replace("\\", "/"));

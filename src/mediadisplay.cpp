@@ -18,11 +18,13 @@ MediaDisplay::MediaDisplay(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->prevButton, &QPushButton::clicked, this, &MediaDisplay::prevFile);
-    connect(ui->nextButton, &QPushButton::clicked, this, &MediaDisplay::nextFile);
+    connect(ui->prevButton, &QPushButton::clicked, this, [this] { showFile(--m_currentPage); });
+    connect(ui->nextButton, &QPushButton::clicked, this, [this] { showFile(++m_currentPage); });
     connect(ui->openButton, &QPushButton::clicked, this, &MediaDisplay::openFile);
 
     connect(ui->addFileButton, &QToolButton::clicked, this, &MediaDisplay::addFile);
+    connect(APP_STATE, &AppState::selectedTagChanged, this, &MediaDisplay::refresh);
+    connect(APP_STATE, &AppState::editModeChanged, this, &MediaDisplay::onEditModeChange);
 }
 
 MediaDisplay::~MediaDisplay()
@@ -30,93 +32,84 @@ MediaDisplay::~MediaDisplay()
     delete ui;
 }
 
-void MediaDisplay::setFilesFromNode(TagNode *node) {
-    this->node = node;
-    currentPage = 0;
-    files.clear();
-    ui->addFileButton->setEnabled(node != nullptr);
-    if (node != nullptr) {
-        for (const std::string& file : node->getFiles())
-            files.append(QString::fromStdString(file));
+void MediaDisplay::refresh() {
+    m_currentPage = 0;
+    m_files.clear();
+    ui->addFileButton->setEnabled(APP_STATE->selectedTag() != nullptr && !APP_STATE->selectedTag()->isRoot());
+    if (APP_STATE->selectedTag() != nullptr) {
+        for (const std::string &file : APP_STATE->selectedTag()->files())
+            m_files.append(QString::fromStdString(file));
     }
     showFile(0);
 }
 
-QStringList MediaDisplay::getFiles() const {
-    return files;
-}
-
 void MediaDisplay::save() {
-    QList<std::string> newFiles = static_cast<FileListWidget*>(currentWidget)->getFiles();
-    files.clear();
-    for (const std::string& f : newFiles)
-        files.append(QString::fromStdString(f));
+    m_files = static_cast<FileListWidget*>(u_displayWidget)->values();
 }
 
-void MediaDisplay::setEditMode(bool mode) {
-    editModeEnabled = mode;
-    ui->addFileButton->setVisible(!mode);
-    if (mode) {
-        delete currentWidget;
+void MediaDisplay::onEditModeChange(bool editModeEnabled) {
+    editModeEnabled = editModeEnabled;
+    ui->addFileButton->setVisible(!editModeEnabled);
+    if (editModeEnabled) {
+        delete u_displayWidget;
         FileListWidget* fileList = new FileListWidget(ui->viewport);
-        fileList->setFiles(this->files);
+        fileList->setFiles(APP_STATE->selectedTag()->files());
 
-        currentWidget = fileList;
-        ui->viewportLayout->insertWidget(0, currentWidget, 1);
+        u_displayWidget = fileList;
+        ui->viewportLayout->insertWidget(0, u_displayWidget, 1);
 
         disableControls();
     } else {
-        showFile(currentPage);
+        showFile(m_currentPage);
     }
 }
 
 void MediaDisplay::showFile(int index) {
-    currentPage = index;
-    if (currentWidget != nullptr)
-        delete currentWidget;
+    if (u_displayWidget != nullptr)
+        delete u_displayWidget;
 
-    if (files.isEmpty()) {
-        isImage = false;
+    if (m_files.isEmpty()) {
+        m_isImage = false;
         QLabel* error = new QLabel();
         error->setText("No files to display");
         error->setAlignment(Qt::AlignCenter);
         ui->fileCounter->setText("");
-        currentWidget = error;
+        u_displayWidget = error;
         disableControls();
 
     } else {
         try {
-            QString filePath = files[currentPage];
+            QString filePath = m_files[m_currentPage];
             QMimeDatabase db;
             QString mimeType = db.mimeTypeForFile(filePath).name();
             ui->openButton->setEnabled(true);
             if (mimeType.startsWith("image")) {
-                isImage = true;
+                m_isImage = true;
                 PixmapLabel* image = new PixmapLabel();
                 image->setImage(filePath, mimeType.endsWith("gif"));
-                currentWidget = image;
+                u_displayWidget = image;
             } else if (mimeType.startsWith("video")) {
-                isImage = false;
+                m_isImage = false;
                 VideoPlayer* video = new VideoPlayer();
                 video->setVideo(filePath);
                 video->play();
-                currentWidget = video;
+                u_displayWidget = video;
             }
         } catch (...) {
-            isImage = false;
+            m_isImage = false;
             QLabel* error = new QLabel();
             error->setText("Failed to load file");
             error->setAlignment(Qt::AlignCenter);
-            currentWidget = error;
+            u_displayWidget = error;
         }
 
-        ui->fileCounter->setText(QString::number(currentPage+1) + " / " + QString::number(files.length()));
-        ui->prevButton->setEnabled(currentPage > 0);
-        ui->nextButton->setEnabled(currentPage < files.length()-1);
+        ui->fileCounter->setText(QString::number(m_currentPage+1) + " / " + QString::number(m_files.length()));
+        ui->prevButton->setEnabled(m_currentPage > 0);
+        ui->nextButton->setEnabled(m_currentPage < m_files.length()-1);
     }
-    if (currentWidget != nullptr)
-        ui->viewportLayout->insertWidget(0, currentWidget, 1);
-    if (isImage)
+    if (u_displayWidget != nullptr)
+        ui->viewportLayout->insertWidget(0, u_displayWidget, 1);
+    if (m_isImage)
         resizeImage();
 }
 
@@ -124,16 +117,8 @@ void MediaDisplay::setFile(int index) {
     showFile(index);
 }
 
-void MediaDisplay::prevFile() {
-    showFile(currentPage-1);
-}
-
-void MediaDisplay::nextFile() {
-    showFile(currentPage+1);
-}
-
 void MediaDisplay::openFile() {
-    QDesktopServices::openUrl("file:///" + files[currentPage]);
+    QDesktopServices::openUrl("file:///" + m_files[m_currentPage]);
 }
 
 void MediaDisplay::addFile() {
@@ -146,41 +131,40 @@ void MediaDisplay::addFile() {
     if (!selected.empty())
         LAST_IMAGE_FOLDER_PATH = QFileInfo(selected.last()).absoluteDir().path().toStdString();
 
-
     for (const QString file : selected) {
         QString f = file;
         insertFile(f);
         QListWidgetItem *item = new QListWidgetItem(f.replace("\\", "/"));
         item->setFlags(item->flags() | Qt::ItemIsEditable);
     }
-
 }
 
 void MediaDisplay::insertFile(QString filePath) {
     filePath.replace("\\", "/");
-    if (files.contains(filePath)) return;
+    if (m_files.contains(filePath)) return;
 
-    files.append(filePath);
-    if (editModeEnabled)
-        static_cast<FileListWidget*>(currentWidget)->addFile(filePath);
+    m_files.append(filePath);
+    if (APP_STATE->editModeEnabled())
+        static_cast<FileListWidget*>(u_displayWidget)->addFile(filePath);
     else
-        showFile(files.length()-1);
-    emit fileAdded(filePath);
+        showFile(m_files.length()-1);
+
+    APP_STATE->selectedTag()->addFile(filePath.toStdString());
+    APP_STATE->signalSelectedTagUpdated();
 }
-void MediaDisplay::resizeEvent(QResizeEvent* event)
-{
+void MediaDisplay::resizeEvent(QResizeEvent* event) {
     Q_UNUSED(event);
 
     // force QLabel to follow fixed dimensions
     // based on the loaded QPixmap aspect ratio
-    if (isImage)
+    if (m_isImage)
         resizeImage();
 }
 
 void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
     QMimeDatabase db;
     const QMimeData* data = event->mimeData();
-    if (node == nullptr || event->source() != nullptr) {
+    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->isRoot() || event->source() != nullptr) {
         event->ignore();
     } else if (data->hasUrls()) {
         QString filePath = data->urls()[0].toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
@@ -193,7 +177,6 @@ void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
     } else {
         event->ignore();
     }
-
 }
 
 void MediaDisplay::dropEvent(QDropEvent *event) {
@@ -207,8 +190,8 @@ void MediaDisplay::dropEvent(QDropEvent *event) {
 }
 void MediaDisplay::resizeImage() {
     int w = ui->viewport->width();
-    int h = static_cast<PixmapLabel*>(currentWidget)->heightForWidth(w);
-    static_cast<PixmapLabel*>(currentWidget)->setFixedHeight(std::min(h, ui->viewport->height()));
+    int h = static_cast<PixmapLabel*>(u_displayWidget)->heightForWidth(w);
+    static_cast<PixmapLabel*>(u_displayWidget)->setFixedHeight(std::min(h, ui->viewport->height()));
 
 }
 

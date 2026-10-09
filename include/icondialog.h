@@ -6,7 +6,6 @@
 #include <QList>
 #include <QGridLayout>
 
-#include "iconpanel.h"
 namespace Ui {
 class IconDialog;
 }
@@ -34,7 +33,8 @@ signals:
 
 private:
     Ui::IconDialog *ui;
-    QString iconPath = "";
+    QString m_iconPath = "";
+
     int getAvailableColumns() const;
 };
 

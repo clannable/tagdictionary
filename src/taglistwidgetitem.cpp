@@ -1,24 +1,24 @@
 #include "taglistwidgetitem.h"
+#include <QFileInfo>
 #include "globals.h"
 
 TagListWidgetItem::TagListWidgetItem(QVariant value, QListWidget* parent) :
     QListWidgetItem(parent),
-    value(value)
+    m_value(value)
 {
-    this->tag = TAG_MAP[value.toInt()];
+    TagNode* tag = TAGS[value.toInt()];
     setData(Qt::UserRole, value.toInt());
-    setText(QString::fromStdString(tag->getKey()));
+    setText(QString::fromStdString(tag->key()));
+    QString icon = QString::fromStdString(tag->icon());
+    if (QFileInfo::exists(icon) || icon.startsWith(":/icons/"))
+        setIcon(QIcon(icon));
+    else
+        setIcon(QIcon(":/icons/" + icon));
 }
 
-TagListWidgetItem::TagListWidgetItem(TagNode* node, QListWidget* parent) :
+TagListWidgetItem::TagListWidgetItem(TagNode* tag, QListWidget* parent) :
     QListWidgetItem(parent),
-    tag(node),
-    value(node->getId())
+    m_value(tag->id())
 {
-    setData(Qt::UserRole, value.toInt());
-    setText(QString::fromStdString(tag->getKey()));
-}
 
-QVariant TagListWidgetItem::getValue() const {
-    return value;
 }

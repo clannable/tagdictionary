@@ -5,7 +5,6 @@
 #include <QListWidget>
 #include <nlohmann/json.hpp>
 #include "tagnode.h"
-#include "tagtree.h"
 #include <qevent.h>
 #include <QPushButton>
 #include <list>
@@ -23,41 +22,22 @@ public:
 
     std::list<int> values();
 
-    void linkTagTree(const TagTree* ptr);
-
 public slots:
-    void setEditMode(bool mode);
-    void insertTag(TagNode* node);
     void insertTag(int tagId);
     void setTag(TagNode* node);
     void onItemSelected(QListWidgetItem* item);
     void clear();
-    void toggleExpanded();
-    void updateTitle();
-signals:
-    void tagSelected(int tagId);
+    // void toggleExpanded();
 
 protected:
-    virtual void dropEvent(QDropEvent *event) override;
-    virtual void dragEnterEvent(QDragEnterEvent *event) override;
+    // virtual void dropEvent(QDropEvent *event) override;
+    // virtual void dragEnterEvent(QDragEnterEvent *event) override;
     // virtual void contextMenuEvent(QContextMenuEvent *event) override;
     // virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
-    const TagTree* tagTree = nullptr;
-    bool editModeEnabled = false;
-    QListWidgetItem *selectedItem = nullptr;
-    QListWidgetItem *menuItem = nullptr;
-    TagList *list;
-    QLabel *countLabel;
-    QWidget *header;
-    QPushButton *expandToggle;
-    bool expanded = true;
-    QString title;
-    TagNode* currentTag = nullptr;
-    void onRemoveTag();
-
-
+    TagList* u_list;
+    QString m_title;
 };
 
 #endif // TAGLISTWIDGET_H

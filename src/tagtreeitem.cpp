@@ -1,16 +1,15 @@
 #include "tagtreeitem.h"
 #include "tagnode.h"
 #include <QFileInfo>
+#include <regex>
 
 using json = nlohmann::json;
 
-TagTreeItem::TagTreeItem(TagNode *node) : QTreeWidgetItem()
+TagTreeItem::TagTreeItem(TagNode *node) : QTreeWidgetItem(), m_tag(node)
 {
-    this->node = node;
-
-    if (this->node == nullptr) return;
-
-    if (node->isRoot()) {
+    if (m_tag == nullptr) return;
+    m_tag->setLeaf(this);
+    if (m_tag->isRoot()) {
         QFont font = this->font(0);
         font.setBold(true);
         font.setPointSize(12);
@@ -19,13 +18,11 @@ TagTreeItem::TagTreeItem(TagNode *node) : QTreeWidgetItem()
         setData(0, Qt::UserRole, 0);
         setFlags(Qt::ItemIsSelectable | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled);
         setExpanded(true);
-
     } else {
+        setText(0, QString::fromStdString(m_tag->key()));
+        setData(0, Qt::UserRole, m_tag->id());
 
-        setText(0, QString::fromStdString(this->node->getKey()));
-        setData(0, Qt::UserRole, node->getId());
-
-        QString icon = QString::fromStdString(this->node->getIcon());
+        QString icon = QString::fromStdString(m_tag->icon());
         if (QFileInfo::exists(icon) || icon.startsWith(":/icons/"))
             setIcon(0, QIcon(icon));
         else
@@ -35,32 +32,23 @@ TagTreeItem::TagTreeItem(TagNode *node) : QTreeWidgetItem()
     }
 }
 
-TagNode* TagTreeItem::getNode() const {
-    return node;
-}
-
-void TagTreeItem::setNode(TagNode *node) {
-    this->node = node;
-}
-
-void TagTreeItem::setKey(QString str) {
-    if (node != nullptr)
-        node->setKey(str.toStdString());
-    setText(0, str);
-}
-
-void TagTreeItem::jsonUpdated() {
-    setText(0, QString::fromStdString(node->getKey()));
-    QString icon = QString::fromStdString(node->getIcon());
-    if (QFileInfo::exists(icon) || icon.startsWith(":/icons/"))
-        setIcon(0, QIcon(icon));
-    else
-        setIcon(0, QIcon(":/icons/" + icon));
-
-}
+void TagTreeItem::setTag(TagNode *tag) { m_tag = tag; }
 
 void TagTreeItem::refreshFileIcons() {
-    this->setIcon(1, this->node->hasImages() ? QIcon::fromTheme(QIcon::ThemeIcon::CameraPhoto) : QIcon());
-    this->setIcon(2, this->node->hasVideos() ? QIcon::fromTheme(QIcon::ThemeIcon::CameraVideo) : QIcon());
+    bool images = false;
+    bool videos = false;
+
+    regex videoRegex("\\.(mov|mp4|wmv)$", regex_constants::icase);
+    regex imageRegex("\\.(jpeg|png|gif|jpg|bmp|jfif|webp)$", regex_constants::icase);
+    for (const string& file : m_tag->files()) {
+        if (!videos && regex_search(file, videoRegex))
+            videos = true;
+        if (!images && regex_search(file, imageRegex))
+            images = true;
+        if (images && videos)
+            break;
+    }
+    this->setIcon(1, images ? QIcon::fromTheme(QIcon::ThemeIcon::CameraPhoto) : QIcon());
+    this->setIcon(2, videos ? QIcon::fromTheme(QIcon::ThemeIcon::CameraVideo) : QIcon());
 }
 

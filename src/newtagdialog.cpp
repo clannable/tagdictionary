@@ -28,10 +28,7 @@ NewTagDialog::~NewTagDialog()
 }
 
 void NewTagDialog::onNameChange(QString text) {
-    if (parentNode != nullptr && parentNode->hasChild(text.toStdString()))
-        ui->buttonBox->button(QDialogButtonBox::Save)->setEnabled(false);
-    else
-        ui->buttonBox->button(QDialogButtonBox::Save)->setEnabled(!ui->nameEdit->text().trimmed().isEmpty());
+    ui->buttonBox->button(QDialogButtonBox::Save)->setEnabled(text.trimmed().isEmpty() || !invalidNames.contains(text.trimmed()));
 }
 
 void NewTagDialog::onIconSelect() {
@@ -39,16 +36,18 @@ void NewTagDialog::onIconSelect() {
     iconDialog->exec();
 }
 
-void NewTagDialog::setParentNode(TagNode* node) {
-    this->parentNode = node;
-    if (node != nullptr) {
-        std::string parentIcon = node->getIcon();
+void NewTagDialog::setTag(TagNode* tag) {
+    for (TagNode* child : tag->children())
+        invalidNames.push_back(QString::fromStdString(child->key()));
+
+    if (tag != nullptr) {
+        std::string parentIcon = tag->icon();
         QString icon = QString::fromStdString(parentIcon.empty() ? ":/icons/flat/tag" : parentIcon);
         if (!QFileInfo::exists(icon) && !icon.startsWith(":/icons/"))
             icon = ":/icons/" + icon;
         iconPath = icon;
         ui->iconButton->setIcon(QIcon(iconPath));
-        QString path = QString::fromStdString(node->getFullPath());
+        QString path = QString::fromStdString(tag->getFullPath());
         if (path.isEmpty()) path = "/";
         ui->titleLabel->setText("Creating new tag in \"" + path + "\"");
     } else {
@@ -69,7 +68,7 @@ void NewTagDialog::accept() {
     nlohmann::json data = nlohmann::json();
     data["description"] = ui->descriptionEdit->toPlainText().toStdString();
     data["icon"] = iconPath.toStdString();
-    TagNode *ret = new TagNode(data, ui->nameEdit->text().toStdString(), parentNode);
+    TagNode *ret = new TagNode(data, ui->nameEdit->text().toStdString());
     emit submit(ret);
     QDialog::accept();
 }

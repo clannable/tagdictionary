@@ -9,7 +9,6 @@
 #include <QTimer>
 
 #include "tagnode.h"
-#include "tagtreeitem.h"
 
 #include <nlohmann/json.hpp>
 
@@ -31,36 +30,30 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    TagTreeItem* selectedItem;
 
-    QString jsonFilePath;
-    QAction* saveAction;
-    QAction* openAction;
-    QAction* newTagAction;
-    QAction* iconAction;
+    QString m_jsonFilePath;
 
-    QMenu* recentMenu;
-    QTimer* searchDebounce;
+    QAction* a_save;
+    QAction* a_open;
+    QAction* a_newTag;
+    QAction* a_icon;
 
-    bool editModeEnabled = false;
+    QMenu* u_recent;
+    QTimer* m_searchDebounce;
 
     void pushToRecent();
     void setupRecentFileList();
 
 private slots:
-    void onTagSelect();
-    void onTagChange();
-    void onTagListSelect(int tagId);
-    void onTagDoubleClicked(QTreeWidgetItem* item, int column);
     void onSearchChange();
     void onSearchTimeout();
 
-    void setEditMode(bool mode);
-
-    void onSave(TagNode* tag, std::string oldPath);
-    void onPartialSave(TagNode* tag);
-    void onAddFile(QString filePath);
+    // void setEditMode(bool mode);
+    void onTagTreeChange();
+    void onEditorSave();
+    void onTagUpdate();
     void onToggleAutoSave(bool checked);
+
     void saveJson();
     void openJson();
     void newJson();

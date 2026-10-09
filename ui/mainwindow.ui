@@ -221,28 +221,7 @@
        </size>
       </property>
       <property name="styleSheet">
-       <string notr="true">TagListWidget QLabel {
-	font: 700 10pt &quot;Segoe UI&quot;;
-}
-
-TagListWidget QListWidget {
-	background: transparent;
-	border: none;
-	
-	font: 350 italic 10pt &quot;Segoe UI&quot;;
-}
-
-QScrollBar:vertical {
-	width: 6px;
-	border: none;
-	background: transparent;
-}
-
-QScrollBar::handle:vertical {
-	width: 6px;
-	border-radius: 3px;
-	background: #aaaaaa;
-}</string>
+       <string notr="true"/>
       </property>
      </widget>
     </item>
