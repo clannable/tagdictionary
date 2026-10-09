@@ -80,13 +80,16 @@ void TagList::dropEvent(QDropEvent *event) {
         return;
     }
     int id = QVariant(event->mimeData()->data("application/x-tag-id")).toInt();
-    int index = row(itemAt(event->position().toPoint()));
+    QListWidgetItem* dest = itemAt(event->position().toPoint());
+    int index = -1;
+    if (dest != nullptr)
+        index = row(dest);
     if (dropIndicatorPosition() == DropIndicatorPosition::BelowItem)
         index += 1;
 
     createListItem(id, index);
-    if (static_cast<TagList*>(event->source()) != nullptr)
-        static_cast<TagList*>(event->source())->removeTag(id);
+    if (dynamic_cast<TagList*>(event->source()) != nullptr)
+        dynamic_cast<TagList*>(event->source())->removeTag(id);
 }
 
 void TagList::dragEnterEvent(QDragEnterEvent *event) {
@@ -101,10 +104,10 @@ void TagList::dragEnterEvent(QDragEnterEvent *event) {
             event->setDropAction(Qt::IgnoreAction);
             event->ignore();
         } else {
-            if (static_cast<TagTree*>(event->source()) != nullptr) {
+            if (dynamic_cast<TagTree*>(event->source()) != nullptr) {
                 event->setDropAction(Qt::CopyAction);
                 event->accept();
-            } else if (static_cast<TagList*>(event->source()) != nullptr) {
+            } else if (dynamic_cast<TagList*>(event->source()) != nullptr) {
                 event->accept();
             } else return;
         }
