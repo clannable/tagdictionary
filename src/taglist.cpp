@@ -64,7 +64,7 @@ void TagList::onEditModeChanged(bool editModeEnabled) {
 void TagList::removeTag(int id) {
     for (int i = 0; i < count(); i++) {
         if (item(i)->data(Qt::UserRole) == id) {
-            removeItemWidget(item(i));
+            delete item(i);
             return;
         }
     }
@@ -97,7 +97,7 @@ void TagList::dragEnterEvent(QDragEnterEvent *event) {
     if (APP_STATE->editModeEnabled() && event->mimeData()->hasFormat("application/x-tag-id")) {
         int id = QVariant(event->mimeData()->data("application/x-tag-id")).toInt();
 
-        if (id != APP_STATE->selectedTag()->id()) {
+        if (id == APP_STATE->selectedTag()->id()) {
             event->setDropAction(Qt::IgnoreAction);
             event->ignore();
         } else {
