@@ -76,23 +76,22 @@ void TagTree::onCreateTag(TagTreeItem* item = nullptr) {
 }
 
 void TagTree::onNewTag(TagTreeItem* srcItem, TagNode *tag) {
-    TagTreeItem* item = new TagTreeItem(tag);
-
     ICON_LIST->push_back(tag->icon());
     ICON_LIST->sort();
     ICON_LIST->unique();
 
     if (srcItem != nullptr) {
         tag->setParent(srcItem->tag());
-        srcItem->addChild(item);
+        srcItem->addChild(new TagTreeItem(tag));
         expandItem(srcItem);
     } else {
         tag->setParent(m_rootNode);
-        m_rootItem->addChild(item);
+        m_rootItem->addChild(new TagTreeItem(tag));
     }
     sortItems(0, Qt::AscendingOrder);
     emit tagsChanged();
     APP_STATE->setSelectedTag(tag);
+    scrollToItem(tag->leaf());
 }
 
 void TagTree::onRemoveTag(TagTreeItem* item) {
