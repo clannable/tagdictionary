@@ -44,6 +44,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(tagviewer
         MANUAL_FINALIZATION
         resources/icons.qrc
+        resources/styles.qrc
         ${PROJECT_SOURCES}
         ${app_icon_resource_windows}
         resources/icons.qrc
@@ -68,6 +69,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         include/mediadisplay.h src/mediadisplay.cpp ui/mediadisplay.ui
         include/tageditor.h src/tageditor.cpp ui/tageditor.ui
         include/taglist.h src/taglist.cpp
+        resources/styles.qrc
 
 
 

@@ -4,6 +4,7 @@
 #include <QScrollBar>
 #include <QFileDialog>
 #include "globals.h"
+
 IconDialog::IconDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::IconDialog)
