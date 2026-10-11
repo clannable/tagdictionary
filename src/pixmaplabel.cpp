@@ -71,7 +71,8 @@ void PixmapLabel::onMovieUpdate() {
 
 /* virtual */ int PixmapLabel::heightForWidth(int width) const
 {
-    return (m_cols != 0) ? width * m_rows / m_cols: this->parentWidget()->height();
+    int scaleHeight = width * m_rows / m_cols;
+    return (m_cols != 0) ? (m_rows < scaleHeight ? m_rows : scaleHeight): this->parentWidget()->height();
 }
 
 
