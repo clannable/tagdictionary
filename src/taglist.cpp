@@ -6,11 +6,11 @@
 #include "tagtree.h"
 
 TagList::TagList(QWidget* parent) : QListWidget(parent) {
-    setFixedHeight(105);
+    setFixedHeight(107);
     setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     setDefaultDropAction(Qt::MoveAction);
     setDropIndicatorShown(true);
-    setStyleSheet("TagList { background: transparent; border: none; font: 350 10pt 'Segoe UI'}");
+    setStyleSheet("TagList { background: transparent; border: 1px solid transparent; font: 350 10pt 'Segoe UI'}");
     connect(APP_STATE, &AppState::editModeChanged, this, &TagList::onEditModeChanged);
     connect(this, &QListWidget::itemDoubleClicked, this, &TagList::onItemDoubleClicked);
 }
@@ -53,12 +53,12 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
 }
 
 void TagList::onEditModeChanged(bool editModeEnabled) {
-    this->setStyleSheet(editModeEnabled
+    setStyleSheet(editModeEnabled
         ? "TagList { background-color: #eeeeee; border: 1px solid #777777; border-radius: 4px; }"
-        : "TagList { background: transparent; border: none; font: 350 10pt 'Segoe UI'}");
-    this->setAcceptDrops(editModeEnabled);
-    this->setDragEnabled(editModeEnabled);
-    this->setDragDropMode(editModeEnabled ? DragDropMode::DragDrop : DragDropMode::NoDragDrop);
+        : "TagList { background: transparent; border: 1px solid transparent; font: 350 10pt 'Segoe UI'}");
+    setAcceptDrops(editModeEnabled);
+    setDragEnabled(editModeEnabled);
+    setDragDropMode(editModeEnabled ? DragDropMode::DragDrop : DragDropMode::NoDragDrop);
 }
 
 void TagList::removeTag(int id) {
