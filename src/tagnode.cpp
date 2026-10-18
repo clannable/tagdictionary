@@ -108,6 +108,8 @@ void TagNode::addChild(int id) {
     m_children.push_back(id);
 }
 
+void TagNode::setReplacesParent(bool replacesParent) { m_replacesParent = replacesParent; }
+
 void TagNode::removeChild(int id) {
     const auto itr = std::find(m_children.begin(), m_children.end(), id);
     if (itr == m_children.end()) return;
@@ -134,6 +136,7 @@ json TagNode::toJson() {
         { "frequent", m_frequent },
         { "excludes", m_excludes },
         { "files", m_files },
+        { "replacesParent", m_replacesParent },
         { "children", m_children }
     });
 }

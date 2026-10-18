@@ -13,6 +13,7 @@ TagEditor::TagEditor(QWidget *parent)
     ui->iconButton->hide();
     ui->descriptionEditor->hide();
     ui->tagLabelEdit->setText("");
+    ui->replaceWidget->hide();
 
     u_relatedList = new TagList();
     u_requiredList = new TagList();
@@ -47,6 +48,7 @@ TagEditor::~TagEditor()
 void TagEditor::setTag(TagNode *tag) {
 
     if (tag == nullptr) {
+        ui->replaceWidget->hide();
         ui->listContainer->hide();
         ui->editButton->setEnabled(false);
         ui->tagLabelEdit->setText("");
@@ -56,7 +58,8 @@ void TagEditor::setTag(TagNode *tag) {
         ui->description->show();
         return;
     }
-    else if (tag->id() == -1) {
+    else if (tag->id() <= 0) {
+        ui->replaceWidget->hide();
         ui->listContainer->hide();
         ui->tagLabelEdit->setText("");
         ui->editButton->setEnabled(false);
@@ -121,6 +124,10 @@ void TagEditor::onEditModeChange(bool editModeEnabled) {
         ui->listContainer->layout()->itemAt(2)->widget()->hide();
         ui->listContainer->layout()->itemAt(5)->widget()->hide();
         ui->listContainer->layout()->itemAt(8)->widget()->hide();
+        if (selectedTag->parent()->isRoot())
+            ui->replaceWidget->hide();
+        else
+            ui->replaceWidget->show();
     }
     else {
         ui->descriptionEditor->hide();
@@ -134,6 +141,11 @@ void TagEditor::onEditModeChange(bool editModeEnabled) {
         ui->listContainer->layout()->itemAt(2)->widget()->show();
         ui->listContainer->layout()->itemAt(5)->widget()->show();
         ui->listContainer->layout()->itemAt(8)->widget()->show();
+
+        if (APP_STATE->selectedTag()->replacesParent())
+            ui->replaceWidget->show();
+        else
+            ui->replaceWidget->hide();
     }
 }
 
@@ -180,10 +192,10 @@ void TagEditor::save() {
     tag->setKey(ui->tagLabelEdit->text());
     tag->setDescription(updatedDescription);
     tag->setIcon(m_iconPath);
-    tag->setRelated(json(u_relatedList->values()));
-    tag->setRequired(json(u_requiredList->values()));
-    tag->setFrequent(json(u_frequentList->values()));
-    tag->setExcludes(json(u_excludesList->values()));
+    tag->setRelated(u_relatedList->values());
+    tag->setRequired(u_requiredList->values());
+    tag->setFrequent(u_frequentList->values());
+    tag->setExcludes(u_excludesList->values());
     tag->setReplacesParent(ui->replaceWidget->isReplaceChecked());
 
     emit tagSaved(tag);
