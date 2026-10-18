@@ -31,7 +31,5 @@ private:
     int m_cols;
     int m_rows;
     QMovie* m_movie = nullptr;
-
-    // void onMovieUpdate(int frame);
 };
 #endif // PIXMAPLABEL_H

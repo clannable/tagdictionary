@@ -4,6 +4,7 @@
 #include <list>
 #include <nlohmann/json.hpp>
 #include <QString>
+#include <QTreeWidgetItem>
 
 using json = nlohmann::json;
 using namespace std;
@@ -14,7 +15,7 @@ class TagNode
 
 public:
     TagNode();
-    TagNode(json data, string key="", TagNode* parent=nullptr);
+    TagNode(json data, string key="");
 
     static TagNode* createRoot(json data);
 
@@ -22,73 +23,70 @@ public:
 
     bool isRoot() const;
 
-    int getId() const;
+    int id() const { return m_id; }
 
-    string getDescription() const;
+    string description() const { return m_description; }
     void setDescription(string description);
     void setDescription(QString description);
 
-    string getIcon() const;
+    string icon() const { return m_icon; }
     void setIcon(string icon);
     void setIcon(QString icon);
 
-    string getKey() const;
+    string key() const { return m_key; }
     void setKey(string key);
     void setKey(QString key);
 
-    list<string> getFiles() const;
+    list<string> files() const { return list<string>(m_files); }
     void setFiles(list<string> files);
+    void setFiles(QStringList files);
     void addFile(string file);
 
-    json getRelated() const;
-    void setRelated(json related);
+    json::array_t related() const { return m_related; }
+    void setRelated(list<int> related);
 
-    json getRequired() const;
-    void setRequired(json required);
+    json::array_t required() const { return m_required; }
+    void setRequired(list<int> required);
 
-    json getFrequent() const;
-    void setFrequent(json frequent);
+    json::array_t frequent() const { return m_frequent; }
+    void setFrequent(list<int> frequent);
 
     void cleanSublists();
 
-    map<string, TagNode*> getChildren();
-    TagNode* getParent() const;
+    list<TagNode*> children() const { return list<TagNode*>(m_children); }
+    void addChild(TagNode* child);
+    void removeChild(TagNode* child);
+    void insertChild(TagNode* child);
+
+    TagNode* parent() const;
     void setParent(TagNode* parent);
 
-    string getFullPath() const;
-    void updateFullPath();
+    // void convertSublistsToId();
 
-    void addChild(TagNode* node);
-    bool hasChild(string key);
-    void removeChildAt(string key);
-    void insertChildAt(string key, TagNode* child);
-
-    bool hasImages();
-    bool hasVideos();
-
-    void convertSublistsToId();
+    string getFullPath();
 
     json toJson();
 
+    QTreeWidgetItem* leaf() const { return m_leaf; }
+    void setLeaf(QTreeWidgetItem* leaf);
+
+    bool operator==(TagNode &rhs) const { return m_id == rhs.m_id; }
+    bool operator!=(TagNode &rhs) const { return m_id != rhs.m_id; }
+
 private:
-    int id = 0;
-    string key = "";
-    string description = "";
-    string icon = "";
-    list<string> files;
-    json related = json::array();
-    json required = json::array();
-    json frequent = json::array();
-    string fullPath = "";
+    int m_id = -1;
+    string m_key = "";
+    string m_description = "";
+    string m_icon = "";
+    list<string> m_files;
+    json m_related = json::array();
+    json m_required = json::array();
+    json m_frequent = json::array();
 
-    TagNode* parent = nullptr;
+    TagNode* m_parent = nullptr;
 
-    map<string, TagNode*> children;
-
-    bool wImages = false;
-    bool wVideos = false;
-
-    void checkFiles();
+    list<TagNode*> m_children = {};
+    QTreeWidgetItem* m_leaf = nullptr;
 };
 
 #endif // TAGNODE_H

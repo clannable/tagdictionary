@@ -35,7 +35,6 @@ private:
     void updateVideoProgress(qint64 position);
     void onDurationChange(qint64 duration);
     void updateVolumeIcon();
-    // void onProgressMoved(int value);
     void onProgressReleased();
     void onProgressSliderAction(int action);
     void onProgressSliderMove(int position);

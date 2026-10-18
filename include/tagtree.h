@@ -14,35 +14,27 @@ class TagTree : public QTreeWidget
 
 public:
     TagTree(QWidget* parent);
-    ~TagTree();
+    // ~TagTree();
     QTreeWidgetItem* findTag(int tagId);
 
     void fromJson(nlohmann::json json);
     json toJson();
 
 public slots:
-    void setEditMode(bool mode);
-    void onCreateTag();
-    void onNewTag(TagNode* node);
-    void onRemoveTag();
+
+    void onCreateTag(TagTreeItem* item);
+    void onNewTag(TagTreeItem* srcItem, TagNode* node);
+    void onRemoveTag(TagTreeItem* item);
 
     void expandTreeTo(QTreeWidgetItem* item);
     void filterTree(QString search);
 
-    void onExpandSelected();
-    void onCollapseSelected();
-    void onExpandAll();
-    void onCollapseAll();
-
 protected:
-
-    // virtual void mouseMoveEvent(QMouseEvent *event) override;
-    // virtual void mousePressEvent(QMouseEvent *event) override;
-    // virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent* event) override;
     virtual void dropEvent(QDropEvent *event) override;
     virtual void dragMoveEvent(QDragMoveEvent *event) override;
-    // virtual void dragEnterEvent(QDragEnterEvent *event) override;
+    virtual QMimeData* mimeData(const QList<QTreeWidgetItem*> &items) const override;
+    virtual QStringList mimeTypes() const override;
 
 signals:
     void addToRelated(TagNode *node);
@@ -51,17 +43,8 @@ signals:
     void listsUpdated();
 
 private:
-    TagNode* rootNode = nullptr;
-    TagTreeItem* rootItem = nullptr;
-    TagTreeItem* menuItem = nullptr;
-
-    TagTreeItem* dragItem;
-    QPoint dragStartPosition;
-
-    void deleteNode(TagNode* node);
-
-    bool editModeEnabled;
-    // TagTreeItem* findTag(TagTreeItem* item, QString tagPath);
+    TagNode* m_rootNode = nullptr;
+    TagTreeItem* m_rootItem = nullptr;
 
     void createChildren(TagTreeItem* item, TagNode *node);
     bool filterTags(QString search, QTreeWidgetItem *node);
@@ -70,8 +53,10 @@ private:
     void setExpandedRecursive(bool expanded, QTreeWidgetItem* root);
 
 private slots:
-    void signalRelated();
-    void signalRequired();
+    void onEditModeChanged(bool editModeEnabled);
+
+    void onItemDoubleClicked(QTreeWidgetItem* item, int column);
+    void onItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* previous);
 };
 
 #endif // TAGTREE_H

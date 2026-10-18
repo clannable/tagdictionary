@@ -13,53 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">QSlider::groove:horizontal {
-  height: 5px;
-background: #ffffff;
-border: none;
-}
-
-QSlider::handle:horizontal {
-  width: 12px;
-  margin: -8px 0;
-  border-radius: 4px;
-  background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f5f5f5, stop: 1 #e2e2e2);
-  border: 1px solid #5c5c5c;
-}
-
-QSlider::handle:horizontal::hover {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e5e5e5, stop: 1 #d2d2d2);
-}
-
-QSlider::handle:horizontal::pressed{
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #c5c5c5, stop: 1 #b2b2b2);
-}
-
-QSlider::sub-page:horizontal {
-  background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #014fb5, stop:1 #0089ce);
-  border: 1px solid #b1b1b1;
-height: 5px;
-border-radius: 2px;
-}
-
-QSlider::sub-page:horizontal::disabled {
-	background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0  #b9b9b9, stop:1 #a4a4a4);
-}
-
-QSlider::add-page:horizontal {
-background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0  #d9d9d9, stop:1 #e4e4e4);
-  border: 1px solid #b1b1b1;
-height: 5px;
-border-radius: 2px;
-}</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="18,0">
    <item>
     <widget class="QFrame" name="frame">
-     <property name="styleSheet">
-      <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
-     </property>
      <property name="frameShape">
       <enum>QFrame::Shape::NoFrame</enum>
      </property>
@@ -112,11 +68,7 @@ border-radius: 2px;
         <enum>Qt::LayoutDirection::LeftToRight</enum>
        </property>
        <property name="styleSheet">
-        <string notr="true">QSlider::handle:horizontal {
-  width: 12px;
-  margin: -8px 0;
-}
-</string>
+        <string notr="true"/>
        </property>
        <property name="maximum">
         <number>1500</number>
@@ -151,40 +103,6 @@ border-radius: 2px;
        </property>
        <property name="toolTip">
         <string/>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QPushButton {
-	width: 40px;
-}
-
-QToolButton {
-	width: 25px;
-	height: 25px;
-}
-
-QPushButton, QToolButton {
-	border-radius: 4px;
-	border: 1px solid #b9b9b9;
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f9f9f9, stop: 1 #e5e5e5);
-	color: #3a3a3a; 
-	height: 25px;
-}
-
-QPushButton:hover, QToolButton:hover {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #c9c9c9, stop: 1 #a5a5a5);
-    border-color: #8f8f8f;
-}
-
-QPushButton:pressed, QToolButton:pressed {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #a9a9a9, stop: 1 #959595);
-    border-color: #8f8f8f;
-}
-
- QToolButton:disabled {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eaeaea, stop: 1 #c5c5c5);
-	border-color: #bebebe;
-	color: #bebebe;
-}</string>
        </property>
        <property name="text">
         <string/>
@@ -321,14 +239,6 @@ QPushButton:pressed, QToolButton:pressed {
        </property>
        <property name="focusPolicy">
         <enum>Qt::FocusPolicy::NoFocus</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QSlider::handle:horizontal {
-  width: 10px;
-  margin: -5px 0;
-}
-
-</string>
        </property>
        <property name="maximum">
         <number>100</number>

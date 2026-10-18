@@ -4,33 +4,34 @@
 #include <QScrollBar>
 #include <QFileDialog>
 #include "globals.h"
+
 IconDialog::IconDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::IconDialog)
 {
     ui->setupUi(this);
-
+    setAttribute(Qt::WA_DeleteOnClose);
 }
 
-void IconDialog::resizeEvent(QResizeEvent *event) {
-    Q_UNUSED(event);
+IconDialog::~IconDialog() {
+    delete ui;
+}
+
+void IconDialog::resizeEvent(QResizeEvent *event) { Q_UNUSED(event);
     if (!isVisible()) return;
     if (ui->scrollArea->viewport() == nullptr) return;
     int cols = getAvailableColumns();
-    if (cols+1 != ui->iconTable->columnCount()) {
+    if (cols+1 != ui->iconTable->columnCount())
         ui->iconTable->updateLayout(cols);
-    }
 }
 
-void IconDialog::showEvent(QShowEvent *event) {
-    Q_UNUSED(event);
+void IconDialog::showEvent(QShowEvent *event) { Q_UNUSED(event);
     ui->iconTable->refresh();
     ui->iconTable->updateLayout(getAvailableColumns());
 }
 
 void IconDialog::setSelected(QString value) {
-    iconPath = value;
-
+    m_iconPath = value;
     ui->iconTable->setCurrentItem(ui->iconTable->item(value));
 }
 
@@ -56,8 +57,8 @@ void IconDialog::clearSelection() {
 }
 
 void IconDialog::accept() {
-    IconPanel *selected = ui->iconTable->currentItem();
-    emit iconSelected(selected != nullptr ? selected->getIcon() : iconPath);
+    IconPanel *selected = ui->iconTable->currentPanel();
+    emit iconSelected(selected != nullptr ? selected->icon() : m_iconPath);
     QDialog::accept();
 }
 
@@ -65,7 +66,4 @@ int IconDialog::getAvailableColumns() const {
     return ui->scrollArea->viewport()->width() / 40;
 }
 
-IconDialog::~IconDialog()
-{
-    delete ui;
-}
+

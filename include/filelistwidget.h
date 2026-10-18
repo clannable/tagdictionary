@@ -14,11 +14,12 @@ class FileListWidget : public QWidget
 public:
     explicit FileListWidget(QWidget *parent = nullptr);
     ~FileListWidget();
-    void setFiles(QStringList files);
+    void setFiles(std::list<std::string> files);
 
     void clear();
     void addFile(QString filePath);
-    QList<std::string> getFiles();
+
+    QStringList values();
 
 public slots:
     void onAddFile();

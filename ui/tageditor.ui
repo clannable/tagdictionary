@@ -13,10 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true"/>
-  </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1,1,0,0,0">
    <property name="topMargin">
     <number>0</number>
    </property>
@@ -38,38 +35,7 @@
       </size>
      </property>
      <property name="styleSheet">
-      <string notr="true">QLineEdit:disabled {
-	border: none;
-	padding-bottom: 1px;
-}
-
-QLineEdit {
-	height: 24px;
-	border: 1px solid #6a6a6a;
-	background-color: rgba(255,255,255,0);
-	color: #3d3d3d;
-	padding-bottom: 0;
-}
-
-QToolButton:disabled {
-	border: none;
-	color: unset;
-}
-
-QToolButton {
-	background: rgba(0, 0, 0, 0);
-	border: 1px solid #6a6a6a;
-	border-radius: 2px;
-}
-
-QToolButton:hover {
-	background: rgba(0,0,0,50);
-}
-
-QToolButton:pressed {
-	background: rgba(0,0,0, 80);
-	border: 1px solid #959595;
-}</string>
+      <string notr="true"/>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <property name="spacing">
@@ -142,7 +108,7 @@ QToolButton:pressed {
          </size>
         </property>
         <property name="text">
-         <string>TextLabel</string>
+         <string/>
         </property>
        </widget>
       </item>
@@ -176,10 +142,67 @@ QToolButton:pressed {
     </widget>
    </item>
    <item>
+    <widget class="QTextBrowser" name="description">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>25</width>
+       <height>25</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Shape::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Plain</enum>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+     <property name="openLinks">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTextEdit" name="descriptionEditor">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="acceptDrops">
+      <bool>false</bool>
+     </property>
+     <property name="acceptRichText">
+      <bool>false</bool>
+     </property>
+     <property name="placeholderText">
+      <string>Enter a tag description...</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QWidget" name="listContainer" native="true">
-     <layout class="QVBoxLayout" name="listLayout" stretch="1,1">
+     <layout class="QVBoxLayout" name="listLayout">
       <property name="spacing">
-       <number>2</number>
+       <number>3</number>
       </property>
       <property name="leftMargin">
        <number>0</number>
@@ -193,69 +216,6 @@ QToolButton:pressed {
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item>
-       <widget class="QTextBrowser" name="description">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="baseSize">
-         <size>
-          <width>25</width>
-          <height>25</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Shape::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Shadow::Plain</enum>
-        </property>
-        <property name="sizeAdjustPolicy">
-         <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-        <property name="openLinks">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTextEdit" name="descriptionEditor">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
-        <property name="acceptDrops">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="acceptRichText">
-         <bool>false</bool>
-        </property>
-        <property name="placeholderText">
-         <string>Enter a tag description...</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -273,40 +233,6 @@ QToolButton:pressed {
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QPushButton {
-	width: 40px;
-}
-
-QToolButton {
-	width: 25px;
-	height: 25px;
-}
-
-QPushButton, QToolButton {
-	border-radius: 4px;
-	border: 1px solid #b9b9b9;
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f9f9f9, stop: 1 #e5e5e5);
-	color: #3a3a3a; 
-	height: 28px;
-}
-
-QPushButton:hover, QToolButton:hover {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #c9c9c9, stop: 1 #a5a5a5);
-    border-color: #8f8f8f;
-}
-
-QPushButton:pressed, QToolButton:pressed {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #a9a9a9, stop: 1 #959595);
-    border-color: #8f8f8f;
-}
-
-QPushButton:disabled, QToolButton:disabled {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eaeaea, stop: 1 #c5c5c5);
-	border-color: #bebebe;
-	color: #bebebe;
-}</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="leftMargin">
@@ -338,29 +264,6 @@ QPushButton:disabled, QToolButton:disabled {
         <property name="toolTip">
          <string>Save changes</string>
         </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton {
-	border: 1px solid #b9b9b9;
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #247ccf, stop: 1 #1c62a3);
-	color: #c5c5c5; 
-}
-
-QPushButton:hover, QToolButton:hover {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #1f6bb3, stop: 1 #18578d);
-    border-color: #8f8f8f;
-}
-
-QPushButton:pressed, QToolButton:pressed {
-	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #18578d, stop: 1 #1f6bb3);
-    border-color: #8f8f8f;
-}
-
-QPushButton:disabled, QToolButton:disabled {
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eaeaea, stop: 1 #c5c5c5);
-	border-color: #bebebe;
-	color: #bebebe;
-}</string>
-        </property>
         <property name="text">
          <string>Save Changes</string>
         </property>
@@ -385,9 +288,6 @@ QPushButton:disabled, QToolButton:disabled {
         </property>
         <property name="toolTip">
          <string>Edit tag</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
         </property>
         <property name="text">
          <string>Edit Tag</string>
