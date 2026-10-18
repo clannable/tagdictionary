@@ -189,6 +189,7 @@ void TagTree::dropEvent(QDropEvent *event) {
     if (dest == nullptr) {
         m_rootItem->addChild(tag->leaf());
         tag->setParent(m_rootNode);
+        tag->setReplacesParent(false);
     } else {
         dest->addChild(tag->leaf());
         tag->setParent(static_cast<TagTreeItem*>(dest)->tag());

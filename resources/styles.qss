@@ -138,6 +138,10 @@ TagEditor .QLabel {
     font: 700 12pt "Segoe UI";
 }
 
+TagEditor ReplaceWidget .QLabel {
+    font: 350 9pt 'Segoe UI';
+}
+
 VideoPlayer QSlider::groove:horizontal {
     height: 5px;
     background: #ffffff;

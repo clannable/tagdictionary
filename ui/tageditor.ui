@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1,1,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,1,1,0,0,0">
    <property name="topMargin">
     <number>0</number>
    </property>
@@ -133,6 +133,9 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <widget class="ReplaceWidget" name="replaceWidget" native="true"/>
    </item>
    <item>
     <widget class="Line" name="line">
@@ -302,6 +305,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ReplaceWidget</class>
+   <extends>QWidget</extends>
+   <header>replacewidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>iconButton</tabstop>
   <tabstop>tagLabelEdit</tabstop>

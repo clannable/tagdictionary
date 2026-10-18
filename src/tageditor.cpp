@@ -12,7 +12,7 @@ TagEditor::TagEditor(QWidget *parent)
     ui->iconButton->hide();
     ui->descriptionEditor->hide();
     ui->tagLabelEdit->setText("");
-
+    ui->replaceWidget->hide();
 
     u_relatedList = new TagList();
     u_requiredList = new TagList();
@@ -44,6 +44,7 @@ TagEditor::~TagEditor()
 void TagEditor::setTag(TagNode *tag) {
 
     if (tag == nullptr) {
+        ui->replaceWidget->hide();
         ui->listContainer->hide();
         ui->editButton->setEnabled(false);
         ui->tagLabelEdit->setText("");
@@ -54,6 +55,7 @@ void TagEditor::setTag(TagNode *tag) {
         return;
     }
     else if (tag->isRoot()) {
+        ui->replaceWidget->hide();
         ui->listContainer->hide();
         ui->tagLabelEdit->setText("");
         ui->editButton->setEnabled(false);
@@ -70,6 +72,13 @@ void TagEditor::setTag(TagNode *tag) {
     u_relatedList->setValues(tag->related());
     u_requiredList->setValues(tag->required());
     u_frequentList->setValues(tag->frequent());
+
+    if (tag->replacesParent())
+        ui->replaceWidget->show();
+    else
+        ui->replaceWidget->hide();
+    ui->replaceWidget->useParent(tag->parent());
+    ui->replaceWidget->setReplaceChecked(tag->replacesParent());
 
     ui->listContainer->show();
     ui->editButton->setEnabled(true);
@@ -93,6 +102,7 @@ void TagEditor::setTag(TagNode *tag) {
 }
 
 void TagEditor::onEditModeChange(bool editModeEnabled) {
+    const TagNode* selectedTag = APP_STATE->selectedTag();
     ui->tagLabelEdit->setEnabled(editModeEnabled);
     ui->saveButton->setEnabled(editModeEnabled);
     ui->editButton->setIcon(QIcon::fromTheme(editModeEnabled
@@ -102,19 +112,28 @@ void TagEditor::onEditModeChange(bool editModeEnabled) {
     ui->editButton->setText(editModeEnabled ? "Cancel" : "Edit Tag");
     if (editModeEnabled) {
         ui->description->hide();
-        ui->descriptionEditor->setText(QString::fromStdString(APP_STATE->selectedTag()->description()));
+        ui->descriptionEditor->setText(QString::fromStdString(selectedTag->description()));
         ui->descriptionEditor->show();
         ui->iconButton->show();
         ui->iconLabel->hide();
+        if (selectedTag->parent()->isRoot())
+            ui->replaceWidget->hide();
+        else
+            ui->replaceWidget->show();
     }
     else {
         ui->descriptionEditor->hide();
         ui->description->show();
         ui->iconButton->hide();
         ui->iconLabel->show();
-        u_relatedList->setValues(APP_STATE->selectedTag()->related());
-        u_requiredList->setValues(APP_STATE->selectedTag()->required());
-        u_frequentList->setValues(APP_STATE->selectedTag()->frequent());
+        u_relatedList->setValues(selectedTag->related());
+        u_requiredList->setValues(selectedTag->required());
+        u_frequentList->setValues(selectedTag->frequent());
+
+        if (APP_STATE->selectedTag()->replacesParent())
+            ui->replaceWidget->show();
+        else
+            ui->replaceWidget->hide();
     }
 }
 
@@ -155,6 +174,7 @@ void TagEditor::save() {
     tag->setRelated(json(u_relatedList->values()));
     tag->setRequired(json(u_requiredList->values()));
     tag->setFrequent(json(u_frequentList->values()));
+    tag->setReplacesParent(ui->replaceWidget->isReplaceChecked());
 
     emit tagSaved(tag);
 }

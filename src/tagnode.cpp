@@ -28,6 +28,7 @@ TagNode::TagNode(json data, string key) : m_key(key) {
     setRequired(data.value("required", json::array()));
     setFrequent(data.value("frequent", json::array()));
     setFiles(data.value("files", list<string>()));
+    setReplacesParent(data.value<bool>("replacesParent", false));
 
     if (data.contains("children")) {
         for (const auto& [k, c] : data["children"].items()) {
@@ -87,6 +88,8 @@ void TagNode::setParent(TagNode* parent) {
     m_parent = parent;
 }
 
+void TagNode::setReplacesParent(bool replacesParent) { m_replacesParent = replacesParent; }
+
 void TagNode::addChild(TagNode* child) {
     const auto itr = std::find_if(m_children.begin(), m_children.end(),
                                   [child](TagNode* c) { return *c == *child; });
@@ -130,6 +133,7 @@ json TagNode::toJson() {
             { "required", m_required },
             { "frequent", m_frequent },
             { "files", m_files },
+            { "replacesParent", m_replacesParent },
             { "children", json() }
         });
         for (TagNode* child : m_children)

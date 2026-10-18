@@ -58,8 +58,11 @@ public:
     void removeChild(TagNode* child);
     void insertChild(TagNode* child);
 
-    TagNode* parent() const;
+    TagNode* parent() const { return m_parent; }
     void setParent(TagNode* parent);
+
+    bool replacesParent() const { return m_replacesParent; }
+    void setReplacesParent(bool replacesParent);
 
     // void convertSublistsToId();
 
@@ -84,6 +87,7 @@ private:
     json m_frequent = json::array();
 
     TagNode* m_parent = nullptr;
+    bool m_replacesParent = false;
 
     list<TagNode*> m_children = {};
     QTreeWidgetItem* m_leaf = nullptr;
