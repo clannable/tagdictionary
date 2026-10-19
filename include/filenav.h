@@ -16,7 +16,6 @@ public:
 
 public slots:
     void setSelected(int index);
-
 signals:
     void fileSelected(int index);
 
