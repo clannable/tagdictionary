@@ -48,10 +48,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         resources/styles.qrc
         ${PROJECT_SOURCES}
         ${app_icon_resource_windows}
-        resources/icons.qrc
 
         include/pixmaplabel.h src/pixmaplabel.cpp
         include/replacewidget.h src/replacewidget.cpp
+        include/filenav.h src/filenav.cpp
 
         include/tagtreeitem.h src/tagtreeitem.cpp
         include/videoplayer.h src/videoplayer.cpp ui/videoplayer.ui
