@@ -16,6 +16,7 @@ find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 find_package(Qt6 REQUIRED COMPONENTS MultimediaWidgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 include(FetchContent)
 
@@ -84,7 +85,6 @@ target_link_libraries(tagviewer PRIVATE
 target_link_libraries(tagviewer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(tagviewer PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(tagviewer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-target_link_libraries(tagviewer PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
