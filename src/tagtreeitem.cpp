@@ -48,7 +48,7 @@ void TagTreeItem::refreshFileIcons() {
         if (images && videos)
             break;
     }
-    this->setIcon(1, images ? QIcon::fromTheme(QIcon::ThemeIcon::CameraPhoto) : QIcon());
-    this->setIcon(2, videos ? QIcon::fromTheme(QIcon::ThemeIcon::CameraVideo) : QIcon());
+    this->setIcon(1, QIcon(images ? ":/icons/linear/image.png" : ""));
+    this->setIcon(2, QIcon(videos ? ":/icons/linear/video.png" : ""));
 }
 

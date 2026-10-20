@@ -11,19 +11,22 @@ public:
     explicit FileNav(QWidget *parent = nullptr);
 
     void addFile(QString filePath);
+    void setFiles(QStringList files);
     void clear();
+
+public slots:
+    void setSelected(int index);
 
 signals:
     void fileSelected(int index);
 
 private:
-    int currentFile = -1;
-
+    int currentFile = 0;
+    int numFiles = 0;
     QToolButton* prevButton;
     QToolButton* nextButton;
 
-private slots:
-    void onSelectionChange(int index);
+    QWidget* numContainer = nullptr;
 };
 
 #endif // FILENAV_H

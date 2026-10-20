@@ -86,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onEditorSave);
     connect(APP_STATE, &AppState::selectedTagUpdated, this, &MainWindow::onTagUpdate);
+    connect(APP_STATE, &AppState::selectedTagChanged, this, [this](TagNode* selectedTag) { this->a_icon->setEnabled(selectedTag != nullptr && !selectedTag->isRoot()); });
     connect(ui->tagEditor, &TagEditor::displayLinkClicked, ui->mediaDisplay, &MediaDisplay::setFile);
 
     m_searchDebounce = new QTimer(this);
