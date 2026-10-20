@@ -2,7 +2,6 @@
 #include <QHBoxLayout>
 #include <regex>
 #include <QPushButton>
-#include "filenavbutton.h"
 
 FileNav::FileNav(QWidget *parent)
     : QWidget{parent}
@@ -111,5 +110,4 @@ void FileNav::addFile(QString filePath) {
     numContainer->layout()->addWidget(button);
     connect(button, &QToolButton::clicked, this, [this, button]() { emit fileSelected(numContainer->layout()->indexOf(button)); });
     numFiles++;
-
 }
