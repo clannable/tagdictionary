@@ -144,6 +144,8 @@ void MainWindow::onEditorSave() {
 }
 
 void MainWindow::onTagUpdate() {
+    TagTreeItem* item = static_cast<TagTreeItem*>(APP_STATE->selectedTag()->leaf());
+    if (item != nullptr) item->refreshFileIcons();
     if (AUTOSAVE_ENABLED)
         saveJson();
 }
@@ -207,6 +209,7 @@ void MainWindow::reloadJson() {
     APP_STATE->setEditModeEnabled(false);
     APP_STATE->setSelectedTag(nullptr);
     ui->tagTree->clear();
+    ui->searchInput->clear();
     std::ifstream* f;
 
     try {

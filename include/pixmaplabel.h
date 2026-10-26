@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QPixmap>
 #include <QMovie>
+#include "imageloader.h"
 
 class PixmapLabel : public QLabel
 {
@@ -16,10 +17,11 @@ public:
 
     bool hasImage();
 
-    void setImage(const QString& filePath, bool animated);
+    void setFile(const QString& filePath);
     int heightForWidth(int width) const override;
 
 public slots:
+    void setImage(QImage image);
     void onMovieUpdate();
 protected:
 
@@ -31,5 +33,6 @@ private:
     int m_cols;
     int m_rows;
     QMovie* m_movie = nullptr;
+    ImageLoader* m_loader;
 };
 #endif // PIXMAPLABEL_H
