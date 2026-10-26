@@ -95,7 +95,7 @@ void MediaDisplay::showFile(int index) {
             if (mimeType.startsWith("image")) {
                 m_isImage = true;
                 PixmapLabel* image = new PixmapLabel();
-                image->setImage(filePath, mimeType.endsWith("gif"));
+                image->setFile(filePath);
                 u_displayWidget = image;
             } else if (mimeType.startsWith("video")) {
                 m_isImage = false;

@@ -36,9 +36,6 @@ FileNav::FileNav(QWidget *parent)
     setLayout(row);
 
     connect(this, &FileNav::fileSelected, this, &FileNav::setSelected);
-
-
-
 }
 
 void FileNav::setFiles(QStringList files) {
