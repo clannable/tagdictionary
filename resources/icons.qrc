@@ -27,5 +27,6 @@
         <file>flat/tag.png</file>
         <file>flat/hanger.png</file>
         <file>flat/water.png</file>
+        <file>linear/turn-down.png</file>
     </qresource>
 </RCC>
