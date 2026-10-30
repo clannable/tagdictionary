@@ -6,20 +6,33 @@
 #include "tagtree.h"
 #include <QRegularExpression>
 #include <QHeaderView>
+#include <QStyledItemDelegate>
+#include <QPainter>
+
+class TagListDelegate : public QStyledItemDelegate {
+protected:
+    void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override {
+        QStyledItemDelegate::initStyleOption(option, index);
+        option->displayAlignment = Qt::AlignHCenter;
+        option->textElideMode = Qt::ElideNone;
+    }
+};
 
 TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
     setFixedHeight(107);
     setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-    setDefaultDropAction(Qt::MoveAction);
     setDropIndicatorShown(true);
     setColumnCount(2);
     setHeaderHidden(true);
-    // setIndentation(5);
-    setRootIsDecorated(false);
+    setDefaultDropAction(Qt::MoveAction);
+    setItemsExpandable(false);
+    setAllColumnsShowFocus(true);
+    setIndentation(0);
+    setItemDelegateForColumn(0, new TagListDelegate());
+    setExpandsOnDoubleClick(false);
     header()->setSectionResizeMode(0, QHeaderView::Fixed);
     header()->setSectionResizeMode(1, QHeaderView::Stretch);
-    header()->resizeSection(0, 15);
-
+    header()->resizeSection(0, 10);
     connect(APP_STATE, &AppState::editModeChanged, this, &TagList::onEditModeChanged);
     connect(this, &QTreeWidget::itemDoubleClicked, this, &TagList::onItemDoubleClicked);
     parser = new TokenParser();
@@ -33,6 +46,8 @@ void TagList::setValues(nlohmann::json::array_t ids) {
                 ? QString::fromStdString(i.get<std::string>())
                 : QString::number(i.get<int>()))
         );
+    header()->resizeSection(0, 10);
+    expandAll();
     scrollToTop();
 }
 
@@ -43,10 +58,32 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
 
     QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
-    QAction *removeTag = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove), "Remove \""+item->text(1)+"\"");
-    menu->addAction(removeTag);
-    connect(removeTag, &QAction::triggered, this, [item] { delete item; });
+    if (TAGS[item->data(1, Qt::UserRole).toInt()]->children().empty()) {
+        QAction* toggleAction = menu->addAction("Include sub-tags");
+        toggleAction->setCheckable(true);
+        toggleAction->setChecked(item->data(1, Qt::UserRole+1).toBool());
+        connect(toggleAction, &QAction::toggled, this, [this, item](bool checked) { toggleIncludeSubtags(item, checked); });
+        menu->addSeparator();
+    }
+    connect(menu->addAction(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove), "Remove \""+item->text(1)+"\""), &QAction::triggered, this, [item] {
+        if (item->parent() != nullptr && item->parent()->childCount() == 1) {
+            item->parent()->setText(0, "");
+            item->parent()->setData(0, Qt::UserRole, Modifier::NONE);
+        }
+        delete item;
+    });
+
     menu->exec(QCursor::pos());
+}
+
+void TagList::toggleIncludeSubtags(QTreeWidgetItem* item, bool checked) {
+    item->setData(1, Qt::UserRole+1, checked);
+    QString label = item->text(1);
+    if (checked && !label.endsWith("*"))
+        label += "*";
+    else if (!checked && label.endsWith("*"))
+        label = label.left(label.length()-1);
+    item->setText(1, label);
 }
 
 void TagList::onEditModeChanged(bool editModeEnabled) {
@@ -62,6 +99,10 @@ void TagList::removeTag(int id) {
     QTreeWidgetItemIterator it(this);
     while (*it) {
         if ((*it)->data(1, Qt::UserRole) == id) {
+            if ((*it)->parent() != nullptr && (*it)->childCount() == 1) {
+                (*it)->parent()->setText(0, "");
+                (*it)->parent()->setData(0, Qt::UserRole, Modifier::NONE);
+            }
             delete *it;
             return;
         }
@@ -77,58 +118,74 @@ void TagList::dropEvent(QDropEvent *event) {
     if (!APP_STATE->editModeEnabled()) return;
     QTreeWidgetItem* item;
     int id = QVariant(event->mimeData()->data("application/x-tag-id")).toInt();
-    if (dynamic_cast<TagList*>(event->source()) != nullptr) {
-        QString tokenStr = QVariant(event->mimeData()->data("application/x-tag-token")).toString();
-        item = parser->parseString(tokenStr);
+    if (event->mimeData()->hasFormat("application/x-tag-token")) {
+        item = parser->parseString(QVariant(event->mimeData()->data("application/x-tag-token")).toString());
     } else {
         item = new QTreeWidgetItem();
         item->setData(1, Qt::UserRole, id);
         item->setIcon(1, QIcon(QString::fromStdString(TAGS[id]->icon())));
         item->setText(1, QString::fromStdString(TAGS[id]->key()));
-        item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
+        item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicatorWhenChildless);
         item->setExpanded(true);
     }
     QTreeWidgetItem* dest = itemAt(event->position().toPoint());
-    QTreeWidgetItem* parent = dest->parent();
-    int index;
-    switch (dropIndicatorPosition()) {
-        case QAbstractItemView::OnItem:
-        if (!dest->childCount()) {
+
+
+    if (dropIndicatorPosition() == QAbstractItemView::OnItem) {
+        if (!dest->childCount() && dest->parent() == nullptr) {
             QMenu contextMenu(this);
             // event->acceptProposedAction();
             contextMenu.setAttribute(Qt::WA_DeleteOnClose);
             connect(&contextMenu, &QMenu::triggered, this, [this, item, id, dest, event](QAction *action) {
-                if (dynamic_cast<TagList*>(event->source()) != nullptr)
-                    dynamic_cast<TagList*>(event->source())->removeTag(id);
+                if (qobject_cast<TagList*>(event->source()) != nullptr)
+                    qobject_cast<TagList*>(event->source())->removeTag(id);
                 insertChildTag(item, dest, static_cast<Modifier>(action->data().toInt()));
-
+                expandAll();
+                // event->accept();
             });
             contextMenu.addAction("If -> then")->setData(Modifier::IF_THEN);
             contextMenu.addAction("And")->setData(Modifier::AND);
             contextMenu.addAction("Or")->setData(Modifier::OR);
             contextMenu.exec(QCursor::pos());
-        }
-        return;
-        case QAbstractItemView::AboveItem:
-        case QAbstractItemView::BelowItem:
-            index = parent->indexOfChild(dest);
-            if (dropIndicatorPosition() == QAbstractItemView::BelowItem) index += 1;
-            if (parent != invisibleRootItem())
-                insertChildTag(item, parent, static_cast<Modifier>(parent->data(0, Qt::UserRole).toInt()), index);
+        } else {
+            if (event->source() == this)
+                QTreeWidget::dropEvent(event);
             else
-                insertTopLevelItem(index, item);
-            break;
-        case QAbstractItemView::OnViewport:
+                insertChildTag(item, dest, static_cast<Modifier>(dest->data(0, Qt::UserRole).toInt()));
+            expandAll();
+        }
+    } else {
+        int index;
+        if (event->source() == this)
+            QTreeWidget::dropEvent(event);
+        else if (dropIndicatorPosition() == QAbstractItemView::BelowItem || dropIndicatorPosition() == QAbstractItemView::AboveItem) {
+            {
+                if (dest->parent() == nullptr)
+                    index = this->indexOfTopLevelItem(dest);
+                else
+                    index = dest->parent()->indexOfChild(dest);
+                if (dropIndicatorPosition() == QAbstractItemView::BelowItem) index += 1;
+                if (dest->parent() != nullptr) {
+                    insertChildTag(item, dest->parent(), static_cast<Modifier>(dest->parent()->data(0, Qt::UserRole).toInt()), index);
+                    expandAll();
+                }
+                else
+                    insertTopLevelItem(index, item);
+            }
+        } else {
             addTopLevelItem(item);
-            break;
+        }
+        if (qobject_cast<TagList*>(event->source()) != nullptr && event->source() != this)
+            qobject_cast<TagList*>(event->source())->removeTag(id);
     }
-    if (dynamic_cast<TagList*>(event->source()) != nullptr && event->source() != this)
-        dynamic_cast<TagList*>(event->source())->removeTag(id);
+    expandAll();
+    // event->accept();
 }
 
 void TagList::insertChildTag(QTreeWidgetItem* item, QTreeWidgetItem* parent, Modifier mod, int index) {
     if (mod == Modifier::IF_THEN) {
         item->setIcon(0, QIcon(":/icons/linear/turn-down.png"));
+        item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicatorWhenChildless);
         parent->setText(0, "IF");
     }
     else if (mod == Modifier::AND) item->setText(0, "AND");
@@ -139,10 +196,7 @@ void TagList::insertChildTag(QTreeWidgetItem* item, QTreeWidgetItem* parent, Mod
         parent->addChild(item);
     else
         parent->insertChild(index, item);
-    parent->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
     parent->setExpanded(true);
-
-
 }
 
 void TagList::dragEnterEvent(QDragEnterEvent *event) {
@@ -157,11 +211,10 @@ void TagList::dragEnterEvent(QDragEnterEvent *event) {
             event->setDropAction(Qt::IgnoreAction);
             event->ignore();
         } else {
-            if (dynamic_cast<TagTree*>(event->source()) != nullptr) {
-
+            if (qobject_cast<TagTree*>(event->source()) != nullptr) {
                 event->setDropAction(Qt::CopyAction);
-                event->accept();
-            } else if (dynamic_cast<TagList*>(event->source()) != nullptr) {
+                event->acceptProposedAction();
+            } else if (qobject_cast<TagList*>(event->source()) != nullptr){
                 QTreeWidgetItemIterator it(this);
                 while (*it) {
                     if ((*it)->data(1, Qt::UserRole).toInt() == id) {
@@ -171,14 +224,33 @@ void TagList::dragEnterEvent(QDragEnterEvent *event) {
                     }
                     it++;
                 }
-                event->accept();
-            } else return;
+                event->setDropAction(Qt::MoveAction);
+                event->acceptProposedAction();
+            }
         }
     } else {
         event->setDropAction(Qt::IgnoreAction);
         event->ignore();
     }
 }
+
+// void TagList::expandAll() {
+//     QTreeWidgetItemIterator it(this);
+//     while (*it) {
+//         (*it)->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+//         (*it)->setExpanded(true);
+//         (*it)->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
+//         ++it;
+//     }
+// }
+
+// void TagList::drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+//     QTreeWidget::drawRow(painter, option, index);
+//     if (index.parent().isValid() && !index.siblingAtRow(index.row()+1).isValid()) {
+//         painter->setPen(Qt::DashLine);
+//         painter->drawLine(option.widget->rect().bottomLeft(), option.widget->rect().bottomRight());
+//     }
+// }
 
 std::list<std::string> TagList::values() {
     std::list<std::string> ids = {};
@@ -191,6 +263,9 @@ std::list<std::string> TagList::values() {
 
 QString TagList::itemToString(QTreeWidgetItem* item) const {
     QString ret = item->data(1, Qt::UserRole).toString();
+    if (!item->data(1, Qt::UserRole+1).isNull() && item->data(1, Qt::UserRole+1).toBool()) {
+        ret += "*";
+    }
     if (item->childCount()) {
         switch (static_cast<Modifier>(item->data(0, Qt::UserRole).toInt())) {
         case Modifier::IF_THEN:
@@ -210,9 +285,6 @@ QString TagList::itemToString(QTreeWidgetItem* item) const {
             children.push_back(itemToString(item->child(i)));
         }
         ret += children.join(",") + ")";
-    }
-    else if (!item->data(1, Qt::UserRole+1).isNull()) {
-        ret += "*";
     }
     return ret;
 }

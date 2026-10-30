@@ -152,9 +152,9 @@ void TagEditor::save() {
     tag->setKey(ui->tagLabelEdit->text());
     tag->setDescription(updatedDescription);
     tag->setIcon(m_iconPath);
-    tag->setRelated(json(u_relatedList->values()));
-    tag->setRequired(json(u_requiredList->values()));
-    tag->setFrequent(json(u_frequentList->values()));
+    tag->setRelated(u_relatedList->values());
+    tag->setRequired(u_requiredList->values());
+    tag->setFrequent(u_frequentList->values());
 
     emit tagSaved(tag);
 }

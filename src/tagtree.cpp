@@ -214,7 +214,6 @@ QStringList TagTree::mimeTypes() const {
 void TagTree::dragMoveEvent(QDragMoveEvent *event) {
     QTreeWidget::dragMoveEvent(event);
     if (event->source() != this) event->ignore();
-
     int id = QVariant(event->mimeData()->data("application/x-tag-id")).toInt();
 
     QTreeWidgetItem *hoverItem = itemAt(event->position().toPoint());

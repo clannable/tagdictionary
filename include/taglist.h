@@ -26,6 +26,8 @@ public:
 
     void removeTag(int id);
     void setValues(nlohmann::json::array_t ids);
+    // void expandAll();
+
 signals:
     void tagRemoved();
 
@@ -38,6 +40,7 @@ protected:
     virtual QStringList mimeTypes() const override;
     virtual void dragEnterEvent(QDragEnterEvent* event) override;
     virtual void dropEvent(QDropEvent* event) override;
+    // virtual void drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 protected slots:
     void onItemDoubleClicked(QTreeWidgetItem* item);
@@ -45,6 +48,7 @@ protected slots:
 private:
     QString itemToString(QTreeWidgetItem* item) const;
     void insertChildTag(QTreeWidgetItem* item, QTreeWidgetItem* parent, Modifier mod, int index = -1);
+    void toggleIncludeSubtags(QTreeWidgetItem* item, bool checked);
     TokenParser* parser;
 };
 

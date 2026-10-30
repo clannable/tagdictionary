@@ -43,14 +43,19 @@ public:
     void addFile(string file);
 
     json::array_t related() const { return m_related; }
+    void setRelated(list<string> related);
     void setRelated(list<int> related);
+    void setRelated(json related);
 
     json::array_t required() const { return m_required; }
+    void setRequired(list<string> required);
     void setRequired(list<int> required);
+    void setRequired(json required);
 
     json::array_t frequent() const { return m_frequent; }
+    void setFrequent(list<string> frequent);
     void setFrequent(list<int> frequent);
-
+    void setFrequent(json frequent);
     void cleanSublists();
 
     list<TagNode*> children() const { return list<TagNode*>(m_children); }

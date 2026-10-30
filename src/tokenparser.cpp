@@ -7,7 +7,7 @@
 TokenParser::TokenParser() {}
 
 QTreeWidgetItem* TokenParser::parseString(QString value) {
-    for (const auto& match : QRegularExpression("^(\\d+([\\+\\|\\?]\\()?)|,|\\)").globalMatch(value)) {
+    for (const auto &match : QRegularExpression("(\\d+\\*?([\\+\\|\\?]\\()?)|,|\\)").globalMatch(value)) {
         tokens.enqueue(Token(match.captured(0)));
     }
 
@@ -18,9 +18,13 @@ QTreeWidgetItem* TokenParser::processToken(Token token) {
     QTreeWidgetItem* item = new QTreeWidgetItem();
     item->setData(1, Qt::UserRole, token.value);
     item->setData(0, Qt::UserRole, token.type);
-    item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
-    item->setExpanded(true);
+    item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicatorWhenChildless);
+    if (token.sub) {
+        item->setText(1, item->text(1)+"*");
+        item->setData(1, Qt::UserRole+1, true);
+    }
     TagNode* tag = TAGS[token.value];
+    if (tag == nullptr) return nullptr;
     item->setText(1, QString::fromStdString(tag->key()));
     QString icon = QString::fromStdString(tag->icon());
     if (QFileInfo::exists(icon) || icon.startsWith(":/icons/"))
@@ -35,6 +39,7 @@ QTreeWidgetItem* TokenParser::processToken(Token token) {
         Token nextToken;
         while ((nextToken = tokens.dequeue()).type != Token::END) {
             QTreeWidgetItem* child = processToken(nextToken);
+            if (child == nullptr) continue;
             switch (token.type) {
                 case Token::IF_THEN:
                     child->setIcon(0, QIcon(":/icons/linear/turn-down.png"));
@@ -45,15 +50,12 @@ QTreeWidgetItem* TokenParser::processToken(Token token) {
                 case Token::OR:
                     child->setText(0, "OR");
                     break;
-                case Token::SUB:
-                    child->setText(1, child->text(1)+"*");
-                    child->setData(1, Qt::UserRole+1, Token::SUB);
                 default:
                     break;
             }
             item->addChild(child);
         }
-
+        item->setExpanded(true);
     }
     return item;
 }

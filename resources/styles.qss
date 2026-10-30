@@ -120,6 +120,7 @@ TagList {
     border: 1px solid transparent;
     height: 107px;
     font: 350 10pt 'Segoe UI';
+
 }
 
 TagEditor QTextEdit QScrollBar:vertical, TagList QScrollbar:vertical{

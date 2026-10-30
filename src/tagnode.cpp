@@ -66,11 +66,27 @@ void TagNode::setIcon(QString icon) {
 void TagNode::setDescription(string description) { m_description = description; }
 void TagNode::setDescription(QString description) { m_description = description.toStdString(); }
 
-void TagNode::setRelated(list<int> related) { m_related = related; }
-
-void TagNode::setRequired(list<int> required) { m_required = required; }
-
-void TagNode::setFrequent(list<int> frequent) { m_frequent = frequent; }
+void TagNode::setRelated(list<string> related) { m_related = related; }
+void TagNode::setRelated(list<int> related) {
+    list<string> vals = {};
+    for (int i : related) vals.push_back(to_string(i));
+    m_related = json(vals);
+}
+void TagNode::setRelated(json related) { m_related = related; }
+void TagNode::setRequired(list<string> required) { m_required = required; }
+void TagNode::setRequired(list<int> required) {
+    list<string> vals = {};
+    for (int i : required) vals.push_back(to_string(i));
+    m_required = json(vals);
+}
+void TagNode::setRequired(json required) { m_required = required; }
+void TagNode::setFrequent(list<string> frequent) { m_frequent = frequent; }
+void TagNode::setFrequent(list<int> frequent) {
+    list<string> vals = {};
+    for (int i : frequent) vals.push_back(to_string(i));
+    m_frequent = json(vals);
+}
+void TagNode::setFrequent(json frequent) { m_frequent = frequent; }
 
 void TagNode::setFiles(list<string> files) { m_files = files; }
 void TagNode::setFiles(QStringList files) {
