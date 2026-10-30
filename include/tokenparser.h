@@ -15,26 +15,25 @@ struct Token {
     };
 
     bool sub = false;
-    int value;
+    int value = 0;
     TokenType type;
 
     Token() {}
     Token(QString str) {
-        if (str == ")") type = TokenType::END;
-        else {
-            if (str.contains("*")) {
-                value = str.left(str.indexOf("*")).toInt();
-                sub = true;
-            } else if (str.endsWith("(")) {
-                value = str.left(str.length()-2).toInt();
-                QChar bType = str[str.length()-2];
-                if (bType == "?") type = TokenType::IF_THEN;
-                else if (bType == "+") type = TokenType::AND;
-                else if (bType == "|") type = TokenType::OR;
-            } else {
-                value = str.toInt();
-                type = TokenType::NODE;
-            }
+        int ix = str.length();
+        if (str.endsWith("*")) {
+            ix--;
+            sub = true;
+        }
+        QChar fChar = str[0];
+        if (!fChar.isDigit()) {
+            value = str.sliced(1, ix-1).toInt();
+            if (fChar == "?") type = TokenType::IF_THEN;
+            else if (fChar == "+") type = TokenType::AND;
+            else if (fChar == "|") type = TokenType::OR;
+        } else {
+            value = str.sliced(0, ix).toInt();
+            type = TokenType::NODE;
         }
     }
 };

@@ -47,7 +47,7 @@ protected slots:
 
 private:
     QString itemToString(QTreeWidgetItem* item) const;
-    void insertChildTag(QTreeWidgetItem* item, QTreeWidgetItem* parent, Modifier mod, int index = -1);
+    void setModifier(QTreeWidgetItem* item, Modifier mod);
     void toggleIncludeSubtags(QTreeWidgetItem* item, bool checked);
     TokenParser* parser;
 };
