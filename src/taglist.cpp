@@ -32,7 +32,7 @@ TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
     setExpandsOnDoubleClick(false);
     header()->setSectionResizeMode(0, QHeaderView::Fixed);
     header()->setSectionResizeMode(1, QHeaderView::Stretch);
-    header()->resizeSection(0, 10);
+    header()->resizeSection(0, 5);
     connect(APP_STATE, &AppState::editModeChanged, this, &TagList::onEditModeChanged);
     connect(this, &QTreeWidget::itemDoubleClicked, this, &TagList::onItemDoubleClicked);
     parser = new TokenParser();
@@ -40,13 +40,17 @@ TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
 
 void TagList::setValues(nlohmann::json::array_t ids) {
     clear();
-    for (const auto& i : ids)
-        addTopLevelItem(parser->parseString(
+    setColumnHidden(0, true);
+    for (const auto& i : ids) {
+        QTreeWidgetItem* item = parser->parseString(
             i.type() == nlohmann::json::value_t::string
                 ? QString::fromStdString(i.get<std::string>())
-                : QString::number(i.get<int>()))
-        );
-    header()->resizeSection(0, 10);
+                : QString::number(i.get<int>()));
+        addTopLevelItem(item);
+        if (item->data(0, Qt::UserRole) != Modifier::NONE)
+            setColumnHidden(0, false);
+    }
+    header()->resizeSection(0, 5);
     expandAll();
     scrollToTop();
 }
@@ -58,7 +62,13 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
 
     QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
-    if (TAGS[item->data(1, Qt::UserRole).toInt()]->children().empty()) {
+    QMenu *mods = menu->addMenu("Set modifier");
+    mods->setAttribute(Qt::WA_DeleteOnClose);
+    connect(mods->addAction("None"), &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::NONE);  });
+    connect(mods->addAction("IF"), &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::IF_THEN);  });
+    connect(mods->addAction("AND"), &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::AND);  });
+    connect(mods->addAction("OR"), &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::OR);  });
+    if (!TAGS[item->data(1, Qt::UserRole).toInt()]->children().empty()) {
         QAction* toggleAction = menu->addAction("Include sub-tags");
         toggleAction->setCheckable(true);
         toggleAction->setChecked(item->data(1, Qt::UserRole+1).toBool());
@@ -116,6 +126,10 @@ void TagList::onItemDoubleClicked(QTreeWidgetItem* item) {
 
 void TagList::dropEvent(QDropEvent *event) {
     if (!APP_STATE->editModeEnabled()) return;
+    if (event->source() == this) {
+        QTreeWidget::dropEvent(event);
+        return;
+    }
     QTreeWidgetItem* item;
     int id = QVariant(event->mimeData()->data("application/x-tag-id")).toInt();
     if (event->mimeData()->hasFormat("application/x-tag-token")) {
@@ -125,78 +139,21 @@ void TagList::dropEvent(QDropEvent *event) {
         item->setData(1, Qt::UserRole, id);
         item->setIcon(1, QIcon(QString::fromStdString(TAGS[id]->icon())));
         item->setText(1, QString::fromStdString(TAGS[id]->key()));
-        item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicatorWhenChildless);
         item->setExpanded(true);
     }
     QTreeWidgetItem* dest = itemAt(event->position().toPoint());
 
+    int index;
+    if (dest != nullptr)
+        index = indexOfTopLevelItem(dest);
+    if (dropIndicatorPosition() == DropIndicatorPosition::BelowItem)
+        index += 1;
 
-    if (dropIndicatorPosition() == QAbstractItemView::OnItem) {
-        if (!dest->childCount() && dest->parent() == nullptr) {
-            QMenu contextMenu(this);
-            // event->acceptProposedAction();
-            contextMenu.setAttribute(Qt::WA_DeleteOnClose);
-            connect(&contextMenu, &QMenu::triggered, this, [this, item, id, dest, event](QAction *action) {
-                if (qobject_cast<TagList*>(event->source()) != nullptr)
-                    qobject_cast<TagList*>(event->source())->removeTag(id);
-                insertChildTag(item, dest, static_cast<Modifier>(action->data().toInt()));
-                expandAll();
-                // event->accept();
-            });
-            contextMenu.addAction("If -> then")->setData(Modifier::IF_THEN);
-            contextMenu.addAction("And")->setData(Modifier::AND);
-            contextMenu.addAction("Or")->setData(Modifier::OR);
-            contextMenu.exec(QCursor::pos());
-        } else {
-            if (event->source() == this)
-                QTreeWidget::dropEvent(event);
-            else
-                insertChildTag(item, dest, static_cast<Modifier>(dest->data(0, Qt::UserRole).toInt()));
-            expandAll();
-        }
-    } else {
-        int index;
-        if (event->source() == this)
-            QTreeWidget::dropEvent(event);
-        else if (dropIndicatorPosition() == QAbstractItemView::BelowItem || dropIndicatorPosition() == QAbstractItemView::AboveItem) {
-            {
-                if (dest->parent() == nullptr)
-                    index = this->indexOfTopLevelItem(dest);
-                else
-                    index = dest->parent()->indexOfChild(dest);
-                if (dropIndicatorPosition() == QAbstractItemView::BelowItem) index += 1;
-                if (dest->parent() != nullptr) {
-                    insertChildTag(item, dest->parent(), static_cast<Modifier>(dest->parent()->data(0, Qt::UserRole).toInt()), index);
-                    expandAll();
-                }
-                else
-                    insertTopLevelItem(index, item);
-            }
-        } else {
-            addTopLevelItem(item);
-        }
-        if (qobject_cast<TagList*>(event->source()) != nullptr && event->source() != this)
-            qobject_cast<TagList*>(event->source())->removeTag(id);
-    }
-    expandAll();
+    insertTopLevelItem(index, item);
+
+    if (dynamic_cast<TagList*>(event->source()) != nullptr)
+        dynamic_cast<TagList*>(event->source())->removeTag(id);
     // event->accept();
-}
-
-void TagList::insertChildTag(QTreeWidgetItem* item, QTreeWidgetItem* parent, Modifier mod, int index) {
-    if (mod == Modifier::IF_THEN) {
-        item->setIcon(0, QIcon(":/icons/linear/turn-down.png"));
-        item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicatorWhenChildless);
-        parent->setText(0, "IF");
-    }
-    else if (mod == Modifier::AND) item->setText(0, "AND");
-    else if (mod == Modifier::OR) item->setText(0, "OR");
-
-    parent->setData(0, Qt::UserRole, mod);
-    if (index == -1)
-        parent->addChild(item);
-    else
-        parent->insertChild(index, item);
-    parent->setExpanded(true);
 }
 
 void TagList::dragEnterEvent(QDragEnterEvent *event) {
@@ -234,6 +191,23 @@ void TagList::dragEnterEvent(QDragEnterEvent *event) {
     }
 }
 
+void TagList::setModifier(QTreeWidgetItem* item, Modifier mod) {
+    item->setData(0, Qt::UserRole, mod);
+    switch (mod) {
+    case Modifier::IF_THEN:
+        item->setText(0, "IF");
+        break;
+    case Modifier::AND:
+        item->setText(0, "AND");
+        break;
+    case Modifier::OR:
+        item->setText(0, "OR");
+        break;
+    default:
+        item->setText(0, "");
+        break;
+    }
+}
 // void TagList::expandAll() {
 //     QTreeWidgetItemIterator it(this);
 //     while (*it) {
@@ -266,25 +240,18 @@ QString TagList::itemToString(QTreeWidgetItem* item) const {
     if (!item->data(1, Qt::UserRole+1).isNull() && item->data(1, Qt::UserRole+1).toBool()) {
         ret += "*";
     }
-    if (item->childCount()) {
-        switch (static_cast<Modifier>(item->data(0, Qt::UserRole).toInt())) {
-        case Modifier::IF_THEN:
-            ret += "?(";
-            break;
-        case Modifier::AND:
-            ret += "+(";
-            break;
-        case Modifier::OR:
-            ret += "|(";
-            break;
-        default:
-            break;
-        }
-        QStringList children;
-        for (int i = 0; i < item->childCount(); i++) {
-            children.push_back(itemToString(item->child(i)));
-        }
-        ret += children.join(",") + ")";
+    switch (static_cast<Modifier>(item->data(0, Qt::UserRole).toInt())) {
+    case Modifier::IF_THEN:
+        ret = "?" + ret;
+        break;
+    case Modifier::AND:
+        ret = "+" + ret;
+        break;
+    case Modifier::OR:
+        ret = "|" + ret;
+        break;
+    default:
+        break;
     }
     return ret;
 }
