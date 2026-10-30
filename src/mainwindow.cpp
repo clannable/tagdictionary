@@ -86,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onEditorSave);
     connect(APP_STATE, &AppState::selectedTagUpdated, this, &MainWindow::onTagUpdate);
+    connect(APP_STATE, &AppState::selectedTagChanged, this, [this](TagNode* selectedTag) { this->a_icon->setEnabled(selectedTag != nullptr && !selectedTag->isRoot()); });
     connect(ui->tagEditor, &TagEditor::displayLinkClicked, ui->mediaDisplay, &MediaDisplay::setFile);
 
     m_searchDebounce = new QTimer(this);
@@ -143,6 +144,8 @@ void MainWindow::onEditorSave() {
 }
 
 void MainWindow::onTagUpdate() {
+    TagTreeItem* item = static_cast<TagTreeItem*>(APP_STATE->selectedTag()->leaf());
+    if (item != nullptr) item->refreshFileIcons();
     if (AUTOSAVE_ENABLED)
         saveJson();
 }
@@ -206,6 +209,7 @@ void MainWindow::reloadJson() {
     APP_STATE->setEditModeEnabled(false);
     APP_STATE->setSelectedTag(nullptr);
     ui->tagTree->clear();
+    ui->searchInput->clear();
     std::ifstream* f;
 
     try {

@@ -21,9 +21,6 @@ QDialog QPushButton {
     font-weight: 600;
 }
 
-QDialog QPushButton:enabled {
-    cursor: pointer;
-}
 QToolButton {
     width: 25px;
     height: 25px;
@@ -187,4 +184,44 @@ VideoPlayer QSlider#volumeSlider::handle:horizontal {
 VideoPlayer QSlider#progressSlider::handle:horizontal {
     width: 12px;
     margin: -8px 0;
+}
+
+FileNav #numbers QToolButton {
+    background: transparent;
+    border-color: #b1b1b1;
+    font-weight: 700;
+    border-radius: 13px;
+    height: 30px;
+}
+
+FileNav #numbers QToolButton::disabled {
+    background-color: rgba(74, 157, 208, 125);
+    border-color: rgba(74, 157, 208, 125);
+    color: black;
+}
+
+FileNav #numbers QToolButton::hover {
+    border-color: rgb(74, 157, 208);
+}
+
+FileNav #numbers QToolButton:pressed {
+    background-color: rgba(74, 157, 208, 125);
+}
+
+FileNav #previous, FileNav #next {
+    border-radius: 12px;
+    border-color: rgba(74, 157, 208, 125);
+    background-color: transparent;
+}
+
+FileNav #previous::disabled, FileNav #next::disabled {
+    border-color: #b1b1b1;
+}
+
+FileNav #previous::enabled::hover, FileNav #next::enabled::hover {
+    border-color: rgb(74, 157, 208);
+}
+
+FileNav #previous:pressed, FileNav #next:pressed {
+    background-color: rgba(74, 157, 208, 75);
 }

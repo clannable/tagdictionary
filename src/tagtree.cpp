@@ -168,7 +168,7 @@ void TagTree::onItemDoubleClicked(QTreeWidgetItem* item, int column) {
 }
 
 void TagTree::onItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* previous) { Q_UNUSED(previous);
-    if (APP_STATE->editModeEnabled()) return;
+    if (APP_STATE->editModeEnabled() || current == nullptr) return;
     APP_STATE->setSelectedTag(static_cast<TagTreeItem*>(current)->tag());
 }
 
