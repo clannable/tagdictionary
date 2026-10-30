@@ -14,7 +14,8 @@ QTreeWidgetItem* TokenParser::processToken(Token token) {
     QTreeWidgetItem* item = new QTreeWidgetItem();
     item->setData(1, Qt::UserRole, token.value);
     item->setData(0, Qt::UserRole, token.type);
-    // item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicatorWhenChildless);
+    item->setFlags(item->flags() & ~Qt::ItemIsDropEnabled);
+    item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
 
     TagNode* tag = TAGS[token.value];
     if (tag == nullptr) return nullptr;
