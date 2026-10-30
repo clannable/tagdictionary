@@ -7,14 +7,14 @@
 
 struct Token {
     enum TokenType {
-        NODE,
-        IF_THEN,
-        AND,
-        OR,
-        SUB,
-        END
+        NODE = 0,
+        IF_THEN = 1,
+        AND = 2,
+        OR = 3,
+        END = 5
     };
 
+    bool sub = false;
     int value;
     TokenType type;
 
@@ -22,12 +22,12 @@ struct Token {
     Token(QString str) {
         if (str == ")") type = TokenType::END;
         else {
-            if (str.endsWith("*")) {
-                value = str.left(str.length()-1).toInt();
-                type = TokenType::SUB;
+            if (str.contains("*")) {
+                value = str.left(str.indexOf("*")).toInt();
+                sub = true;
             } else if (str.endsWith("(")) {
                 value = str.left(str.length()-2).toInt();
-                QChar bType = str[str.length()-1];
+                QChar bType = str[str.length()-2];
                 if (bType == "?") type = TokenType::IF_THEN;
                 else if (bType == "+") type = TokenType::AND;
                 else if (bType == "|") type = TokenType::OR;
