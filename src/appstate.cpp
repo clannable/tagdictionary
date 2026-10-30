@@ -13,7 +13,7 @@ void AppState::setSelectedTag(TagNode* selectedTag) {
     if (m_selectedTag == selectedTag) return;
     if (m_selectedTag != nullptr && selectedTag != nullptr && *m_selectedTag == *selectedTag) return;
     m_selectedTag = selectedTag;
-    if (m_selectedTag->leaf() != nullptr)
+    if (m_selectedTag != nullptr && m_selectedTag->leaf() != nullptr)
         m_selectedTag->leaf()->setSelected(true);
     emit selectedTagChanged(selectedTag);
 }
