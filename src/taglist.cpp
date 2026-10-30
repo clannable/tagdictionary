@@ -27,12 +27,12 @@ TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
     setDefaultDropAction(Qt::MoveAction);
     setItemsExpandable(false);
     setAllColumnsShowFocus(true);
-    setIndentation(0);
+    setRootIsDecorated(false);
     setItemDelegateForColumn(0, new TagListDelegate());
     setExpandsOnDoubleClick(false);
     header()->setSectionResizeMode(0, QHeaderView::Fixed);
     header()->setSectionResizeMode(1, QHeaderView::Stretch);
-    header()->resizeSection(0, 5);
+    header()->resizeSection(0, 10);
     connect(APP_STATE, &AppState::editModeChanged, this, &TagList::onEditModeChanged);
     connect(this, &QTreeWidget::itemDoubleClicked, this, &TagList::onItemDoubleClicked);
     parser = new TokenParser();
@@ -50,7 +50,7 @@ void TagList::setValues(nlohmann::json::array_t ids) {
         if (item->data(0, Qt::UserRole) != Modifier::NONE)
             setColumnHidden(0, false);
     }
-    header()->resizeSection(0, 5);
+    header()->resizeSection(0, 10);
     expandAll();
     scrollToTop();
 }
@@ -73,8 +73,9 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
         toggleAction->setCheckable(true);
         toggleAction->setChecked(item->data(1, Qt::UserRole+1).toBool());
         connect(toggleAction, &QAction::toggled, this, [this, item](bool checked) { toggleIncludeSubtags(item, checked); });
-        menu->addSeparator();
+
     }
+    menu->addSeparator();
     connect(menu->addAction(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove), "Remove \""+item->text(1)+"\""), &QAction::triggered, this, [item] {
         if (item->parent() != nullptr && item->parent()->childCount() == 1) {
             item->parent()->setText(0, "");
@@ -109,10 +110,6 @@ void TagList::removeTag(int id) {
     QTreeWidgetItemIterator it(this);
     while (*it) {
         if ((*it)->data(1, Qt::UserRole) == id) {
-            if ((*it)->parent() != nullptr && (*it)->childCount() == 1) {
-                (*it)->parent()->setText(0, "");
-                (*it)->parent()->setData(0, Qt::UserRole, Modifier::NONE);
-            }
             delete *it;
             return;
         }
@@ -139,13 +136,15 @@ void TagList::dropEvent(QDropEvent *event) {
         item->setData(1, Qt::UserRole, id);
         item->setIcon(1, QIcon(QString::fromStdString(TAGS[id]->icon())));
         item->setText(1, QString::fromStdString(TAGS[id]->key()));
-        item->setExpanded(true);
+        item->setFlags(item->flags() & ~Qt::ItemIsDropEnabled);
     }
     QTreeWidgetItem* dest = itemAt(event->position().toPoint());
 
     int index;
     if (dest != nullptr)
         index = indexOfTopLevelItem(dest);
+    else
+        index = topLevelItemCount();
     if (dropIndicatorPosition() == DropIndicatorPosition::BelowItem)
         index += 1;
 
@@ -207,6 +206,7 @@ void TagList::setModifier(QTreeWidgetItem* item, Modifier mod) {
         item->setText(0, "");
         break;
     }
+    setColumnHidden(0, false);
 }
 // void TagList::expandAll() {
 //     QTreeWidgetItemIterator it(this);
