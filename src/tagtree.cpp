@@ -36,6 +36,7 @@ QTreeWidgetItem* TagTree::findTag(int tagId) {
 
 void TagTree::loadTags() {
     clear();
+    m_rootItem = nullptr;
     m_items.clear();
     if (m_rootNode != nullptr)
         delete m_rootNode;
@@ -43,7 +44,6 @@ void TagTree::loadTags() {
     m_rootNode = new TagNode();
     m_rootItem = new TagTreeItem(m_rootNode);
     addTopLevelItem(m_rootItem);
-    if (topLevelItemCount() != 0) removeItemWidget(m_rootItem, 0);
 
     for (const auto [id, tag] : TAGS)
         m_items[id] = new TagTreeItem(tag);

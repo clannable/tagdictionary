@@ -120,7 +120,7 @@ json TagNode::toJson() {
         { "required", m_required },
         { "frequent", m_frequent },
         { "files", m_files },
-        { "children", json::array() }
+        { "children", m_children }
     });
 }
 
