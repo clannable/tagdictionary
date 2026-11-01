@@ -82,7 +82,7 @@ void FileNav::clear() {
 
 }
 
-void FileNav::addFile(QString filePath) {
+int FileNav::addFile(QString filePath) {
     int nextIndex = numFiles;
     if (nextIndex > 0)
         nextButton->setEnabled(true);
@@ -107,4 +107,5 @@ void FileNav::addFile(QString filePath) {
     numContainer->layout()->addWidget(button);
     connect(button, &QToolButton::clicked, this, [this, button]() { emit fileSelected(numContainer->layout()->indexOf(button)); });
     numFiles++;
+    return nextIndex;
 }

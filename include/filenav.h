@@ -10,7 +10,7 @@ class FileNav : public QWidget
 public:
     explicit FileNav(QWidget *parent = nullptr);
 
-    void addFile(QString filePath);
+    int addFile(QString filePath);
     void setFiles(QStringList files);
     void clear();
 

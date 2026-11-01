@@ -1,8 +1,8 @@
 #ifndef NEWTAGDIALOG_H
 #define NEWTAGDIALOG_H
 #include <QDialog>
-#include "./tagnode.h"
-#include "./icondialog.h"
+#include "tagnode.h"
+#include "icondialog.h"
 
 namespace Ui {
 class NewTagDialog;
@@ -16,24 +16,22 @@ public:
     explicit NewTagDialog(QWidget *parent = nullptr);
     ~NewTagDialog();
 
-    void setTag(TagNode* node);
-
-public slots:
-    void onNameChange(QString text);
-    virtual void accept() override;
-    void onIconSelect();
-    void onIconUpdate(QString iconPath);
-    void resetIcon();
+    void setTag(int id);
 
 signals:
     void submit(TagNode* node);
 
+protected slots:
+    void onNameChange(QString text);
+    virtual void accept() override;
+    void selectIcon();
+    void updateIcon(QString iconPath);
+    void resetIcon();
 
 private:
     Ui::NewTagDialog *ui;
-    IconDialog* iconDialog;
-    QString iconPath;
-    QStringList invalidNames;
+    QString m_icon;
+    QStringList m_invalidNames;
 };
 
 #endif // NEWTAGDIALOG_H

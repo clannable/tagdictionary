@@ -14,6 +14,11 @@ public:
     void setTag(TagNode* tag);
 
     void refreshFileIcons();
+    void addChild(QTreeWidgetItem* child);
+    void removeChild(QTreeWidgetItem* child);
+
+public slots:
+    void refresh();
 
 private:
     TagNode* m_tag;

@@ -17,17 +17,19 @@ public:
     // ~TagTree();
     QTreeWidgetItem* findTag(int tagId);
 
-    void fromJson(nlohmann::json json);
+    void loadTags();
     json toJson();
 
 public slots:
 
-    void onCreateTag(TagTreeItem* item);
-    void onNewTag(TagTreeItem* srcItem, TagNode* node);
-    void onRemoveTag(TagTreeItem* item);
+    void newTag(int id = 0);
+    void addTag(int parentId, TagNode* node);
+    void onRemoveTag(int id);
 
     void expandTreeTo(QTreeWidgetItem* item);
     void filterTree(QString search);
+    void setCurrentTag(TagNode* tag);
+    void refreshTag(TagNode* tag);
 
 protected:
     virtual void contextMenuEvent(QContextMenuEvent* event) override;
@@ -45,12 +47,12 @@ signals:
 private:
     TagNode* m_rootNode = nullptr;
     TagTreeItem* m_rootItem = nullptr;
-
+    QMap<int, TagTreeItem*> m_items;
     void createChildren(TagTreeItem* item, TagNode *node);
     bool filterTags(QString search, QTreeWidgetItem *node);
     void resetTagVisibility();
 
-    void setExpandedRecursive(bool expanded, QTreeWidgetItem* root);
+    void collapseRecursive(QTreeWidgetItem* root);
 
 private slots:
     void onEditModeChanged(bool editModeEnabled);

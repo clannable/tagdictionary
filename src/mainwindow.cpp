@@ -76,7 +76,7 @@ MainWindow::MainWindow(QWidget *parent)
     a_newTag = new QAction("Create New Tag", this);
     a_icon = new QAction("Modify Icon", this);
     a_icon->setShortcut(QKeySequence(QKeyCombination(Qt::AltModifier, Qt::Key_I)));
-    connect(a_newTag, &QAction::triggered, ui->tagTree, [this] { ui->tagTree->onCreateTag(nullptr); });
+    connect(a_newTag, &QAction::triggered, ui->tagTree, &TagTree::newTag);
     connect(a_icon, &QAction::triggered, ui->tagEditor, &TagEditor::selectIcon);
     a_icon->setDisabled(true);
 
@@ -117,8 +117,8 @@ MainWindow::~MainWindow()
 /*---------  Tag Tree Slots ---------*/
 
 void MainWindow::onTagTreeChange() {
-    if (AUTOSAVE_ENABLED)
-        saveJson();
+    ui->tagEditor->cleanSublists();
+    if (AUTOSAVE_ENABLED) saveJson();
 }
 
 void MainWindow::onSearchChange() {
@@ -138,14 +138,14 @@ void MainWindow::onEditorSave() {
 
     ui->tagTree->sortItems(0, Qt::AscendingOrder);
     // ui->mediaDisplay->setFilesFromNode(tag);
-    ui->tagTree->setCurrentItem(APP_STATE->selectedTag()->leaf());
+
     APP_STATE->signalSelectedTagUpdated();
     APP_STATE->setEditModeEnabled(false);
 }
 
 void MainWindow::onTagUpdate() {
-    TagTreeItem* item = static_cast<TagTreeItem*>(APP_STATE->selectedTag()->leaf());
-    if (item != nullptr) item->refreshFileIcons();
+    ui->tagTree->setCurrentTag(APP_STATE->selectedTag());
+    ui->tagTree->refreshTag(APP_STATE->selectedTag());
     if (AUTOSAVE_ENABLED)
         saveJson();
 }
@@ -178,7 +178,12 @@ void MainWindow::newJson() {
 
 void MainWindow::saveJson() {
     if (m_jsonFilePath.isNull() || m_jsonFilePath.isEmpty()) return;
-    json tags = ui->tagTree->toJson();
+    // json tags = ui->tagTree->toJson();
+    json tags = json({{ "tags", json() }});
+    for (const auto [id, tag] : TAGS) {
+        if (id == 0 || tag == nullptr) continue;
+        tags["tags"][tag->key()] = tag->toJson();
+    }
     std::ofstream of(m_jsonFilePath.toStdString());
     if (!of.is_open()) {
         std::cout << "Failed to open output file\n" << std::flush;
@@ -206,9 +211,9 @@ void MainWindow::openJson() {
 
 void MainWindow::reloadJson() {
     if (m_jsonFilePath.isNull() || m_jsonFilePath.isEmpty()) return;
+    TAGS.clear();
     APP_STATE->setEditModeEnabled(false);
     APP_STATE->setSelectedTag(nullptr);
-    ui->tagTree->clear();
     ui->searchInput->clear();
     std::ifstream* f;
 
@@ -224,7 +229,18 @@ void MainWindow::reloadJson() {
         }
 
         json tags = json::parse(*f);
-        ui->tagTree->fromJson(tags);
+
+        for (const auto& [k, t] : tags["tags"].items()) {
+            TagNode* tag = new TagNode(t, k);
+            TAGS[tag->id()] = tag;
+        }
+        for (const auto [id, t] : TAGS) {
+            list<int> children = t->children();
+            for (auto itr = children.begin(); itr != children.end(); itr++)
+                if (TAGS.find(*itr) != TAGS.end())
+                   TAGS[*itr]->setParent(t);
+        }
+        ui->tagTree->loadTags();
         ui->tagTree->sortByColumn(0, Qt::AscendingOrder);
     } catch (std::exception e) {
         QMessageBox::critical(this, "An error has occurred", "Error loading dictionary");
