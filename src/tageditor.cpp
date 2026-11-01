@@ -141,6 +141,14 @@ void TagEditor::iconSelected(QString icon) {
     }
 }
 
+void TagEditor::cleanSublists() {
+    if (APP_STATE->selectedTag() != nullptr) {
+        u_relatedList->clean();
+        u_requiredList->clean();
+        u_frequentList->clean();
+    }
+}
+
 void TagEditor::save() {
     QIcon icon = QIcon(m_iconPath);
     ui->iconLabel->setPixmap(icon.pixmap(QSize(20,20)));

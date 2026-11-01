@@ -159,8 +159,8 @@ void MediaDisplay::insertFile(QString filePath) {
     else
         showFile(m_files.length()-1);
 
-    ui->fileNav->addFile(filePath);
-
+    int index = ui->fileNav->addFile(filePath);
+    ui->fileNav->setSelected(index);
     APP_STATE->selectedTag()->addFile(filePath.toStdString());
     APP_STATE->signalSelectedTagUpdated();
 }

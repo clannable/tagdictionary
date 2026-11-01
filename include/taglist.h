@@ -33,6 +33,7 @@ signals:
 
 public slots:
     void onEditModeChanged(bool editModeEnabled);
+    void clean();
 
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *event) override;

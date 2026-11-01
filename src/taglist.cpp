@@ -235,6 +235,14 @@ std::list<std::string> TagList::values() {
     return ids;
 }
 
+void TagList::clean() {
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        if (TAGS.find(topLevelItem(i)->data(1, Qt::UserRole).toInt()) == TAGS.end()) {
+            delete topLevelItem(i);
+            i--;
+        }
+    }
+}
 QString TagList::itemToString(QTreeWidgetItem* item) const {
     QString ret = item->data(1, Qt::UserRole).toString();
     if (!item->data(1, Qt::UserRole+1).isNull() && item->data(1, Qt::UserRole+1).toBool()) {

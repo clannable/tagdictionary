@@ -25,6 +25,7 @@ public slots:
     void iconSelected(QString icon);
     void setTag(TagNode *tag);
     void save();
+    void cleanSublists();
 
 private slots:
     void onAnchorClick(const QUrl &link);

@@ -19,8 +19,6 @@ public:
 
     static TagNode* createRoot(json data);
 
-    ~TagNode();
-
     bool isRoot() const;
 
     int id() const { return m_id; }
@@ -58,12 +56,12 @@ public:
     void setFrequent(json frequent);
     void cleanSublists();
 
-    list<TagNode*> children() const { return list<TagNode*>(m_children); }
-    void addChild(TagNode* child);
-    void removeChild(TagNode* child);
-    void insertChild(TagNode* child);
+    list<int> children() const { return m_children; }
+    void addChild(int id);
+    void removeChild(int id);
+    void insertChild(int id);
 
-    TagNode* parent() const;
+    TagNode* parent() const { return m_parent; }
     void setParent(TagNode* parent);
 
     // void convertSublistsToId();
@@ -72,8 +70,8 @@ public:
 
     json toJson();
 
-    QTreeWidgetItem* leaf() const { return m_leaf; }
-    void setLeaf(QTreeWidgetItem* leaf);
+    // QTreeWidgetItem* leaf() const { return m_leaf; }
+    // void setLeaf(QTreeWidgetItem* leaf);
 
     bool operator==(TagNode &rhs) const { return m_id == rhs.m_id; }
     bool operator!=(TagNode &rhs) const { return m_id != rhs.m_id; }
@@ -90,8 +88,13 @@ private:
 
     TagNode* m_parent = nullptr;
 
-    list<TagNode*> m_children = {};
-    QTreeWidgetItem* m_leaf = nullptr;
+    list<int> m_children = {};
+    // QTreeWidgetItem* m_leaf = nullptr;
+
+    static int parseId(string val) {
+        int ix = isdigit(val[0]) ? 0 : 1;
+        return stoi(val.substr(ix, val.length() - ix - (isdigit(val[val.length()-1]) ? 0 : 1)));
+    }
 };
 
 #endif // TAGNODE_H
