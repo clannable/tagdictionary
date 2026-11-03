@@ -84,14 +84,17 @@ void TagTree::refreshTag(TagNode* tag) {
 }
 
 void TagTree::addTag(int parentId, TagNode *tag) {
-    ICON_LIST->push_back(tag->icon());
-    ICON_LIST->sort();
-    ICON_LIST->unique();
+    if (!tag->icon().empty()) {
+        ICON_LIST->push_back(tag->icon());
+        ICON_LIST->sort();
+        ICON_LIST->unique();
+    }
 
-    if (parentId != 0)
-        m_items[parentId]->addChild(new TagTreeItem(tag));
+    m_items[tag->id()] = new TagTreeItem(tag);
+    if (parentId > 0)
+        m_items[parentId]->addChild(m_items[tag->id()]);
     else
-        m_rootItem->addChild(new TagTreeItem(tag));
+        m_rootItem->addChild(m_items[tag->id()]);
 
     sortItems(0, Qt::AscendingOrder);
     emit tagsChanged();
