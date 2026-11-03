@@ -10,16 +10,18 @@
 #include <QHeaderView>
 
 TagTree::TagTree(QWidget* parent) : QTreeWidget(parent) {
+    setExpandsOnDoubleClick(true);
+    header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    header()->setSectionResizeMode(1, QHeaderView::Fixed);
+    header()->setSectionResizeMode(2, QHeaderView::Fixed);
+    header()->resizeSection(1, 20);
+    header()->resizeSection(2, 20);
+
     connect(addAction("Expand All Tags"), &QAction::triggered, this, &QTreeView::expandAll);
     connect(addAction("Collapse All Tags"), &QAction::triggered, this, &QTreeView::collapseAll);
 
-    this->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    this->header()->setSectionResizeMode(1, QHeaderView::Fixed);
-    this->header()->setSectionResizeMode(2, QHeaderView::Fixed);
-    this->header()->resizeSection(1, 20);
-    this->header()->resizeSection(2, 20);
     connect(this, &QTreeWidget::currentItemChanged, this, &TagTree::onItemSelected);
-    connect(this, &QTreeWidget::itemDoubleClicked, this, &TagTree::onItemDoubleClicked);
+    // connect(this, &QTreeWidget::itemDoubleClicked, this, &TagTree::onItemDoubleClicked);
     connect(APP_STATE, &AppState::editModeChanged, this, &TagTree::onEditModeChanged);
 }
 
@@ -242,7 +244,10 @@ void TagTree::dragMoveEvent(QDragMoveEvent *event) {
 }
 
 void TagTree::setCurrentTag(TagNode* tag) {
-    setCurrentItem(m_items[tag->id()]);
+    if (this->currentItem()->data(0, Qt::UserRole).toInt() != tag->id()) {
+        expandTreeTo(m_items[tag->id()]);
+        setCurrentItem(m_items[tag->id()]);
+    }
 }
 
 void TagTree::contextMenuEvent(QContextMenuEvent *event) {

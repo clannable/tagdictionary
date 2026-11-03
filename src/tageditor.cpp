@@ -53,7 +53,7 @@ void TagEditor::setTag(TagNode *tag) {
         ui->description->show();
         return;
     }
-    else if (tag->isRoot()) {
+    else if (tag->id() == -1) {
         ui->listContainer->hide();
         ui->tagLabelEdit->setText("");
         ui->editButton->setEnabled(false);

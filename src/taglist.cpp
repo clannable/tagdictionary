@@ -131,6 +131,8 @@ void TagList::dropEvent(QDropEvent *event) {
     int id = QVariant(event->mimeData()->data("application/x-tag-id")).toInt();
     if (event->mimeData()->hasFormat("application/x-tag-token")) {
         item = parser->parseString(QVariant(event->mimeData()->data("application/x-tag-token")).toString());
+        if (!item->text(0).isNull())
+            setColumnHidden(0, false);
     } else {
         item = new QTreeWidgetItem();
         item->setData(1, Qt::UserRole, id);
