@@ -20,7 +20,6 @@ TagNode::TagNode(json data, string key) : m_key(key) {
     } else {
         m_id = NEXT_TAG_ID++;
     }
-    TAGS[m_id] = this;
 
     setDescription(data.value("description", ""));
     setIcon(data.value("icon", ""));
@@ -30,6 +29,8 @@ TagNode::TagNode(json data, string key) : m_key(key) {
     setFiles(data.value("files", list<string>()));
     m_children = data.value("children", list<int>());
     setReplacesParent(data.value<bool>("replacesParent", false));
+
+    TAGS[m_id] = this;
 }
 
 bool TagNode::isRoot() const { return m_parent == nullptr; }
