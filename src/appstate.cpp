@@ -17,7 +17,7 @@ void AppState::setSelectedTag(TagNode* selectedTag) {
 }
 
 bool AppState::isSelectedTagEditable()  {
-    return !(m_selectedTag == nullptr || m_selectedTag->isRoot());
+    return !(m_selectedTag == nullptr || m_selectedTag->id() <= 0);
 }
 
 void AppState::toggleEditMode() {
