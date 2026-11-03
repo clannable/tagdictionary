@@ -36,27 +36,5 @@ QTreeWidgetItem* TokenParser::processToken(Token token) {
         item->setText(0, "AND");
     else if (token.type == Token::OR)
         item->setText(0, "OR");
-    // if (token.type != Token::NODE) {
-    //     Token nextToken;
-    //     while ((nextToken = tokens.dequeue()).type != Token::END) {
-    //         QTreeWidgetItem* child = processToken(nextToken);
-    //         if (child == nullptr) continue;
-    //         switch (token.type) {
-    //             case Token::IF_THEN:
-    //                 child->setIcon(0, QIcon(":/icons/linear/turn-down.png"));
-    //                 break;
-    //             case Token::AND:
-    //                 child->setText(0, "AND");
-    //                 break;
-    //             case Token::OR:
-    //                 child->setText(0, "OR");
-    //                 break;
-    //             default:
-    //                 break;
-    //         }
-    //         item->addChild(child);
-    //     }
-    //     item->setExpanded(true);
-    // }
     return item;
 }
