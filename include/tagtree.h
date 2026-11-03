@@ -14,7 +14,6 @@ class TagTree : public QTreeWidget
 
 public:
     TagTree(QWidget* parent);
-    // ~TagTree();
     QTreeWidgetItem* findTag(int tagId);
 
     void loadTags();

@@ -95,12 +95,10 @@ int FileNav::addFile(QString filePath) {
     else if (std::regex_search(filePath.toStdString(), videoRegex))
         icon = ":/icons/linear/video.png";
 
-    // FileNavButton* button = new FileNavButton(nextIndex+1, icon);
     QToolButton* button = new QToolButton();
     button->setText(QString::number(nextIndex+1));
     button->setIcon(QIcon(icon));
     button->setCursor(Qt::PointingHandCursor);
-    // button->setLayoutDirection(Qt::RightToLeft);
     button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     button->setToolTip(filePath);
     button->setEnabled(currentFile != nextIndex);

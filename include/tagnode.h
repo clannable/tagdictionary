@@ -73,9 +73,6 @@ public:
 
     json toJson();
 
-    // QTreeWidgetItem* leaf() const { return m_leaf; }
-    // void setLeaf(QTreeWidgetItem* leaf);
-
     bool operator==(TagNode &rhs) const { return m_id == rhs.m_id; }
     bool operator!=(TagNode &rhs) const { return m_id != rhs.m_id; }
 
@@ -93,7 +90,6 @@ private:
     bool m_replacesParent = false;
 
     list<int> m_children = {};
-    // QTreeWidgetItem* m_leaf = nullptr;
 
     static int parseId(string val) {
         int ix = isdigit(val[0]) ? 0 : 1;

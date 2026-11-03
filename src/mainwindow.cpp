@@ -178,7 +178,6 @@ void MainWindow::newJson() {
 
 void MainWindow::saveJson() {
     if (m_jsonFilePath.isNull() || m_jsonFilePath.isEmpty()) return;
-    // json tags = ui->tagTree->toJson();
     json tags = json({{ "tags", json() }});
     for (const auto [id, tag] : TAGS) {
         if (id == 0 || tag == nullptr) continue;

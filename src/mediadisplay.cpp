@@ -18,10 +18,7 @@ MediaDisplay::MediaDisplay(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // connect(ui->prevButton, &QPushButton::clicked, this, [this] { showFile(--m_currentPage); });
-    // connect(ui->nextButton, &QPushButton::clicked, this, [this] { showFile(++m_currentPage); });
     connect(ui->openButton, &QToolButton::clicked, this, &MediaDisplay::openFile);
-
     connect(ui->addFileButton, &QToolButton::clicked, this, &MediaDisplay::addFile);
     connect(ui->fileNav, &FileNav::fileSelected, this, &MediaDisplay::setFile);
     connect(APP_STATE, &AppState::selectedTagChanged, this, &MediaDisplay::refresh);
@@ -113,8 +110,6 @@ void MediaDisplay::showFile(int index) {
         }
 
         ui->fileCounter->setText(QString::number(m_currentPage+1) + " / " + QString::number(m_files.length()));
-        // ui->prevButton->setEnabled(m_currentPage > 0);
-        // ui->nextButton->setEnabled(m_currentPage < m_files.length()-1);
     }
     if (u_displayWidget != nullptr)
         ui->viewportLayout->insertWidget(0, u_displayWidget, 1);

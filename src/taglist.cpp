@@ -81,7 +81,6 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
         toggleAction->setCheckable(true);
         toggleAction->setChecked(item->data(1, Qt::UserRole+1).toBool());
         connect(toggleAction, &QAction::toggled, this, [this, item](bool checked) { toggleIncludeSubtags(item, checked); });
-
     }
     menu->addSeparator();
     connect(menu->addAction(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove), "Remove \""+item->text(1)+"\""), &QAction::triggered, this, [item] {
@@ -162,7 +161,6 @@ void TagList::dropEvent(QDropEvent *event) {
 
     if (dynamic_cast<TagList*>(event->source()) != nullptr)
         dynamic_cast<TagList*>(event->source())->removeTag(id);
-    // event->accept();
 }
 
 void TagList::dragEnterEvent(QDragEnterEvent *event) {
@@ -223,23 +221,6 @@ void TagList::setModifier(QTreeWidgetItem* item, Modifier mod) {
     }
     setColumnHidden(0, false);
 }
-// void TagList::expandAll() {
-//     QTreeWidgetItemIterator it(this);
-//     while (*it) {
-//         (*it)->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
-//         (*it)->setExpanded(true);
-//         (*it)->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
-//         ++it;
-//     }
-// }
-
-// void TagList::drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
-//     QTreeWidget::drawRow(painter, option, index);
-//     if (index.parent().isValid() && !index.siblingAtRow(index.row()+1).isValid()) {
-//         painter->setPen(Qt::DashLine);
-//         painter->drawLine(option.widget->rect().bottomLeft(), option.widget->rect().bottomRight());
-//     }
-// }
 
 std::list<std::string> TagList::values() {
     std::list<std::string> ids = {};

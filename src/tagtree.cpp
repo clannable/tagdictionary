@@ -21,7 +21,6 @@ TagTree::TagTree(QWidget* parent) : QTreeWidget(parent) {
     connect(addAction("Collapse All Tags"), &QAction::triggered, this, &QTreeView::collapseAll);
 
     connect(this, &QTreeWidget::currentItemChanged, this, &TagTree::onItemSelected);
-    // connect(this, &QTreeWidget::itemDoubleClicked, this, &TagTree::onItemDoubleClicked);
     connect(APP_STATE, &AppState::editModeChanged, this, &TagTree::onEditModeChanged);
 }
 
