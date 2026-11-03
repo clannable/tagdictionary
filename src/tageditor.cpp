@@ -44,7 +44,6 @@ TagEditor::~TagEditor()
 void TagEditor::setTag(TagNode *tag) {
 
     if (tag == nullptr) {
-        ui->replaceWidget->hide();
         ui->listContainer->hide();
         ui->editButton->setEnabled(false);
         ui->tagLabelEdit->setText("");
@@ -54,8 +53,7 @@ void TagEditor::setTag(TagNode *tag) {
         ui->description->show();
         return;
     }
-    else if (tag->isRoot()) {
-        ui->replaceWidget->hide();
+    else if (tag->id() == -1) {
         ui->listContainer->hide();
         ui->tagLabelEdit->setText("");
         ui->editButton->setEnabled(false);
