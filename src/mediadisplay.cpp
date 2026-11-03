@@ -36,12 +36,12 @@ MediaDisplay::~MediaDisplay()
 void MediaDisplay::refresh() {
     m_currentPage = 0;
     m_files.clear();
-    ui->addFileButton->setEnabled(APP_STATE->selectedTag() != nullptr && !APP_STATE->selectedTag()->isRoot());
+    ui->addFileButton->setEnabled(APP_STATE->selectedTag() != nullptr && APP_STATE->selectedTag()->id() > 0);
     if (APP_STATE->selectedTag() != nullptr) {
         for (const std::string &file : APP_STATE->selectedTag()->files())
             m_files.append(QString::fromStdString(file));
     }
-    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->isRoot())
+    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->id() <= 0)
         ui->fileNav->hide();
     else
         ui->fileNav->show();

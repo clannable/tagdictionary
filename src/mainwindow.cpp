@@ -86,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onEditorSave);
     connect(APP_STATE, &AppState::selectedTagUpdated, this, &MainWindow::onTagUpdate);
-    connect(APP_STATE, &AppState::selectedTagChanged, this, [this](TagNode* selectedTag) { this->a_icon->setEnabled(selectedTag != nullptr && !selectedTag->isRoot()); });
+    connect(APP_STATE, &AppState::selectedTagChanged, this, [this](TagNode* selectedTag) { this->a_icon->setEnabled(selectedTag != nullptr && !selectedTag->id() > 0); });
     connect(ui->tagEditor, &TagEditor::displayLinkClicked, ui->mediaDisplay, &MediaDisplay::setFile);
 
     m_searchDebounce = new QTimer(this);
@@ -232,6 +232,8 @@ void MainWindow::reloadJson() {
 
         for (const auto& [k, t] : tags["tags"].items()) {
             TagNode* tag = new TagNode(t, k);
+            if (!tag->icon().empty())
+                ICON_LIST->push_back(tag->icon());
             TAGS[tag->id()] = tag;
         }
         for (const auto [id, t] : TAGS) {
@@ -240,6 +242,8 @@ void MainWindow::reloadJson() {
                 if (TAGS.find(*itr) != TAGS.end())
                    TAGS[*itr]->setParent(t);
         }
+        ICON_LIST->sort();
+        ICON_LIST->unique();
         ui->tagTree->loadTags();
         ui->tagTree->sortByColumn(0, Qt::AscendingOrder);
     } catch (std::exception e) {
