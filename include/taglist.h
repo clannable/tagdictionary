@@ -8,16 +8,16 @@
 #include <QTreeWidget>
 #include "tokenparser.h"
 
+enum Modifier {
+    NONE = 0,
+    IF_THEN = 1,
+    AND = 2,
+    OR = 3,
+    SUB = 4,
+};
+
 class TagList : public QTreeWidget
 {
-    enum Modifier {
-        NONE = 0,
-        IF_THEN = 1,
-        AND = 2,
-        OR = 3,
-        SUB = 4,
-    };
-
     Q_OBJECT
 
 public:

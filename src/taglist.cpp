@@ -62,12 +62,20 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
 
     QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
-    QMenu *mods = menu->addMenu("Set modifier");
-    mods->setAttribute(Qt::WA_DeleteOnClose);
-    connect(mods->addAction("None"), &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::NONE);  });
-    connect(mods->addAction("IF"), &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::IF_THEN);  });
-    connect(mods->addAction("AND"), &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::AND);  });
-    connect(mods->addAction("OR"), &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::OR);  });
+    Modifier mod = static_cast<Modifier>(item->data(0, Qt::UserRole).toInt());
+    QAction* a_if = menu->addAction("IF");
+    a_if->setCheckable(true);
+    a_if->setChecked(mod == Modifier::IF_THEN);
+    connect(a_if, &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::IF_THEN);  });
+    QAction* a_and = menu->addAction("AND");
+    a_and->setCheckable(true);
+    a_and->setChecked(mod == Modifier::AND);
+    connect(a_and, &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::AND);  });
+    QAction* a_or = menu->addAction("OR");
+    a_or->setCheckable(true);
+    a_or->setChecked(mod == Modifier::OR);
+    connect(a_or, &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::OR);  });
+
     if (!TAGS[item->data(1, Qt::UserRole).toInt()]->children().empty()) {
         QAction* toggleAction = menu->addAction("Include sub-tags");
         toggleAction->setCheckable(true);
@@ -193,6 +201,11 @@ void TagList::dragEnterEvent(QDragEnterEvent *event) {
 }
 
 void TagList::setModifier(QTreeWidgetItem* item, Modifier mod) {
+    if (mod == static_cast<Modifier>(item->data(0, Qt::UserRole).toInt())) {
+        item->setData(0, Qt::UserRole, Modifier::NONE);
+        item->setText(0, "");
+        return;
+    }
     item->setData(0, Qt::UserRole, mod);
     switch (mod) {
     case Modifier::IF_THEN:
