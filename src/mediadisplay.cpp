@@ -151,11 +151,11 @@ void MediaDisplay::insertFile(QString filePath) {
     m_files.append(filePath);
     if (APP_STATE->editModeEnabled())
         static_cast<FileListWidget*>(u_displayWidget)->addFile(filePath);
-    else
+    else {
         showFile(m_files.length()-1);
+        ui->fileNav->setSelected(ui->fileNav->addFile(filePath));
+    }
 
-    int index = ui->fileNav->addFile(filePath);
-    ui->fileNav->setSelected(index);
     APP_STATE->selectedTag()->addFile(filePath.toStdString());
     APP_STATE->signalSelectedTagUpdated();
 }

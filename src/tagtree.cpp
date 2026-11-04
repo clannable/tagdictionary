@@ -115,7 +115,8 @@ void TagTree::onRemoveTag(int id) {
             APP_STATE->setSelectedTag(nullptr);
         }
         TagNode* tag = TAGS[id];
-        tag->parent()->removeChild(id);
+        tag->setParent(nullptr);
+        TAGS.erase(id);
         delete tag;
         delete m_items[id];
         m_items.remove(id);

@@ -46,9 +46,11 @@ void TagList::setValues(nlohmann::json::array_t ids) {
             i.type() == nlohmann::json::value_t::string
                 ? QString::fromStdString(i.get<std::string>())
                 : QString::number(i.get<int>()));
-        addTopLevelItem(item);
-        if (item->data(0, Qt::UserRole) != Modifier::NONE)
-            setColumnHidden(0, false);
+        if (item != nullptr) {
+            addTopLevelItem(item);
+            if (item->data(0, Qt::UserRole).toInt() != Modifier::NONE)
+                setColumnHidden(0, false);
+        }
     }
     header()->resizeSection(0, 10);
     expandAll();

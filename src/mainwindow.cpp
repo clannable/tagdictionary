@@ -180,7 +180,7 @@ void MainWindow::saveJson() {
     if (m_jsonFilePath.isNull() || m_jsonFilePath.isEmpty()) return;
     json tags = json({{ "tags", json() }});
     for (const auto [id, tag] : TAGS) {
-        if (id == 0 || tag == nullptr) continue;
+        if (id <= 0 || tag == nullptr) continue;
         tags["tags"][tag->key()] = tag->toJson();
     }
     std::ofstream of(m_jsonFilePath.toStdString());
