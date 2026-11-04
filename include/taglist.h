@@ -10,10 +10,10 @@
 
 enum Modifier {
     NONE = 0,
-    IF_THEN = 1,
+    IF = 1,
     AND = 2,
     OR = 3,
-    SUB = 4,
+    THEN = 4,
 };
 
 class TagList : public QTreeWidget
@@ -41,6 +41,7 @@ protected:
     virtual QStringList mimeTypes() const override;
     virtual void dragEnterEvent(QDragEnterEvent* event) override;
     virtual void dropEvent(QDropEvent* event) override;
+    virtual void drawRow(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 protected slots:
     void onItemDoubleClicked(QTreeWidgetItem* item);
