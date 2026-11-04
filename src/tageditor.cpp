@@ -12,7 +12,6 @@ TagEditor::TagEditor(QWidget *parent)
     ui->iconButton->hide();
     ui->descriptionEditor->hide();
     ui->tagLabelEdit->setText("");
-    ui->replaceWidget->hide();
 
     u_relatedList = new TagList();
     u_requiredList = new TagList();

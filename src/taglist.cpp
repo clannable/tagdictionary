@@ -1,13 +1,13 @@
 #include "taglist.h"
-#include <QMenu>
 #include "globals.h"
-#include <QFileInfo>
-#include <qmimedata.h>
 #include "tagtree.h"
+#include <QMenu>
+#include <QFileInfo>
+#include <QMimeData>
 #include <QRegularExpression>
 #include <QHeaderView>
 #include <QStyledItemDelegate>
-#include <QPainter>
+#include <QActionGroup>
 
 class TagListDelegate : public QStyledItemDelegate {
 protected:
@@ -35,14 +35,36 @@ TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
     header()->resizeSection(0, 10);
     connect(APP_STATE, &AppState::editModeChanged, this, &TagList::onEditModeChanged);
     connect(this, &QTreeWidget::itemDoubleClicked, this, &TagList::onItemDoubleClicked);
-    parser = new TokenParser();
+
+    QActionGroup* mods = new QActionGroup(this);
+    QAction* a_if = new QAction("IF", mods);
+    a_if->setCheckable(true);
+    a_if->setData(Modifier::IF_THEN);
+    addAction(a_if);
+    QAction* a_and = new QAction("AND", mods);
+    a_and->setCheckable(true);
+    a_and->setData(Modifier::AND);
+    addAction(a_and);
+    QAction* a_or = new QAction("OR", mods);
+    a_or->setCheckable(true);
+    a_or->setData(Modifier::OR);
+    addAction(a_or);
+
+    connect(mods, &QActionGroup::triggered, this, [this](QAction* action) {
+        this->setModifier(m_contextItem, static_cast<Modifier>(action->data().toInt()));
+    });
+
+    QAction* toggleAction = addAction("Include sub-tags");
+    toggleAction->setCheckable(true);
+    connect(toggleAction, &QAction::toggled, this, [this](bool checked) { toggleIncludeSubtags(m_contextItem, checked); });
+    connect(addAction("Remove item"), &QAction::triggered, this, [this]() { removeItem(m_contextItem); });
 }
 
 void TagList::setValues(nlohmann::json::array_t ids) {
     clear();
     setColumnHidden(0, true);
     for (const auto& i : ids) {
-        QTreeWidgetItem* item = parser->parseString(
+        QTreeWidgetItem* item = TokenParser::parseString(
             i.type() == nlohmann::json::value_t::string
                 ? QString::fromStdString(i.get<std::string>())
                 : QString::number(i.get<int>()));
@@ -59,41 +81,30 @@ void TagList::setValues(nlohmann::json::array_t ids) {
 
 void TagList::contextMenuEvent(QContextMenuEvent *event) {
     if (!APP_STATE->editModeEnabled()) return;
-    QTreeWidgetItem *item = this->itemAt(event->pos());
-    if (item == nullptr) return;
+    if ((m_contextItem = this->itemAt(event->pos())) == nullptr) return;
 
     QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
-    Modifier mod = static_cast<Modifier>(item->data(0, Qt::UserRole).toInt());
-    QAction* a_if = menu->addAction("IF");
-    a_if->setCheckable(true);
-    a_if->setChecked(mod == Modifier::IF_THEN);
-    connect(a_if, &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::IF_THEN);  });
-    QAction* a_and = menu->addAction("AND");
-    a_and->setCheckable(true);
-    a_and->setChecked(mod == Modifier::AND);
-    connect(a_and, &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::AND);  });
-    QAction* a_or = menu->addAction("OR");
-    a_or->setCheckable(true);
-    a_or->setChecked(mod == Modifier::OR);
-    connect(a_or, &QAction::triggered, this, [this, item]() { setModifier(item, Modifier::OR);  });
-
-    if (!TAGS[item->data(1, Qt::UserRole).toInt()]->children().empty()) {
-        QAction* toggleAction = menu->addAction("Include sub-tags");
-        toggleAction->setCheckable(true);
-        toggleAction->setChecked(item->data(1, Qt::UserRole+1).toBool());
-        connect(toggleAction, &QAction::toggled, this, [this, item](bool checked) { toggleIncludeSubtags(item, checked); });
-    }
-    menu->addSeparator();
-    connect(menu->addAction(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove), "Remove \""+item->text(1)+"\""), &QAction::triggered, this, [item] {
-        if (item->parent() != nullptr && item->parent()->childCount() == 1) {
-            item->parent()->setText(0, "");
-            item->parent()->setData(0, Qt::UserRole, Modifier::NONE);
-        }
-        delete item;
-    });
-
+    Modifier mod = static_cast<Modifier>(m_contextItem->data(0, Qt::UserRole).toInt());
+    int id = m_contextItem->data(1, Qt::UserRole).toInt();
+    QList<QAction*> mod_actions = actions();
+    mod_actions[0]->setChecked(mod == Modifier::IF_THEN);
+    mod_actions[1]->setChecked(mod == Modifier::AND);
+    mod_actions[2]->setChecked(mod == Modifier::OR);
+    mod_actions[3]->setChecked(m_contextItem->data(1, Qt::UserRole+1).toBool());
+    mod_actions[3]->setEnabled(!TAGS[id]->children().empty());
+    mod_actions[4]->setText("Remove \"" + QString::fromStdString(TAGS[id]->key()) + "\"");
+    menu->addActions(mod_actions);
+    menu->insertSeparator(mod_actions[4]);
     menu->exec(QCursor::pos());
+}
+
+void TagList::removeItem(QTreeWidgetItem* item) {
+    if (item->parent() != nullptr && item->parent()->childCount() == 1) {
+        item->parent()->setText(0, "");
+        item->parent()->setData(0, Qt::UserRole, Modifier::NONE);
+    }
+    delete item;
 }
 
 void TagList::toggleIncludeSubtags(QTreeWidgetItem* item, bool checked) {
@@ -124,6 +135,20 @@ void TagList::removeTag(int id) {
         }
         ++it;
     }
+    checkModifiers();
+}
+
+void TagList::checkModifiers() {
+    QTreeWidgetItemIterator it(this);
+
+    while(*it) {
+        if ((*it)->data(0, Qt::UserRole).toInt() != 0) {
+            setColumnHidden(0, false);
+            return;
+        }
+        it++;
+    }
+    setColumnHidden(0, true);
 }
 
 void TagList::onItemDoubleClicked(QTreeWidgetItem* item) {
@@ -139,7 +164,7 @@ void TagList::dropEvent(QDropEvent *event) {
     QTreeWidgetItem* item;
     int id = QVariant(event->mimeData()->data("application/x-tag-id")).toInt();
     if (event->mimeData()->hasFormat("application/x-tag-token")) {
-        item = parser->parseString(QVariant(event->mimeData()->data("application/x-tag-token")).toString());
+        item = TokenParser::parseString(QVariant(event->mimeData()->data("application/x-tag-token")).toString());
         if (!item->text(0).isNull())
             setColumnHidden(0, false);
     } else {
@@ -202,26 +227,26 @@ void TagList::dragEnterEvent(QDragEnterEvent *event) {
 
 void TagList::setModifier(QTreeWidgetItem* item, Modifier mod) {
     if (mod == static_cast<Modifier>(item->data(0, Qt::UserRole).toInt())) {
-        item->setData(0, Qt::UserRole, Modifier::NONE);
+        item->setData(0, Qt::UserRole, 0);
         item->setText(0, "");
-        return;
+    } else {
+        item->setData(0, Qt::UserRole, mod);
+        switch (mod) {
+        case Modifier::IF_THEN:
+            item->setText(0, "IF");
+            break;
+        case Modifier::AND:
+            item->setText(0, "AND");
+            break;
+        case Modifier::OR:
+            item->setText(0, "OR");
+            break;
+        default:
+            item->setText(0, "");
+            break;
+        }
     }
-    item->setData(0, Qt::UserRole, mod);
-    switch (mod) {
-    case Modifier::IF_THEN:
-        item->setText(0, "IF");
-        break;
-    case Modifier::AND:
-        item->setText(0, "AND");
-        break;
-    case Modifier::OR:
-        item->setText(0, "OR");
-        break;
-    default:
-        item->setText(0, "");
-        break;
-    }
-    setColumnHidden(0, false);
+    checkModifiers();
 }
 
 std::list<std::string> TagList::values() {
