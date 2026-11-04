@@ -32,6 +32,7 @@ signals:
 
 public slots:
     void onEditModeChanged(bool editModeEnabled);
+    void removeItem(QTreeWidgetItem* item);
     void clean();
 
 protected:
@@ -48,7 +49,9 @@ private:
     QString itemToString(QTreeWidgetItem* item) const;
     void setModifier(QTreeWidgetItem* item, Modifier mod);
     void toggleIncludeSubtags(QTreeWidgetItem* item, bool checked);
-    TokenParser* parser;
+    void checkModifiers();
+
+    QTreeWidgetItem* m_contextItem = nullptr;
 };
 
 #endif // TAGLIST_H

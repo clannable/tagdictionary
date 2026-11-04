@@ -13,7 +13,6 @@ TagEditor::TagEditor(QWidget *parent)
     ui->descriptionEditor->hide();
     ui->tagLabelEdit->setText("");
 
-
     u_relatedList = new TagList();
     u_requiredList = new TagList();
     u_frequentList = new TagList();

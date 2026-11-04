@@ -43,13 +43,7 @@ class TokenParser
 
 public:
     TokenParser();
-    QTreeWidgetItem* parseString(QString value);
-    QTreeWidgetItem* processToken(Token token);
-
-private:
-    QQueue<Token> tokens;
-
-    void splitTokens(QString value);
+    static QTreeWidgetItem* parseString(QString value);
 };
 
 #endif // TOKENPARSER_H
