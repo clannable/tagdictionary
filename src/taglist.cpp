@@ -1,6 +1,5 @@
 #include "taglist.h"
 #include "globals.h"
-#include "tagtree.h"
 #include <QMenu>
 #include <QFileInfo>
 #include <QMimeData>
@@ -8,13 +7,16 @@
 #include <QHeaderView>
 #include <QStyledItemDelegate>
 #include <QActionGroup>
+#include <QPainter>
 
 class TagListDelegate : public QStyledItemDelegate {
 protected:
     void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override {
         QStyledItemDelegate::initStyleOption(option, index);
-        option->displayAlignment = Qt::AlignHCenter;
-        option->textElideMode = Qt::ElideNone;
+        if (index.column() == 0) {
+            option->displayAlignment = Qt::AlignHCenter;
+            option->textElideMode = Qt::ElideNone;
+        }
     }
 };
 
@@ -39,8 +41,12 @@ TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
     QActionGroup* mods = new QActionGroup(this);
     QAction* a_if = new QAction("IF", mods);
     a_if->setCheckable(true);
-    a_if->setData(Modifier::IF_THEN);
+    a_if->setData(Modifier::IF);
     addAction(a_if);
+    QAction* a_then = new QAction("Then (\u2937)", mods);
+    a_then->setCheckable(true);
+    a_then->setData(Modifier::THEN);
+    addAction(a_then);
     QAction* a_and = new QAction("AND", mods);
     a_and->setCheckable(true);
     a_and->setData(Modifier::AND);
@@ -49,7 +55,14 @@ TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
     a_or->setCheckable(true);
     a_or->setData(Modifier::OR);
     addAction(a_or);
+    QAction* a_sep = new QAction("Separator");
+    a_sep->setCheckable(true);
+    addAction(a_sep);
 
+    connect(a_sep, &QAction::toggled, this, [this](bool checked) {
+        m_contextItem->setData(0, Qt::UserRole+5, checked);
+        m_contextItem->setData(1, Qt::UserRole+5, checked);
+    });
     connect(mods, &QActionGroup::triggered, this, [this](QAction* action) {
         this->setModifier(m_contextItem, static_cast<Modifier>(action->data().toInt()));
     });
@@ -88,14 +101,16 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
     Modifier mod = static_cast<Modifier>(m_contextItem->data(0, Qt::UserRole).toInt());
     int id = m_contextItem->data(1, Qt::UserRole).toInt();
     QList<QAction*> mod_actions = actions();
-    mod_actions[0]->setChecked(mod == Modifier::IF_THEN);
-    mod_actions[1]->setChecked(mod == Modifier::AND);
-    mod_actions[2]->setChecked(mod == Modifier::OR);
-    mod_actions[3]->setChecked(m_contextItem->data(1, Qt::UserRole+1).toBool());
-    mod_actions[3]->setEnabled(!TAGS[id]->children().empty());
-    mod_actions[4]->setText("Remove \"" + QString::fromStdString(TAGS[id]->key()) + "\"");
+    mod_actions[0]->setChecked(mod == Modifier::IF);
+    mod_actions[1]->setChecked(mod == Modifier::THEN);
+    mod_actions[2]->setChecked(mod == Modifier::AND);
+    mod_actions[3]->setChecked(mod == Modifier::OR);
+    mod_actions[4]->setChecked(m_contextItem->data(0, Qt::UserRole+5).toBool());
+    mod_actions[5]->setChecked(m_contextItem->data(1, Qt::UserRole+1).toBool());
+    mod_actions[5]->setEnabled(!TAGS[id]->children().empty());
+    mod_actions[6]->setText("Remove \"" + QString::fromStdString(TAGS[id]->key()) + "\"");
     menu->addActions(mod_actions);
-    menu->insertSeparator(mod_actions[4]);
+    menu->insertSeparator(mod_actions[6]);
     menu->exec(QCursor::pos());
 }
 
@@ -120,6 +135,7 @@ void TagList::toggleIncludeSubtags(QTreeWidgetItem* item, bool checked) {
 void TagList::onEditModeChanged(bool editModeEnabled) {
     setAcceptDrops(editModeEnabled);
     setDragEnabled(editModeEnabled);
+    setDropIndicatorShown(editModeEnabled);
     setDragDropMode(editModeEnabled ? DragDropMode::DragDrop : DragDropMode::NoDragDrop);
     setStyleSheet(editModeEnabled
         ? "TagList { background-color: #eeeeee; border: 1px solid #777777; border-radius: 4px; }"
@@ -153,6 +169,18 @@ void TagList::checkModifiers() {
 
 void TagList::onItemDoubleClicked(QTreeWidgetItem* item) {
     APP_STATE->setSelectedTag(TAGS[item->data(1, Qt::UserRole).toInt()]);
+}
+
+void TagList::drawRow(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex& index) const {
+    QTreeWidget::drawRow(painter, option, index);
+    if (index.data(Qt::UserRole+5).toBool()) {
+        QPen pen = painter->pen();
+        pen.setColor(QColor(150, 150, 150));
+        pen.setStyle(Qt::SolidLine);
+        pen.setCapStyle(Qt::RoundCap);
+        painter->setPen(pen);
+        painter->drawLine(option.rect.x(), option.rect.y(), option.rect.x()+option.rect.width(), option.rect.y());
+    }
 }
 
 void TagList::dropEvent(QDropEvent *event) {
@@ -202,10 +230,10 @@ void TagList::dragEnterEvent(QDragEnterEvent *event) {
             event->setDropAction(Qt::IgnoreAction);
             event->ignore();
         } else {
-            if (qobject_cast<TagTree*>(event->source()) != nullptr) {
+            if (!event->mimeData()->hasFormat("application/x-tag-token")) {
                 event->setDropAction(Qt::CopyAction);
                 event->acceptProposedAction();
-            } else if (qobject_cast<TagList*>(event->source()) != nullptr){
+            } else {
                 QTreeWidgetItemIterator it(this);
                 while (*it) {
                     if ((*it)->data(1, Qt::UserRole).toInt() == id) {
@@ -232,7 +260,7 @@ void TagList::setModifier(QTreeWidgetItem* item, Modifier mod) {
     } else {
         item->setData(0, Qt::UserRole, mod);
         switch (mod) {
-        case Modifier::IF_THEN:
+        case Modifier::IF:
             item->setText(0, "IF");
             break;
         case Modifier::AND:
@@ -240,6 +268,9 @@ void TagList::setModifier(QTreeWidgetItem* item, Modifier mod) {
             break;
         case Modifier::OR:
             item->setText(0, "OR");
+            break;
+        case Modifier::THEN:
+            item->setText(0, "\u2937");
             break;
         default:
             item->setText(0, "");
@@ -268,11 +299,13 @@ void TagList::clean() {
 }
 QString TagList::itemToString(QTreeWidgetItem* item) const {
     QString ret = item->data(1, Qt::UserRole).toString();
-    if (!item->data(1, Qt::UserRole+1).isNull() && item->data(1, Qt::UserRole+1).toBool()) {
+    if (item->data(0, Qt::UserRole+5).toBool())
+        ret += "_";
+    if (item->data(1, Qt::UserRole+1).toBool())
         ret += "*";
-    }
+
     switch (static_cast<Modifier>(item->data(0, Qt::UserRole).toInt())) {
-    case Modifier::IF_THEN:
+    case Modifier::IF:
         ret = "?" + ret;
         break;
     case Modifier::AND:
@@ -280,6 +313,9 @@ QString TagList::itemToString(QTreeWidgetItem* item) const {
         break;
     case Modifier::OR:
         ret = "|" + ret;
+        break;
+    case Modifier::THEN:
+        ret = ">" + ret;
         break;
     default:
         break;
