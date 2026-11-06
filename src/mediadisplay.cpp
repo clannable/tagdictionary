@@ -65,6 +65,7 @@ void MediaDisplay::onEditModeChange(bool editModeEnabled) {
         disableControls();
     } else {
         ui->fileNav->show();
+        ui->fileNav->setSelected(m_currentPage);
         showFile(m_currentPage);
     }
 }
@@ -171,7 +172,7 @@ void MediaDisplay::resizeEvent(QResizeEvent* event) {
 void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
     QMimeDatabase db;
     const QMimeData* data = event->mimeData();
-    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->isRoot() || event->source() != nullptr) {
+    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->id() <= 0 || event->source() != nullptr) {
         event->ignore();
     } else if (data->hasUrls()) {
         QString filePath = data->urls().first().toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
