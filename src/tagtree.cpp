@@ -18,7 +18,10 @@ TagTree::TagTree(QWidget* parent) : QTreeWidget(parent) {
     header()->resizeSection(2, 20);
 
     connect(addAction("Expand All Tags"), &QAction::triggered, this, &QTreeView::expandAll);
-    connect(addAction("Collapse All Tags"), &QAction::triggered, this, &QTreeView::collapseAll);
+    connect(addAction("Collapse All Tags"), &QAction::triggered, this, [this]() {
+        collapseAll();
+        m_rootItem->setExpanded(true);
+    });
 
     connect(this, &QTreeWidget::currentItemChanged, this, &TagTree::onItemSelected);
     connect(APP_STATE, &AppState::editModeChanged, this, &TagTree::onEditModeChanged);
