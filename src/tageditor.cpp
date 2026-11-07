@@ -13,7 +13,6 @@ TagEditor::TagEditor(QWidget *parent)
     ui->descriptionEditor->hide();
     ui->tagLabelEdit->setText("");
 
-
     u_relatedList = new TagList();
     u_requiredList = new TagList();
     u_frequentList = new TagList();
@@ -53,7 +52,7 @@ void TagEditor::setTag(TagNode *tag) {
         ui->description->show();
         return;
     }
-    else if (tag->isRoot()) {
+    else if (tag->id() == -1) {
         ui->listContainer->hide();
         ui->tagLabelEdit->setText("");
         ui->editButton->setEnabled(false);
@@ -141,6 +140,14 @@ void TagEditor::iconSelected(QString icon) {
     }
 }
 
+void TagEditor::cleanSublists() {
+    if (APP_STATE->selectedTag() != nullptr) {
+        u_relatedList->clean();
+        u_requiredList->clean();
+        u_frequentList->clean();
+    }
+}
+
 void TagEditor::save() {
     QIcon icon = QIcon(m_iconPath);
     ui->iconLabel->setPixmap(icon.pixmap(QSize(20,20)));
@@ -152,9 +159,9 @@ void TagEditor::save() {
     tag->setKey(ui->tagLabelEdit->text());
     tag->setDescription(updatedDescription);
     tag->setIcon(m_iconPath);
-    tag->setRelated(json(u_relatedList->values()));
-    tag->setRequired(json(u_requiredList->values()));
-    tag->setFrequent(json(u_frequentList->values()));
+    tag->setRelated(u_relatedList->values());
+    tag->setRequired(u_requiredList->values());
+    tag->setFrequent(u_frequentList->values());
 
     emit tagSaved(tag);
 }

@@ -168,9 +168,6 @@
          <property name="headerHidden">
           <bool>true</bool>
          </property>
-         <property name="expandsOnDoubleClick">
-          <bool>false</bool>
-         </property>
          <property name="columnCount">
           <number>3</number>
          </property>

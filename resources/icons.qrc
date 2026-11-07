@@ -3,6 +3,7 @@
         <file>linear/repeat.png</file>
         <file>linear/repeat-disabled.png</file>
         <file>flat/tag.png</file>
+        <file>linear/turn-down.png</file>
         <file>linear/image.png</file>
         <file>linear/video.png</file>
     </qresource>

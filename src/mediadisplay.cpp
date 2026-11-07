@@ -18,10 +18,7 @@ MediaDisplay::MediaDisplay(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // connect(ui->prevButton, &QPushButton::clicked, this, [this] { showFile(--m_currentPage); });
-    // connect(ui->nextButton, &QPushButton::clicked, this, [this] { showFile(++m_currentPage); });
     connect(ui->openButton, &QToolButton::clicked, this, &MediaDisplay::openFile);
-
     connect(ui->addFileButton, &QToolButton::clicked, this, &MediaDisplay::addFile);
     connect(ui->fileNav, &FileNav::fileSelected, this, &MediaDisplay::setFile);
     connect(APP_STATE, &AppState::selectedTagChanged, this, &MediaDisplay::refresh);
@@ -36,12 +33,12 @@ MediaDisplay::~MediaDisplay()
 void MediaDisplay::refresh() {
     m_currentPage = 0;
     m_files.clear();
-    ui->addFileButton->setEnabled(APP_STATE->selectedTag() != nullptr && !APP_STATE->selectedTag()->isRoot());
+    ui->addFileButton->setEnabled(APP_STATE->selectedTag() != nullptr && APP_STATE->selectedTag()->id() > 0);
     if (APP_STATE->selectedTag() != nullptr) {
         for (const std::string &file : APP_STATE->selectedTag()->files())
             m_files.append(QString::fromStdString(file));
     }
-    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->isRoot())
+    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->id() <= 0)
         ui->fileNav->hide();
     else
         ui->fileNav->show();
@@ -68,6 +65,7 @@ void MediaDisplay::onEditModeChange(bool editModeEnabled) {
         disableControls();
     } else {
         ui->fileNav->show();
+        ui->fileNav->setSelected(m_currentPage);
         showFile(m_currentPage);
     }
 }
@@ -113,8 +111,6 @@ void MediaDisplay::showFile(int index) {
         }
 
         ui->fileCounter->setText(QString::number(m_currentPage+1) + " / " + QString::number(m_files.length()));
-        // ui->prevButton->setEnabled(m_currentPage > 0);
-        // ui->nextButton->setEnabled(m_currentPage < m_files.length()-1);
     }
     if (u_displayWidget != nullptr)
         ui->viewportLayout->insertWidget(0, u_displayWidget, 1);
@@ -156,10 +152,10 @@ void MediaDisplay::insertFile(QString filePath) {
     m_files.append(filePath);
     if (APP_STATE->editModeEnabled())
         static_cast<FileListWidget*>(u_displayWidget)->addFile(filePath);
-    else
+    else {
         showFile(m_files.length()-1);
-
-    ui->fileNav->addFile(filePath);
+        ui->fileNav->setSelected(ui->fileNav->addFile(filePath));
+    }
 
     APP_STATE->selectedTag()->addFile(filePath.toStdString());
     APP_STATE->signalSelectedTagUpdated();
@@ -176,7 +172,7 @@ void MediaDisplay::resizeEvent(QResizeEvent* event) {
 void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
     QMimeDatabase db;
     const QMimeData* data = event->mimeData();
-    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->isRoot() || event->source() != nullptr) {
+    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->id() <= 0 || event->source() != nullptr) {
         event->ignore();
     } else if (data->hasUrls()) {
         QString filePath = data->urls().first().toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);

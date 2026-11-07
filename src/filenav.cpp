@@ -82,7 +82,7 @@ void FileNav::clear() {
 
 }
 
-void FileNav::addFile(QString filePath) {
+int FileNav::addFile(QString filePath) {
     int nextIndex = numFiles;
     if (nextIndex > 0)
         nextButton->setEnabled(true);
@@ -95,16 +95,15 @@ void FileNav::addFile(QString filePath) {
     else if (std::regex_search(filePath.toStdString(), videoRegex))
         icon = ":/icons/linear/video.png";
 
-    // FileNavButton* button = new FileNavButton(nextIndex+1, icon);
     QToolButton* button = new QToolButton();
     button->setText(QString::number(nextIndex+1));
     button->setIcon(QIcon(icon));
     button->setCursor(Qt::PointingHandCursor);
-    // button->setLayoutDirection(Qt::RightToLeft);
     button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     button->setToolTip(filePath);
     button->setEnabled(currentFile != nextIndex);
     numContainer->layout()->addWidget(button);
     connect(button, &QToolButton::clicked, this, [this, button]() { emit fileSelected(numContainer->layout()->indexOf(button)); });
     numFiles++;
+    return nextIndex;
 }

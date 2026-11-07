@@ -20,7 +20,6 @@ TagNode::TagNode(json data, string key) : m_key(key) {
     } else {
         m_id = NEXT_TAG_ID++;
     }
-    TAGS[m_id] = this;
 
     setDescription(data.value("description", ""));
     setIcon(data.value("icon", ""));
@@ -28,49 +27,51 @@ TagNode::TagNode(json data, string key) : m_key(key) {
     setRequired(data.value("required", json::array()));
     setFrequent(data.value("frequent", json::array()));
     setFiles(data.value("files", list<string>()));
+    m_children = data.value("children", list<int>());
 
-    if (data.contains("children")) {
-        for (const auto& [k, c] : data["children"].items()) {
-            TagNode* child = new TagNode(c, k);
-            child->setParent(this);
-        }
-    }
+    TAGS[m_id] = this;
 }
 
 bool TagNode::isRoot() const { return m_parent == nullptr; }
 
-TagNode::~TagNode() {
-    TAGS.erase(m_id);
-    for(const TagNode* c : m_children)
-        delete c;
-}
-
 void TagNode::setKey(string key) {
     m_key = key;
-    if (m_leaf != nullptr) m_leaf->setText(0, QString::fromStdString(key));
 }
 void TagNode::setKey(QString key) {
     m_key = key.toStdString();
-    if (m_leaf != nullptr) m_leaf->setText(0, key);
 }
 
 void TagNode::setIcon(string icon) {
     m_icon = icon;
-    if (m_leaf != nullptr) m_leaf->setIcon(0, QIcon(QString::fromStdString(icon)));
 }
 void TagNode::setIcon(QString icon) {
     m_icon = icon.toStdString();
-    if (m_leaf != nullptr) m_leaf->setIcon(0, QIcon(icon));
 }
 
 void TagNode::setDescription(string description) { m_description = description; }
 void TagNode::setDescription(QString description) { m_description = description.toStdString(); }
 
-void TagNode::setRelated(list<int> related) { m_related = related; }
-
-void TagNode::setRequired(list<int> required) { m_required = required; }
-
-void TagNode::setFrequent(list<int> frequent) { m_frequent = frequent; }
+void TagNode::setRelated(list<string> related) { m_related = related; }
+void TagNode::setRelated(list<int> related) {
+    list<string> vals = {};
+    for (int i : related) vals.push_back(to_string(i));
+    m_related = json(vals);
+}
+void TagNode::setRelated(json related) { m_related = related; }
+void TagNode::setRequired(list<string> required) { m_required = required; }
+void TagNode::setRequired(list<int> required) {
+    list<string> vals = {};
+    for (int i : required) vals.push_back(to_string(i));
+    m_required = json(vals);
+}
+void TagNode::setRequired(json required) { m_required = required; }
+void TagNode::setFrequent(list<string> frequent) { m_frequent = frequent; }
+void TagNode::setFrequent(list<int> frequent) {
+    list<string> vals = {};
+    for (int i : frequent) vals.push_back(to_string(i));
+    m_frequent = json(vals);
+}
+void TagNode::setFrequent(json frequent) { m_frequent = frequent; }
 
 void TagNode::setFiles(list<string> files) { m_files = files; }
 void TagNode::setFiles(QStringList files) {
@@ -82,24 +83,25 @@ void TagNode::addFile(string file) { m_files.push_back(file); }
 
 void TagNode::setParent(TagNode* parent) {
     if (m_parent == parent) return;
-    if (m_parent != nullptr) m_parent->removeChild(this);
-    parent->addChild(this);
+    if (m_parent != nullptr) m_parent->removeChild(m_id);
+    if (parent != nullptr) parent->addChild(m_id);
     m_parent = parent;
 }
 
-void TagNode::addChild(TagNode* child) {
-    const auto itr = std::find_if(m_children.begin(), m_children.end(),
-                                  [child](TagNode* c) { return *c == *child; });
+void TagNode::addChild(int id) {
+    if (id == 0) return;
+    const auto itr = std::find(m_children.begin(), m_children.end(), id);
     if (itr != m_children.end()) return;
 
-    m_children.push_back(child);
+    m_children.push_back(id);
 }
 
-void TagNode::removeChild(TagNode* child) {
-    const auto itr = std::find_if(m_children.begin(), m_children.end(),
-                                  [child](TagNode* c) { return *c == *child; });
+void TagNode::removeChild(int id) {
+    const auto itr = std::find(m_children.begin(), m_children.end(), id);
     if (itr == m_children.end()) return;
     m_children.erase(itr);
+    TAGS[id]->setParent(nullptr);
+
 }
 
 string TagNode::getFullPath() {
@@ -110,45 +112,33 @@ string TagNode::getFullPath() {
     return path;
 }
 
-void TagNode::setLeaf(QTreeWidgetItem* leaf) {
-    m_leaf = leaf;
-}
-
 json TagNode::toJson() {
-    json ret;
-    if (isRoot()) {
-        ret = json();
-        for (TagNode* child : m_children)
-            ret[child->key()] = child->toJson();
-    }
-    else {
-        ret = json({
-            { "id", m_id },
-            { "description", m_description },
-            { "icon", m_icon },
-            { "related", m_related },
-            { "required", m_required },
-            { "frequent", m_frequent },
-            { "files", m_files },
-            { "children", json() }
-        });
-        for (TagNode* child : m_children)
-            ret["children"][child->key()] = child->toJson();
-    }
-    return ret;
+    return json({
+        { "id", m_id },
+        { "description", m_description },
+        { "icon", m_icon },
+        { "related", m_related },
+        { "required", m_required },
+        { "frequent", m_frequent },
+        { "files", m_files },
+        { "children", m_children }
+    });
 }
 
 void TagNode::cleanSublists() {
     for (auto itr = m_related.begin(); itr != m_related.end(); itr++) {
-        if (TAGS.find(itr->get<int>()) == TAGS.end())
+        int id = itr->is_string() ? TagNode::parseId(itr->get<string>()) : itr->get<int>();
+        if (TAGS.find(id) == TAGS.end())
             m_related.erase(itr--);
     }
     for (auto itr = m_required.begin(); itr != m_required.end(); itr++) {
-        if (TAGS.find(itr->get<int>()) == TAGS.end())
+        int id = itr->is_string() ? TagNode::parseId(itr->get<string>()) : itr->get<int>();
+        if (TAGS.find(id) == TAGS.end())
             m_required.erase(itr--);
     }
     for (auto itr = m_frequent.begin(); itr != m_frequent.end(); itr++) {
-        if (TAGS.find(itr->get<int>()) == TAGS.end())
+        int id = itr->is_string() ? TagNode::parseId(itr->get<string>()) : itr->get<int>();
+        if (TAGS.find(id) == TAGS.end())
             m_frequent.erase(itr--);
     }
 }
