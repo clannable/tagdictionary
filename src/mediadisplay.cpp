@@ -120,6 +120,7 @@ void MediaDisplay::showFile(int index) {
 
 void MediaDisplay::setFile(int index) {
     showFile(index);
+    ui->fileNav->setSelected(index);
 }
 
 void MediaDisplay::openFile() {
