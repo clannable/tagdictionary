@@ -6,7 +6,6 @@
 #include <QMimeData>
 #include "nlohmann/json.hpp"
 #include <QTreeWidget>
-#include "tokenparser.h"
 
 enum Modifier {
     NONE = 0,

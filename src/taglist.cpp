@@ -1,5 +1,7 @@
 #include "taglist.h"
 #include "globals.h"
+#include "tokenparser.h"
+
 #include <QMenu>
 #include <QFileInfo>
 #include <QMimeData>
@@ -21,7 +23,7 @@ protected:
 };
 
 TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
-    setFixedHeight(107);
+    setFixedHeight(2);
     setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     setDropIndicatorShown(true);
     setColumnCount(2);
@@ -90,6 +92,8 @@ void TagList::setValues(nlohmann::json::array_t ids) {
     header()->resizeSection(0, 10);
     expandAll();
     scrollToTop();
+    setFixedHeight(min((21*topLevelItemCount())+2, 107));
+
 }
 
 void TagList::contextMenuEvent(QContextMenuEvent *event) {
@@ -140,6 +144,12 @@ void TagList::onEditModeChanged(bool editModeEnabled) {
     setStyleSheet(editModeEnabled
         ? "TagList { background-color: #eeeeee; border: 1px solid #777777; border-radius: 4px; }"
         : "");
+    if (editModeEnabled) {
+        show();
+        setFixedHeight(107);
+    }
+    else setFixedHeight(min((21*topLevelItemCount())+2, 107));
+
 }
 
 void TagList::removeTag(int id) {
