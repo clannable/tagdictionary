@@ -28,6 +28,7 @@ std::map<int, TagNode*> TAGS = {};
 std::map<std::string, int> TAG_PATH_MAP = {};
 std::chrono::milliseconds DEBOUNCE_TIME = 250ms;
 bool AUTOSAVE_ENABLED = true;
+
 const int MAX_RECENT = 5;
 AppState* APP_STATE = new AppState();
 
@@ -55,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     autoSaveAction->setCheckable(true);
 
     AUTOSAVE_ENABLED = settings.value("autosave", true).toBool();
+
     autoSaveAction->setChecked(AUTOSAVE_ENABLED);
     autoSaveAction->setToolTip("Automatically save changes to the current dictionary file whenever tags are updated or files are dropped in.");
 
@@ -86,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onEditorSave);
     connect(APP_STATE, &AppState::selectedTagUpdated, this, &MainWindow::onTagUpdate);
-    connect(APP_STATE, &AppState::selectedTagChanged, this, [this](TagNode* selectedTag) { this->a_icon->setEnabled(selectedTag != nullptr && !selectedTag->id() > 0); });
+    connect(APP_STATE, &AppState::selectedTagChanged, this, [this](TagNode* selectedTag) { this->a_icon->setEnabled(selectedTag != nullptr && selectedTag->id() > 0); });
     connect(ui->tagEditor, &TagEditor::displayLinkClicked, ui->mediaDisplay, &MediaDisplay::setFile);
 
     m_searchDebounce = new QTimer(this);
