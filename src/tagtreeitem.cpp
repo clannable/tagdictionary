@@ -33,8 +33,10 @@ void TagTreeItem::setTag(TagNode *tag) { m_tag = tag; }
 
 void TagTreeItem::addChild(QTreeWidgetItem* child) {
     QTreeWidgetItem::addChild(child);
-    if (dynamic_cast<TagTreeItem*>(child) != nullptr)
+    if (dynamic_cast<TagTreeItem*>(child) != nullptr) {
         m_tag->addChild(child->data(0, Qt::UserRole).toInt());
+        dynamic_cast<TagTreeItem*>(child)->tag()->setParent(m_tag);
+    }
 }
 
 void TagTreeItem::removeChild(QTreeWidgetItem* child) {
