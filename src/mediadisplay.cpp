@@ -79,7 +79,7 @@ void MediaDisplay::showFile(int index) {
         QLabel* error = new QLabel();
         error->setText("No files to display");
         error->setAlignment(Qt::AlignCenter);
-        ui->fileCounter->setText("");
+        // ui->fileCounter->setText("");
         u_displayWidget = error;
         disableControls();
 
@@ -110,7 +110,7 @@ void MediaDisplay::showFile(int index) {
             u_displayWidget = error;
         }
 
-        ui->fileCounter->setText(QString::number(m_currentPage+1) + " / " + QString::number(m_files.length()));
+        // ui->fileCounter->setText(QString::number(m_currentPage+1) + " / " + QString::number(m_files.length()));
     }
     if (u_displayWidget != nullptr)
         ui->viewportLayout->insertWidget(0, u_displayWidget, 1);
