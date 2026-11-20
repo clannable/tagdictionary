@@ -49,6 +49,7 @@ void MediaDisplay::refresh() {
 void MediaDisplay::save() {
     m_files = static_cast<FileListWidget*>(u_displayWidget)->values();
     ui->fileNav->setFiles(m_files);
+    m_currentPage = 0;
 }
 
 void MediaDisplay::onEditModeChange(bool editModeEnabled) {
