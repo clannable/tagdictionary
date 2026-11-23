@@ -51,7 +51,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         include/pixmaplabel.h src/pixmaplabel.cpp
         include/replacewidget.h src/replacewidget.cpp
         include/filenav.h src/filenav.cpp
-        include/replacewidget.h src/replacewidget.cpp
 
         include/tagtreeitem.h src/tagtreeitem.cpp
         include/videoplayer.h src/videoplayer.cpp ui/videoplayer.ui
