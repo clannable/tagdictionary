@@ -54,6 +54,11 @@ public:
     void setFrequent(list<string> frequent);
     void setFrequent(list<int> frequent);
     void setFrequent(json frequent);
+
+    json::array_t excludes() const { return m_excludes; }
+    void setExcludes(list<string> excludes);
+    void setExcludes(list<int> excludes);
+    void setExcludes(json excludes);
     void cleanSublists();
 
     list<int> children() const { return m_children; }
@@ -85,6 +90,7 @@ private:
     json m_related = json::array();
     json m_required = json::array();
     json m_frequent = json::array();
+    json m_excludes = json::array();
 
     TagNode* m_parent = nullptr;
     bool m_replacesParent = false;

@@ -79,7 +79,7 @@ TagEditor QLineEdit:disabled {
 TagEditor QLineEdit {
     height: 24px;
     border: 1px solid #6a6a6a;
-    background-color: rgba(255,255,255,0);
+    background: transparent;
     color: #3d3d3d;
     padding-bottom: 0;
 }
@@ -91,6 +91,18 @@ TagEditor QToolButton:disabled {
 
 TagEditor .QTextEdit {
     background-color: white;
+}
+
+TagEditor #listContainer {
+    background-color: palette(alternate-base);
+    border-radius: 2px;
+    border: 1px solid palette(mid);
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+TagEditor #listContainer .QLabel {
+    padding-left: 0.5em;
 }
 
 TagEditor .QTextBrowser {
@@ -117,7 +129,8 @@ TagList {
     border: 1px solid transparent;
     height: 107px;
     font: 350 10pt 'Segoe UI';
-
+    margin-right: 2px;
+    margin-left: 2px;
 }
 
 TagEditor QTextEdit QScrollBar:vertical, TagList QScrollbar:vertical{
@@ -133,7 +146,7 @@ TagEditor QTextEdit QScrollBar::handle:vertical, TagList QScrollbar::handle:vert
 }
 
 TagEditor .QLabel {
-    font: 700 12pt "Segoe UI";
+    font: 600 10pt "Segoe UI";
 }
 
 TagEditor ReplaceWidget .QLabel {
@@ -228,4 +241,8 @@ FileNav #previous::enabled::hover, FileNav #next::enabled::hover {
 
 FileNav #previous:pressed, FileNav #next:pressed {
     background-color: rgba(74, 157, 208, 75);
+}
+
+TagTree {
+    background-color: palette(alternate-base);
 }

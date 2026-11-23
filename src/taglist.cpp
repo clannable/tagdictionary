@@ -12,6 +12,13 @@
 #include <QPainter>
 
 class TagListDelegate : public QStyledItemDelegate {
+public:
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        QSize size(QStyledItemDelegate::sizeHint(option, index));
+        if (index.siblingAtColumn(1).data(Qt::UserRole+5).toBool())
+            size.setHeight(size.height()+2);
+        return size;
+    }
 protected:
     void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override {
         QStyledItemDelegate::initStyleOption(option, index);
@@ -20,10 +27,12 @@ protected:
             option->textElideMode = Qt::ElideNone;
         }
     }
+
 };
 
 TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
     setFixedHeight(2);
+    setAlternatingRowColors(true);
     setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     setDropIndicatorShown(true);
     setColumnCount(2);
@@ -148,7 +157,7 @@ void TagList::onEditModeChanged(bool editModeEnabled) {
         show();
         setFixedHeight(107);
     }
-    else setFixedHeight(min((21*topLevelItemCount())+2, 107));
+    else setFixedHeight(21*topLevelItemCount()+2);
 
 }
 
@@ -186,7 +195,7 @@ void TagList::drawRow(QPainter* painter, const QStyleOptionViewItem &option, con
     if (index.data(Qt::UserRole+5).toBool()) {
         QPen pen = painter->pen();
         pen.setColor(QColor(150, 150, 150));
-        pen.setStyle(Qt::SolidLine);
+        pen.setStyle(Qt::DashLine);
         pen.setCapStyle(Qt::RoundCap);
         painter->setPen(pen);
         painter->drawLine(option.rect.x(), option.rect.y(), option.rect.x()+option.rect.width(), option.rect.y());
