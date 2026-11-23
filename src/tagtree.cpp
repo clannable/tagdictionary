@@ -208,7 +208,7 @@ void TagTree::dropEvent(QDropEvent *event) {
         event->ignore();
         return;
     }
-    if (!QMessageBox::question(this, "Move tag", "Move \"" + QString::fromStdString(TAGS[id]->key()) + "\" here?")) {
+    if (QMessageBox::question(this, "Move tag", "Move \"" + QString::fromStdString(TAGS[id]->key()) + "\" here?") != QMessageBox::Yes) {
         event->ignore();
         return;
     }
