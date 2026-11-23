@@ -24,6 +24,7 @@ TagTree::TagTree(QWidget* parent) : QTreeWidget(parent) {
     });
 
     connect(this, &QTreeWidget::currentItemChanged, this, &TagTree::onItemSelected);
+    connect(APP_STATE, &AppState::selectedTagChanged, this, &TagTree::setCurrentTag);
     connect(APP_STATE, &AppState::editModeChanged, this, &TagTree::onEditModeChanged);
 }
 
