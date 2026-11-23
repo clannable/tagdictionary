@@ -208,9 +208,12 @@ void TagTree::dropEvent(QDropEvent *event) {
         event->ignore();
         return;
     }
-
+    if (!QMessageBox::question(this, "Move tag", "Move \"" + QString::fromStdString(TAGS[id]->key()) + "\" here?")) {
+        event->ignore();
+        return;
+    }
     m_items[id]->parent()->removeChild(m_items[id]);
-    if (dest == nullptr || dest == m_rootItem)
+    if (dest == nullptr || dest == m_rootItem) {
         m_rootItem->addChild(m_items[id]);
         TAGS[id]->setReplacesParent(false);
     }

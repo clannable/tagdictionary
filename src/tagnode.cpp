@@ -127,18 +127,19 @@ string TagNode::getFullPath() {
 }
 
 json TagNode::toJson() {
-    return json({
+    json ret = json({
         { "id", m_id },
         { "description", m_description },
-        { "icon", m_icon },
-        { "related", m_related },
-        { "required", m_required },
-        { "frequent", m_frequent },
-        { "excludes", m_excludes },
-        { "files", m_files },
-        { "replacesParent", m_replacesParent },
-        { "children", m_children }
+        { "icon", m_icon }
     });
+    if (!m_related.empty()) ret["related"] = m_related;
+    if (!m_required.empty()) ret["required"] = m_required;
+    if (!m_frequent.empty()) ret["frequent"] = m_frequent;
+    if (!m_excludes.empty()) ret["excludes"] = m_excludes;
+    if (!m_files.empty()) ret["files"] = m_files;
+    if (m_replacesParent) ret["replacesParent"] = m_replacesParent;
+    if (!m_children.empty()) ret["children"] = m_children;
+    return ret;
 }
 
 void TagNode::cleanSublists() {
