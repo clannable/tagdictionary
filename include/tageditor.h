@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QListWidgetItem>
+
 #include "tagnode.h"
 #include "taglist.h"
 #include <nlohmann/json.hpp>
@@ -40,6 +41,7 @@ private:
     TagList* u_requiredList;
     TagList* u_relatedList;
     TagList* u_frequentList;
+    TagList* u_excludesList;
 
     QString m_iconPath;
 

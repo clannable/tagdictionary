@@ -26,6 +26,7 @@ TagNode::TagNode(json data, string key) : m_key(key) {
     setRelated(data.value("related", json::array()));
     setRequired(data.value("required", json::array()));
     setFrequent(data.value("frequent", json::array()));
+    setExcludes(data.value("excludes", json::array()));
     setFiles(data.value("files", list<string>()));
     m_children = data.value("children", list<int>());
 
@@ -72,6 +73,14 @@ void TagNode::setFrequent(list<int> frequent) {
     m_frequent = json(vals);
 }
 void TagNode::setFrequent(json frequent) { m_frequent = frequent; }
+
+void TagNode::setExcludes(list<string> excludes) { m_excludes = excludes; }
+void TagNode::setExcludes(list<int> excludes) {
+    list<string> vals = {};
+    for (int i : excludes) vals.push_back(to_string(i));
+    m_excludes = json(vals);
+}
+void TagNode::setExcludes(json excludes) { m_excludes = excludes; }
 
 void TagNode::setFiles(list<string> files) { m_files = files; }
 void TagNode::setFiles(QStringList files) {
@@ -120,6 +129,7 @@ json TagNode::toJson() {
         { "related", m_related },
         { "required", m_required },
         { "frequent", m_frequent },
+        { "excludes", m_excludes },
         { "files", m_files },
         { "children", m_children }
     });

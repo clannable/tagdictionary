@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "icondialog.h"
 
+
 TagEditor::TagEditor(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::TagEditor)
@@ -16,10 +17,13 @@ TagEditor::TagEditor(QWidget *parent)
     u_relatedList = new TagList();
     u_requiredList = new TagList();
     u_frequentList = new TagList();
+    u_excludesList = new TagList();
 
-    ui->listContainer->layout()->addWidget(createHLine());
     ui->listContainer->layout()->addWidget(new QLabel("Required Tags"));
     ui->listContainer->layout()->addWidget(u_requiredList);
+    ui->listContainer->layout()->addWidget(createHLine());
+    ui->listContainer->layout()->addWidget(new QLabel("Excludes"));
+    ui->listContainer->layout()->addWidget(u_excludesList);
     ui->listContainer->layout()->addWidget(createHLine());
     ui->listContainer->layout()->addWidget(new QLabel("Frequently Tagged With"));
     ui->listContainer->layout()->addWidget(u_frequentList);
@@ -67,6 +71,7 @@ void TagEditor::setTag(TagNode *tag) {
     ui->editButton->show();
     ui->saveButton->show();
     u_relatedList->setValues(tag->related());
+    u_excludesList->setValues(tag->excludes());
     u_requiredList->setValues(tag->required());
     u_frequentList->setValues(tag->frequent());
 
@@ -105,6 +110,9 @@ void TagEditor::onEditModeChange(bool editModeEnabled) {
         ui->descriptionEditor->show();
         ui->iconButton->show();
         ui->iconLabel->hide();
+        ui->listContainer->layout()->itemAt(2)->widget()->hide();
+        ui->listContainer->layout()->itemAt(5)->widget()->hide();
+        ui->listContainer->layout()->itemAt(8)->widget()->hide();
     }
     else {
         ui->descriptionEditor->hide();
@@ -112,8 +120,12 @@ void TagEditor::onEditModeChange(bool editModeEnabled) {
         ui->iconButton->hide();
         ui->iconLabel->show();
         u_relatedList->setValues(APP_STATE->selectedTag()->related());
+        u_excludesList->setValues(APP_STATE->selectedTag()->excludes());
         u_requiredList->setValues(APP_STATE->selectedTag()->required());
         u_frequentList->setValues(APP_STATE->selectedTag()->frequent());
+        ui->listContainer->layout()->itemAt(2)->widget()->show();
+        ui->listContainer->layout()->itemAt(5)->widget()->show();
+        ui->listContainer->layout()->itemAt(8)->widget()->show();
     }
 }
 
@@ -145,6 +157,7 @@ void TagEditor::cleanSublists() {
         u_relatedList->clean();
         u_requiredList->clean();
         u_frequentList->clean();
+        u_excludesList->clean();
     }
 }
 
@@ -162,6 +175,7 @@ void TagEditor::save() {
     tag->setRelated(u_relatedList->values());
     tag->setRequired(u_requiredList->values());
     tag->setFrequent(u_frequentList->values());
+    tag->setExcludes(u_excludesList->values());
 
     emit tagSaved(tag);
 }
@@ -177,5 +191,6 @@ void TagEditor::onAnchorClick(const QUrl &link) {
 QFrame* TagEditor::createHLine() {
     QFrame* frame = new QFrame();
     frame->setFrameShape(QFrame::HLine);
+    frame->setFrameShadow(QFrame::Sunken);
     return frame;
 }
