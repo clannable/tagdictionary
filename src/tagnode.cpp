@@ -98,8 +98,6 @@ void TagNode::setParent(TagNode* parent) {
     m_parent = parent;
 }
 
-void TagNode::setReplacesParent(bool replacesParent) { m_replacesParent = replacesParent; }
-
 void TagNode::addChild(int id) {
     if (id == 0) return;
     const auto itr = std::find(m_children.begin(), m_children.end(), id);
