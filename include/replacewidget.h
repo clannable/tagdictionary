@@ -5,7 +5,7 @@
 #include <QWidget>
 
 
-class ReplaceWidget : public QWidget
+class ReplaceWidget : public QFrame
 {
     Q_OBJECT
 public:
@@ -14,13 +14,12 @@ public:
     bool isReplaceChecked();
     void setReplaceChecked(bool replace);
 
-    void useParent(const TagNode* tag);
-
 public slots:
     void onEditModeChange(bool editModeEnabled);
+    void setTag(const TagNode* tag);
 
-signals:
-
+protected:
+    virtual void mousePressEvent(QMouseEvent *event) override;
 };
 
 #endif // REPLACEWIDGET_H
