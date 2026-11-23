@@ -56,7 +56,7 @@ void TagEditor::setTag(TagNode *tag) {
         ui->description->show();
         return;
     }
-    else if (tag->id() == -1) {
+    else if (tag->id() <= 0) {
         ui->listContainer->hide();
         ui->tagLabelEdit->setText("");
         ui->editButton->setEnabled(false);
@@ -97,6 +97,7 @@ void TagEditor::setTag(TagNode *tag) {
 }
 
 void TagEditor::onEditModeChange(bool editModeEnabled) {
+    const TagNode* selectedTag = APP_STATE->selectedTag();
     ui->tagLabelEdit->setEnabled(editModeEnabled);
     ui->saveButton->setEnabled(editModeEnabled);
     ui->editButton->setIcon(QIcon::fromTheme(editModeEnabled
@@ -106,7 +107,7 @@ void TagEditor::onEditModeChange(bool editModeEnabled) {
     ui->editButton->setText(editModeEnabled ? "Cancel" : "Edit Tag");
     if (editModeEnabled) {
         ui->description->hide();
-        ui->descriptionEditor->setText(QString::fromStdString(APP_STATE->selectedTag()->description()));
+        ui->descriptionEditor->setText(QString::fromStdString(selectedTag->description()));
         ui->descriptionEditor->show();
         ui->iconButton->show();
         ui->iconLabel->hide();
@@ -176,6 +177,7 @@ void TagEditor::save() {
     tag->setRequired(u_requiredList->values());
     tag->setFrequent(u_frequentList->values());
     tag->setExcludes(u_excludesList->values());
+    tag->setReplacesParent(ui->replaceFrame->isReplaceChecked());
 
     emit tagSaved(tag);
 }

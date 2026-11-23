@@ -149,6 +149,10 @@ TagEditor .QLabel {
     font: 600 10pt "Segoe UI";
 }
 
+TagEditor ReplaceWidget .QLabel {
+    font: 350 9pt 'Segoe UI';
+}
+
 VideoPlayer QSlider::groove:horizontal {
     height: 5px;
     background: #ffffff;
@@ -241,4 +245,16 @@ FileNav #previous:pressed, FileNav #next:pressed {
 
 TagTree {
     background-color: palette(alternate-base);
+}
+
+TagEditor .ReplaceWidget > QLabel {
+    background-color: transparent;
+    font-weight: 500;
+}
+
+TagEditor .ReplaceWidget {
+    background-color: palette(midlight);
+    margin-left: 10px;
+    border-radius: 2px;
+    padding: 3px 10px 3px 10px;
 }

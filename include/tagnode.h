@@ -69,6 +69,9 @@ public:
     TagNode* parent() const { return m_parent; }
     void setParent(TagNode* parent);
 
+    bool replacesParent() const { return m_replacesParent; }
+    void setReplacesParent(bool replacesParent);
+
     // void convertSublistsToId();
 
     string getFullPath();
@@ -90,6 +93,7 @@ private:
     json m_excludes = json::array();
 
     TagNode* m_parent = nullptr;
+    bool m_replacesParent = false;
 
     list<int> m_children = {};
 

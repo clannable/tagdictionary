@@ -32,7 +32,6 @@ protected:
 
 TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
     setFixedHeight(2);
-    setAlternatingRowColors(true);
     setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     setDropIndicatorShown(true);
     setColumnCount(2);

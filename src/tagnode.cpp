@@ -29,6 +29,7 @@ TagNode::TagNode(json data, string key) : m_key(key) {
     setExcludes(data.value("excludes", json::array()));
     setFiles(data.value("files", list<string>()));
     m_children = data.value("children", list<int>());
+    setReplacesParent(data.value<bool>("replacesParent", false));
 
     TAGS[m_id] = this;
 }
@@ -105,6 +106,8 @@ void TagNode::addChild(int id) {
     m_children.push_back(id);
 }
 
+void TagNode::setReplacesParent(bool replacesParent) { m_replacesParent = replacesParent; }
+
 void TagNode::removeChild(int id) {
     const auto itr = std::find(m_children.begin(), m_children.end(), id);
     if (itr == m_children.end()) return;
@@ -122,17 +125,19 @@ string TagNode::getFullPath() {
 }
 
 json TagNode::toJson() {
-    return json({
+    json ret = json({
         { "id", m_id },
         { "description", m_description },
-        { "icon", m_icon },
-        { "related", m_related },
-        { "required", m_required },
-        { "frequent", m_frequent },
-        { "excludes", m_excludes },
-        { "files", m_files },
-        { "children", m_children }
+        { "icon", m_icon }
     });
+    if (!m_related.empty()) ret["related"] = m_related;
+    if (!m_required.empty()) ret["required"] = m_required;
+    if (!m_frequent.empty()) ret["frequent"] = m_frequent;
+    if (!m_excludes.empty()) ret["excludes"] = m_excludes;
+    if (!m_files.empty()) ret["files"] = m_files;
+    if (m_replacesParent) ret["replacesParent"] = m_replacesParent;
+    if (!m_children.empty()) ret["children"] = m_children;
+    return ret;
 }
 
 void TagNode::cleanSublists() {

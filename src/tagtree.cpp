@@ -24,6 +24,7 @@ TagTree::TagTree(QWidget* parent) : QTreeWidget(parent) {
     });
 
     connect(this, &QTreeWidget::currentItemChanged, this, &TagTree::onItemSelected);
+    connect(APP_STATE, &AppState::selectedTagChanged, this, &TagTree::setCurrentTag);
     connect(APP_STATE, &AppState::editModeChanged, this, &TagTree::onEditModeChanged);
 }
 
@@ -208,10 +209,15 @@ void TagTree::dropEvent(QDropEvent *event) {
         event->ignore();
         return;
     }
-
+    if (QMessageBox::question(this, "Move tag", "Move \"" + QString::fromStdString(TAGS[id]->key()) + "\" here?") != QMessageBox::Yes) {
+        event->ignore();
+        return;
+    }
     m_items[id]->parent()->removeChild(m_items[id]);
-    if (dest == nullptr || dest == m_rootItem)
+    if (dest == nullptr || dest == m_rootItem) {
         m_rootItem->addChild(m_items[id]);
+        TAGS[id]->setReplacesParent(false);
+    }
     else
         dynamic_cast<TagTreeItem*>(dest)->addChild(m_items[id]);
 
