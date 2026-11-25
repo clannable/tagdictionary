@@ -25,8 +25,7 @@ MediaDisplay::MediaDisplay(QWidget *parent)
     connect(APP_STATE, &AppState::editModeChanged, this, &MediaDisplay::onEditModeChange);
 }
 
-MediaDisplay::~MediaDisplay()
-{
+MediaDisplay::~MediaDisplay() {
     delete ui;
 }
 
@@ -63,7 +62,7 @@ void MediaDisplay::onEditModeChange(bool editModeEnabled) {
         u_displayWidget = fileList;
         ui->viewportLayout->insertWidget(0, u_displayWidget, 1);
         ui->fileNav->hide();
-        disableControls();
+        ui->openButton->setEnabled(false);
     } else {
         ui->fileNav->show();
         ui->fileNav->setSelected(m_currentPage);
@@ -72,18 +71,17 @@ void MediaDisplay::onEditModeChange(bool editModeEnabled) {
 }
 
 void MediaDisplay::showFile(int index) {
-    if (u_displayWidget != nullptr)
+    if (u_displayWidget)
         delete u_displayWidget;
 
     if (m_files.isEmpty()) {
         m_isImage = false;
+        ui->openButton->setEnabled(false);
+
         QLabel* error = new QLabel();
         error->setText("No files to display");
         error->setAlignment(Qt::AlignCenter);
-        // ui->fileCounter->setText("");
         u_displayWidget = error;
-        disableControls();
-
     } else {
         m_currentPage = index;
         try {
@@ -110,13 +108,11 @@ void MediaDisplay::showFile(int index) {
             error->setAlignment(Qt::AlignCenter);
             u_displayWidget = error;
         }
-
-        // ui->fileCounter->setText(QString::number(m_currentPage+1) + " / " + QString::number(m_files.length()));
     }
-    if (u_displayWidget != nullptr)
+    if (u_displayWidget)
         ui->viewportLayout->insertWidget(0, u_displayWidget, 1);
-    if (m_isImage)
-        resizeImage();
+    // if (m_isImage)
+        // resizeImage();
 }
 
 void MediaDisplay::setFile(int index) {
@@ -138,7 +134,7 @@ void MediaDisplay::addFile() {
     if (!selected.empty())
         LAST_IMAGE_FOLDER_PATH = QFileInfo(selected.last()).absoluteDir().path().toStdString();
 
-    for (const QString file : selected) {
+    for (const QString &file : selected) {
         QString f = file;
         insertFile(f);
         ui->fileNav->setSelected(m_currentPage);
@@ -162,22 +158,16 @@ void MediaDisplay::insertFile(QString filePath) {
     APP_STATE->selectedTag()->addFile(filePath.toStdString());
     APP_STATE->signalSelectedTagUpdated();
 }
-void MediaDisplay::resizeEvent(QResizeEvent* event) {
-    Q_UNUSED(event);
-
-    // force QLabel to follow fixed dimensions
-    // based on the loaded QPixmap aspect ratio
-    if (m_isImage)
-        resizeImage();
-}
 
 void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
     QMimeDatabase db;
     const QMimeData* data = event->mimeData();
-    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->id() <= 0 || event->source() != nullptr) {
+    // Ignore drag events while selected tag is root, and ignore all drags that do not come from outside the application
+    if (!APP_STATE->selectedTag() || APP_STATE->selectedTag()->isRoot() || event->source()) {
         event->ignore();
     } else if (data->hasUrls()) {
-        QString filePath = data->urls().first().toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
+        // Only accept file drags that are images or videos
+        QString filePath = data->urls().front().toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
         QString mimeType = db.mimeTypeForFile(filePath).name();
         if (mimeType.startsWith("image") || mimeType.startsWith("video")) {
             event->setDropAction(Qt::CopyAction);
@@ -190,22 +180,11 @@ void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
 }
 
 void MediaDisplay::dropEvent(QDropEvent *event) {
-    QUrl url = event->mimeData()->urls().first();
-    QString filePath = event->mimeData()->urls().first().toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
+    QUrl url = event->mimeData()->urls()[0];
+    QString filePath = url.toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
     if (filePath.startsWith("file:///"))
         filePath = filePath.slice(8);
     if (!filePath.isEmpty()) {
         insertFile(filePath);
     }
-
-}
-void MediaDisplay::resizeImage() {
-    int w = ui->viewport->width();
-    int h = static_cast<PixmapLabel*>(u_displayWidget)->heightForWidth(w);
-    static_cast<PixmapLabel*>(u_displayWidget)->setFixedHeight(std::min(h, ui->viewport->height()));
-
-}
-
-void MediaDisplay::disableControls() {
-    ui->openButton->setEnabled(false);
 }

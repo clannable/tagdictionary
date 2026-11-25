@@ -20,22 +20,15 @@ public:
     QStringList files() const { return m_files; }
 
 public slots:
-    void disableControls();
-
-
     void save();
     void openFile();
     void setFile(int index);
-
     void addFile();
-
     void refresh();
-
 signals:
     void fileAdded(QString file);
 
 protected:
-    virtual void resizeEvent(QResizeEvent *event) override;
     virtual void dragEnterEvent(QDragEnterEvent *event) override;
     virtual void dropEvent(QDropEvent *event) override;
 
@@ -53,9 +46,6 @@ private:
     void showVideo(QString filePath);
 
     void insertFile(QString filePath);
-
-    void resizeImage();
-
 
 private slots:
     void onEditModeChange(bool editModeEnabled);

@@ -13,22 +13,18 @@ public:
     PixmapLabel(QWidget* parent = nullptr);
     ~PixmapLabel();
 
-    virtual QSize sizeHint() const override;
-
     bool hasImage();
-
+    int  heightForWidth(int width) const override;
     void setFile(const QString& filePath);
-    int heightForWidth(int width) const override;
 
 public slots:
     void setImage(QImage image);
     void onMovieUpdate();
-protected:
 
+protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-
     QPixmap m_pixmap;
     int m_cols;
     int m_rows;

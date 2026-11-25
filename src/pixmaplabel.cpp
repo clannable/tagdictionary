@@ -9,12 +9,13 @@ PixmapLabel::PixmapLabel(QWidget* parent) :
     m_rows(0)
 {
     m_loader = new ImageLoader();
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setAlignment(Qt::AlignCenter);
     connect(m_loader, &ImageLoader::imageReady, this, &PixmapLabel::setImage);
 }
 
 PixmapLabel::~PixmapLabel() {
-    if (m_movie != nullptr)
+    if (m_movie)
         delete m_movie;
     delete m_loader;
 }
@@ -64,27 +65,11 @@ void PixmapLabel::setImage(QImage image) {
     update();
 }
 
-
 void PixmapLabel::onMovieUpdate() {
     update();
 }
 
-/* virtual */ QSize PixmapLabel::sizeHint() const
-{
-    if (m_cols != 0)
-    {
-        int width = this->parentWidget()->width();
-        return QSize(width, heightForWidth(width));
-    }
-    else
-    {
-        return QSize(200, 200);
-    }
-}
-
-
-
-/* virtual */ int PixmapLabel::heightForWidth(int width) const
+int PixmapLabel::heightForWidth(int width) const
 {
     if (m_cols == 0) return parentWidget()->height();
 
@@ -92,9 +77,7 @@ void PixmapLabel::onMovieUpdate() {
     return m_rows < scaleHeight ? m_rows : scaleHeight;
 }
 
-
-
-/* virtual */ void PixmapLabel::paintEvent(QPaintEvent* event)
+void PixmapLabel::paintEvent(QPaintEvent* event)
 {
     QLabel::paintEvent(event);
 
@@ -110,13 +93,12 @@ void PixmapLabel::onMovieUpdate() {
     // Get current pixmap size
     QSize pixmapSize = pm.size();
 
-
     // Scale size to painted rect
     pixmapSize.scale(event->rect().size(), Qt::KeepAspectRatio);
 
     // Scale the pixmap
     QPixmap pixmapScaled = pm.scaled(pixmapSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    // Draw the pixmap
+    // Draw the pixmap positioned at the center of the widget
     painter.drawPixmap(QPoint((this->width()/2) - (pixmapScaled.width()/2), (this->height()/2) - (pixmapScaled.height()/2)), pixmapScaled);
 }
