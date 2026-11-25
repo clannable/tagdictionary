@@ -14,6 +14,6 @@ extern std::map<int, TagNode*> TAGS;
 extern std::map<std::string, int> TAG_PATH_MAP;
 extern bool AUTOSAVE_ENABLED;
 extern bool CONVERT_RELATED_FLAG;
-
+extern bool HIDE_EMPTY_LISTS;
 extern AppState* APP_STATE;
 #endif // GLOBALS_H

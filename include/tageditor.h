@@ -12,6 +12,21 @@ namespace Ui {
 class TagEditor;
 }
 
+class TagListContainer : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit TagListContainer(QString title, TagList* list, QWidget* parent = nullptr);
+
+    void setLineVisible(bool visible);
+    TagList* list() const { return m_list; }
+    //! Returns `true` if the container's TagList widget is empty, `false` otherwise.
+    bool empty() { return m_list->topLevelItemCount() == 0; }
+
+private:
+    TagList* m_list;
+};
+
 class TagEditor : public QWidget
 {
     Q_OBJECT
@@ -27,6 +42,10 @@ public slots:
     void setTag(TagNode *tag);
     void save();
     void cleanSublists();
+    void checkEmptyLists();
+
+protected:
+    virtual void resizeEvent(QResizeEvent* event) override;
 
 private slots:
     void onAnchorClick(const QUrl &link);
@@ -42,10 +61,10 @@ private:
     TagList* u_relatedList;
     TagList* u_frequentList;
     TagList* u_excludesList;
-
     QString m_iconPath;
+    QList<TagListContainer*> lists;
 
-    static QFrame* createHLine();
+    void hideList(int index);
 };
 
 #endif // TAGEDITOR_H

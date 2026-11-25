@@ -4,33 +4,60 @@
 #include "globals.h"
 #include "icondialog.h"
 
+TagListContainer::TagListContainer(QString title, TagList* list, QWidget* parent) : QWidget(parent), m_list(list) {
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->setContentsMargins(0,0,0,0);
+    layout->setSpacing(1);
+    setLayout(layout);
+    layout->addWidget(new QLabel(title));
+    QFrame* f = new QFrame();
+    f->setFrameShape(QFrame::HLine);
+    f->setFrameShadow(QFrame::Sunken);
+    layout->addWidget(list);
+    layout->addWidget(f);
+    connect(APP_STATE, &AppState::editModeChanged, this, [f](bool editModeEnabled) {
+        if (editModeEnabled) f->hide();
+        else f->show();
+    });
+}
+//! Show/hide the horizontal line below the list widget.
+void TagListContainer::setLineVisible(bool visible) {
+    if (visible) layout()->itemAt(2)->widget()->show();
+    else layout()->itemAt(2)->widget()->hide();
+}
 
 TagEditor::TagEditor(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::TagEditor)
 {
     ui->setupUi(this);
+
+    // Set initial view for no tag selected, edit mode disabled
     ui->iconButton->hide();
     ui->descriptionEditor->hide();
     ui->tagLabelEdit->setText("");
+    ui->scrollArea->setMaximumHeight(height() * 0.7);
+    ui->listContainer->hide();
 
     u_relatedList = new TagList();
     u_requiredList = new TagList();
     u_frequentList = new TagList();
     u_excludesList = new TagList();
 
-    ui->listContainer->layout()->addWidget(new QLabel("Required Tags"));
-    ui->listContainer->layout()->addWidget(u_requiredList);
-    ui->listContainer->layout()->addWidget(createHLine());
-    ui->listContainer->layout()->addWidget(new QLabel("Excludes"));
-    ui->listContainer->layout()->addWidget(u_excludesList);
-    ui->listContainer->layout()->addWidget(createHLine());
-    ui->listContainer->layout()->addWidget(new QLabel("Frequently Tagged With"));
-    ui->listContainer->layout()->addWidget(u_frequentList);
-    ui->listContainer->layout()->addWidget(createHLine());
-    ui->listContainer->layout()->addWidget(new QLabel("Related Tags"));
-    ui->listContainer->layout()->addWidget(u_relatedList);
+    QVBoxLayout* layout = static_cast<QVBoxLayout*>(ui->listContainer->layout());
+    lists.append(new TagListContainer("Required Tags", u_requiredList));
+    layout->addWidget(lists[0], 1);
+    lists.append(new TagListContainer("Excludes", u_excludesList));
+    layout->addWidget(lists[1], 1);
+    lists.append(new TagListContainer("Frequently Tagged With", u_frequentList));
+    layout->addWidget(lists[2], 1);
+    lists.append(new TagListContainer("Related Tags", u_relatedList));
+    layout->addWidget(lists[3], 1);
 
+    static_cast<QVBoxLayout*>(ui->scrollArea->widget()->layout())->insertStretch(0, 1);
+
+    // Signals, slots
     connect(ui->editButton, &QPushButton::clicked, this, [] { APP_STATE->toggleEditMode(); });
     connect(ui->saveButton, &QPushButton::clicked, this, &TagEditor::save);
     connect(ui->iconButton, &QToolButton::clicked, this, &TagEditor::selectIcon);
@@ -44,19 +71,10 @@ TagEditor::~TagEditor()
     delete ui;
 }
 
+//! Set the tag shown in the editor.
+//! If the selected tag is the root node, nothing will be shown and editing will be disabled.
 void TagEditor::setTag(TagNode *tag) {
-
-    if (tag == nullptr) {
-        ui->listContainer->hide();
-        ui->editButton->setEnabled(false);
-        ui->tagLabelEdit->setText("");
-        ui->iconButton->setIcon(QIcon());
-        ui->iconLabel->setPixmap(QPixmap());
-        ui->description->setMarkdown("");
-        ui->description->show();
-        return;
-    }
-    else if (tag->id() <= 0) {
+    if (!tag || tag->isRoot()) {
         ui->listContainer->hide();
         ui->tagLabelEdit->setText("");
         ui->editButton->setEnabled(false);
@@ -67,18 +85,6 @@ void TagEditor::setTag(TagNode *tag) {
         ui->saveButton->setEnabled(false);
         return;
     }
-    ui->iconLabel->show();
-    ui->editButton->show();
-    ui->saveButton->show();
-    u_relatedList->setValues(tag->related());
-    u_excludesList->setValues(tag->excludes());
-    u_requiredList->setValues(tag->required());
-    u_frequentList->setValues(tag->frequent());
-
-    ui->listContainer->show();
-    ui->editButton->setEnabled(true);
-    ui->description->show();
-    ui->descriptionEditor->hide();
 
     QString ic = QString::fromStdString(tag->icon());
     if (QFileInfo::exists(ic) || ic.startsWith(":/icons/"))
@@ -86,14 +92,24 @@ void TagEditor::setTag(TagNode *tag) {
     else if (!ic.startsWith(":/icons/"))
         m_iconPath = ":/icons/" + ic;
 
-    QIcon icon = QIcon(m_iconPath);
-    QString description = QString::fromStdString(tag->description());
+    ui->iconLabel->show();
+    ui->iconLabel->setPixmap(QIcon(m_iconPath).pixmap(QSize(20, 20)));
 
-    ui->iconLabel->setPixmap(icon.pixmap(QSize(20, 20)));
-    ui->description->setMarkdown(description);
-    ui->descriptionEditor->setText(description);
+    ui->editButton->show();
+    ui->saveButton->show();
+
+    ui->editButton->setEnabled(true);
+    ui->description->show();
+    ui->description->setMarkdown(QString::fromStdString(tag->description()));
+    ui->descriptionEditor->hide();
     ui->tagLabelEdit->setText(QString::fromStdString(tag->key()));
-    ui->iconButton->setIcon(QIcon(m_iconPath));
+
+    u_relatedList->setValues(tag->related());
+    u_excludesList->setValues(tag->excludes());
+    u_requiredList->setValues(tag->required());
+    u_frequentList->setValues(tag->frequent());
+
+    checkEmptyLists();
 }
 
 void TagEditor::onEditModeChange(bool editModeEnabled) {
@@ -105,31 +121,39 @@ void TagEditor::onEditModeChange(bool editModeEnabled) {
         : QIcon::ThemeIcon::MailMessageNew
     ));
     ui->editButton->setText(editModeEnabled ? "Cancel" : "Edit Tag");
+
     if (editModeEnabled) {
         ui->description->hide();
-        ui->descriptionEditor->setText(QString::fromStdString(selectedTag->description()));
         ui->descriptionEditor->show();
+        ui->descriptionEditor->setText(QString::fromStdString(selectedTag->description()));
+
         ui->iconButton->show();
+        ui->iconButton->setIcon(QIcon(m_iconPath));
         ui->iconLabel->hide();
-        ui->listContainer->layout()->itemAt(2)->widget()->hide();
-        ui->listContainer->layout()->itemAt(5)->widget()->hide();
-        ui->listContainer->layout()->itemAt(8)->widget()->hide();
+
+        ui->listContainer->show();
+        for(const auto &l : lists) l->show();    // Always show all sub-lists when in edit mode
     }
     else {
+        // Hide input fields, show read-only widgets
         ui->descriptionEditor->hide();
         ui->description->show();
+        ui->description->setMarkdown(QString::fromStdString(selectedTag->description()));
+        ui->tagLabelEdit->setText(QString::fromStdString(selectedTag->key()));
         ui->iconButton->hide();
         ui->iconLabel->show();
-        u_relatedList->setValues(APP_STATE->selectedTag()->related());
-        u_excludesList->setValues(APP_STATE->selectedTag()->excludes());
-        u_requiredList->setValues(APP_STATE->selectedTag()->required());
-        u_frequentList->setValues(APP_STATE->selectedTag()->frequent());
-        ui->listContainer->layout()->itemAt(2)->widget()->show();
-        ui->listContainer->layout()->itemAt(5)->widget()->show();
-        ui->listContainer->layout()->itemAt(8)->widget()->show();
+        ui->iconLabel->setPixmap(QIcon(QString::fromStdString(selectedTag->icon())).pixmap(QSize(20,20)));
+
+        u_relatedList->setValues(selectedTag->related());
+        u_excludesList->setValues(selectedTag->excludes());
+        u_requiredList->setValues(selectedTag->required());
+        u_frequentList->setValues(selectedTag->frequent());
+
+        checkEmptyLists();
     }
 }
 
+//! Opens the icon selection dialog
 void TagEditor::selectIcon() {
     if (!APP_STATE->isSelectedTagEditable()) return;
     IconDialog* dialog = new IconDialog(this);
@@ -139,6 +163,8 @@ void TagEditor::selectIcon() {
     dialog->exec();
 }
 
+//! Triggers when the icon selection dialog is accepted and closed.
+//! Updates the icon shown in the button next to the name input field.
 void TagEditor::iconSelected(QString icon) {
     if (icon == m_iconPath) return;
     if (!icon.isEmpty()) {
@@ -154,24 +180,28 @@ void TagEditor::iconSelected(QString icon) {
 }
 
 void TagEditor::cleanSublists() {
-    if (APP_STATE->selectedTag() != nullptr) {
-        u_relatedList->clean();
-        u_requiredList->clean();
-        u_frequentList->clean();
-        u_excludesList->clean();
-    }
+    if (!APP_STATE->selectedTag()) return;
+    u_relatedList->clean();
+    u_requiredList->clean();
+    u_frequentList->clean();
+    u_excludesList->clean();
 }
 
+/*!
+ *  Updates the following values in the currently selected tag with their related controls:
+*   - name
+*   - description
+*   - icon
+*   - sub-lists
+*   - if the "replaces parent" option is checked
+*
+* Then emits the `tagSaved` signal to the main window so that the tag's file list can be updated.
+*/
 void TagEditor::save() {
-    QIcon icon = QIcon(m_iconPath);
-    ui->iconLabel->setPixmap(icon.pixmap(QSize(20,20)));
-    QString updatedDescription = ui->descriptionEditor->toPlainText();
-    ui->description->setMarkdown(updatedDescription);
-
     TagNode* tag = APP_STATE->selectedTag();
 
     tag->setKey(ui->tagLabelEdit->text());
-    tag->setDescription(updatedDescription);
+    tag->setDescription(ui->descriptionEditor->toPlainText());
     tag->setIcon(m_iconPath);
     tag->setRelated(u_relatedList->values());
     tag->setRequired(u_requiredList->values());
@@ -182,6 +212,11 @@ void TagEditor::save() {
     emit tagSaved(tag);
 }
 
+/*!
+ *  Triggers when an internal link starting with `"#"` is clicked in the tag description.
+ * If the link starts with `"#$"`, emits the `displayLinkClicked` signal containing the page number the MediaDisplay widget should navigate to.
+ * Otherwise, it is treated link a normal anchor link in the description viewer.
+ */
 void TagEditor::onAnchorClick(const QUrl &link) {
     QString path = link.toString();
     if (path.startsWith("#$"))
@@ -190,9 +225,34 @@ void TagEditor::onAnchorClick(const QUrl &link) {
         ui->description->scrollToAnchor(path.slice(1));
 }
 
-QFrame* TagEditor::createHLine() {
-    QFrame* frame = new QFrame();
-    frame->setFrameShape(QFrame::HLine);
-    frame->setFrameShadow(QFrame::Sunken);
-    return frame;
+void TagEditor::resizeEvent(QResizeEvent* event) {
+    ui->scrollArea->setMaximumHeight(height() * 0.7);
+}
+
+void TagEditor::checkEmptyLists() {
+    if (HIDE_EMPTY_LISTS) {
+        // If HIDE_EMPTY_LISTS is enabled, do not show any empty-sublists.
+        int lastIndex = -1; // The index of the bottom-most visible list
+        for (int i = 0; i < lists.count(); i++) {
+            if (lists[i]->empty()) lists[i]->hide();
+            else { lists[i]->show(); lastIndex = max(i, lastIndex); }
+        }
+        if (lastIndex == -1) ui->listContainer->hide(); // If no lists are visible, hide the containing widget.
+        else {
+            ui->listContainer->show();
+            // Make the separating horizontal line in each list container widget visible except for the bottom-most visible list.
+            // This effectively collapses the line of the last list into the bottom border of the scroll area.
+            for (int j = 0; j < lists.count(); j++)
+                lists[j]->setLineVisible(true);
+            lists[lastIndex]->setLineVisible(false);
+        }
+    } else {
+        ui->listContainer->show();
+        // If not enabled, show all lists and make all horizontal separators visible except the last one.
+        for (int k = 0; k < lists.count(); k++) {
+            lists[k]->show();
+            lists[k]->setLineVisible(true);
+        }
+        lists[lists.count()-1]->setLineVisible(false);
+    }
 }
