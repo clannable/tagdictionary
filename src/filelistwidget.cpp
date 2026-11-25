@@ -82,7 +82,7 @@ void FileListWidget::onOpenFiles() {
 
 void FileListWidget::onRemoveFile() {
     QListWidgetItem *item = ui->fileList->currentItem();
-    if (item != nullptr) {
+    if (item) {
         delete item;
         ui->fileList->clearSelection();
         ui->removeButton->setEnabled(false);

@@ -34,21 +34,15 @@ TagNode::TagNode(json data, string key) : m_key(key) {
     TAGS[m_id] = this;
 }
 
-bool TagNode::isRoot() const { return m_parent == nullptr; }
+//! Returns `true` if the provided node is the top-level root node, false otherwise.
+//! There should only ever be one root node in the tree structure, which acts as the parent to all top-level tags. The root node has no ID or parent node.
+bool TagNode::isRoot() { return m_id <= 0 && m_parent == nullptr; }
 
-void TagNode::setKey(string key) {
-    m_key = key;
-}
-void TagNode::setKey(QString key) {
-    m_key = key.toStdString();
-}
+void TagNode::setKey(string key) { m_key = key; }
+void TagNode::setKey(QString key) { m_key = key.toStdString(); }
 
-void TagNode::setIcon(string icon) {
-    m_icon = icon;
-}
-void TagNode::setIcon(QString icon) {
-    m_icon = icon.toStdString();
-}
+void TagNode::setIcon(string icon) { m_icon = icon; }
+void TagNode::setIcon(QString icon) { m_icon = icon.toStdString(); }
 
 void TagNode::setDescription(string description) { m_description = description; }
 void TagNode::setDescription(QString description) { m_description = description.toStdString(); }
@@ -91,29 +85,33 @@ void TagNode::setFiles(QStringList files) {
 }
 void TagNode::addFile(string file) { m_files.push_back(file); }
 
+//! Assigns the provided tag as this tag's parent, and adds this tag's ID to the new parent's list of children.
+//! If this tag already has a parent, its ID is removed from that parent's list of children.
 void TagNode::setParent(TagNode* parent) {
     if (m_parent == parent) return;
-    if (m_parent != nullptr) m_parent->removeChild(m_id);
-    if (parent != nullptr) parent->addChild(m_id);
+    if (m_parent) m_parent->removeChild(m_id);
+    if (parent) parent->addChild(m_id);
     m_parent = parent;
 }
 
+//! Add the provided tag ID to this tag's list of children, if not already present.
+//! Assigns this tag as the added tag's parent.
 void TagNode::addChild(int id) {
     if (id == 0) return;
     const auto itr = std::find(m_children.begin(), m_children.end(), id);
     if (itr != m_children.end()) return;
-
     m_children.push_back(id);
+    TAGS[id]->setParent(this);
 }
 
 void TagNode::setReplacesParent(bool replacesParent) { m_replacesParent = replacesParent; }
 
+//! Remove a tag with the given ID from this tag's list of children, and unassign the removed tag's parent.
 void TagNode::removeChild(int id) {
     const auto itr = std::find(m_children.begin(), m_children.end(), id);
     if (itr == m_children.end()) return;
     m_children.erase(itr);
     TAGS[id]->setParent(nullptr);
-
 }
 
 string TagNode::getFullPath() {
@@ -124,6 +122,7 @@ string TagNode::getFullPath() {
     return path;
 }
 
+//! Returns a JSON object representation of this tag.
 json TagNode::toJson() {
     json ret = json({
         { "id", m_id },
@@ -140,6 +139,7 @@ json TagNode::toJson() {
     return ret;
 }
 
+//! Removes any tags that no longer exist from this tag's sub-lists.
 void TagNode::cleanSublists() {
     for (auto itr = m_related.begin(); itr != m_related.end(); itr++) {
         int id = itr->is_string() ? TagNode::parseId(itr->get<string>()) : itr->get<int>();
@@ -157,25 +157,3 @@ void TagNode::cleanSublists() {
             m_frequent.erase(itr--);
     }
 }
-
-// void TagNode::convertSublistsToId() {
-//     if (!isRoot()) {
-
-//         std::list<int> related_ids = {};
-//         std::list<int> required_ids = {};
-
-//         for (json& el : m_related)
-//             related_ids.push_back(TAG_PATH_MAP[el.get<string>()]);
-
-//         for (json& el : m_required)
-//             required_ids.push_back(TAG_PATH_MAP[el.get<string>()]);
-
-
-//         m_related = related_ids;
-//         m_required = required_ids;
-//     }
-
-//     for (TagNode* child : m_children)
-//         child->convertSublistsToId();
-// }
-

@@ -17,7 +17,9 @@ IconPanel::IconPanel(QString iconPath, QWidget *parent)
     setToolTip(m_shortName);
 }
 
-void IconPanel::mousePressEvent(QMouseEvent *event) { emit clicked(this); }
+void IconPanel::mousePressEvent(QMouseEvent *event) {
+    emit clicked(this);
+}
 
 void IconPanel::showEvent(QShowEvent *event) {
     Q_UNUSED(event);
@@ -28,11 +30,10 @@ void IconPanel::showEvent(QShowEvent *event) {
 void IconPanel::setSelected(bool selected) {
     if (m_selected == selected) return;
     m_selected = selected;
-    if (ui == nullptr || ui->frame == nullptr) return;
+    if (!ui || !ui->frame) return;
     ui->frame->setStyleSheet(QString("border-style: ") + (m_selected ? "solid;" : "none;"));
 }
 
-IconPanel::~IconPanel()
-{
+IconPanel::~IconPanel() {
     delete ui;
 }

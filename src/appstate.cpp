@@ -11,13 +11,13 @@ void AppState::setEditModeEnabled(bool editModeEnabled) {
 void AppState::setSelectedTag(TagNode* selectedTag) {
     if (m_editModeEnabled) return;
     if (m_selectedTag == selectedTag) return;
-    if (m_selectedTag != nullptr && selectedTag != nullptr && *m_selectedTag == *selectedTag) return;
+    if (m_selectedTag && selectedTag && *m_selectedTag == *selectedTag) return;
     m_selectedTag = selectedTag;
     emit selectedTagChanged(selectedTag);
 }
 
 bool AppState::isSelectedTagEditable()  {
-    return !(m_selectedTag == nullptr || m_selectedTag->id() <= 0);
+    return m_selectedTag && !m_selectedTag->isRoot();
 }
 
 void AppState::toggleEditMode() {

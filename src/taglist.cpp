@@ -33,6 +33,7 @@ protected:
 TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
     setFixedHeight(2);
     setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setDropIndicatorShown(true);
     setColumnCount(2);
     setHeaderHidden(true);
@@ -80,7 +81,7 @@ TagList::TagList(QWidget* parent) : QTreeWidget(parent) {
     QAction* toggleAction = addAction("Include sub-tags");
     toggleAction->setCheckable(true);
     connect(toggleAction, &QAction::toggled, this, [this](bool checked) { toggleIncludeSubtags(m_contextItem, checked); });
-    connect(addAction("Remove item"), &QAction::triggered, this, [this]() { removeItem(m_contextItem); });
+    connect(addAction("Remove item"), &QAction::triggered, this, [this]() { delete m_contextItem; });
 }
 
 void TagList::setValues(nlohmann::json::array_t ids) {
@@ -100,13 +101,13 @@ void TagList::setValues(nlohmann::json::array_t ids) {
     header()->resizeSection(0, 10);
     expandAll();
     scrollToTop();
-    setFixedHeight(min((21*topLevelItemCount())+2, 107));
+    setFixedHeight((21*topLevelItemCount())+2);
 
 }
 
 void TagList::contextMenuEvent(QContextMenuEvent *event) {
     if (!APP_STATE->editModeEnabled()) return;
-    if ((m_contextItem = this->itemAt(event->pos())) == nullptr) return;
+    if (!(m_contextItem = this->itemAt(event->pos()))) return;
 
     QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
@@ -126,21 +127,11 @@ void TagList::contextMenuEvent(QContextMenuEvent *event) {
     menu->exec(QCursor::pos());
 }
 
-void TagList::removeItem(QTreeWidgetItem* item) {
-    if (item->parent() != nullptr && item->parent()->childCount() == 1) {
-        item->parent()->setText(0, "");
-        item->parent()->setData(0, Qt::UserRole, Modifier::NONE);
-    }
-    delete item;
-}
-
 void TagList::toggleIncludeSubtags(QTreeWidgetItem* item, bool checked) {
     item->setData(1, Qt::UserRole+1, checked);
     QString label = item->text(1);
-    if (checked && !label.endsWith("*"))
-        label += "*";
-    else if (!checked && label.endsWith("*"))
-        label = label.left(label.length()-1);
+    if (checked && !label.endsWith("*")) label += "*";
+    else if (!checked && label.endsWith("*")) label = label.left(label.length()-1);
     item->setText(1, label);
 }
 
@@ -154,9 +145,10 @@ void TagList::onEditModeChanged(bool editModeEnabled) {
         : "");
     if (editModeEnabled) {
         show();
-        setFixedHeight(107);
+        setFixedHeight(max(65, (21*(topLevelItemCount()+1))+2));
     }
-    else setFixedHeight(21*topLevelItemCount()+2);
+    else
+        setFixedHeight(21*topLevelItemCount()+2);
 
 }
 
@@ -170,6 +162,7 @@ void TagList::removeTag(int id) {
         ++it;
     }
     checkModifiers();
+    setFixedHeight(max(65, (21*(topLevelItemCount()+(APP_STATE->editModeEnabled() ? 1 : 0)))+2));
 }
 
 void TagList::checkModifiers() {
@@ -223,7 +216,7 @@ void TagList::dropEvent(QDropEvent *event) {
     QTreeWidgetItem* dest = itemAt(event->position().toPoint());
 
     int index;
-    if (dest != nullptr)
+    if (dest)
         index = indexOfTopLevelItem(dest);
     else
         index = topLevelItemCount();
@@ -231,8 +224,8 @@ void TagList::dropEvent(QDropEvent *event) {
         index += 1;
 
     insertTopLevelItem(index, item);
-
-    if (dynamic_cast<TagList*>(event->source()) != nullptr)
+    setFixedHeight(max(65, (21*(topLevelItemCount()+1))+2));
+    if (dynamic_cast<TagList*>(event->source()))
         dynamic_cast<TagList*>(event->source())->removeTag(id);
 }
 
@@ -350,7 +343,7 @@ QStringList TagList::mimeTypes() const {
 
 QMimeData* TagList::mimeData(const QList<QTreeWidgetItem*> &items) const {
     QMimeData* data = QTreeWidget::mimeData(items);
-    if (data != nullptr) {
+    if (data) {
         data->setData("application/x-tag-id", QVariant(items.first()->data(1, Qt::UserRole)).toByteArray());
         data->setData("application/x-tag-token", QVariant(itemToString(items.first())).toByteArray());
     }

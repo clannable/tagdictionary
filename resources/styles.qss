@@ -101,8 +101,9 @@ TagEditor #listContainer {
     padding-bottom: 4px;
 }
 
-TagEditor #listContainer .QLabel {
+TagEditor TagListContainer .QLabel {
     padding-left: 0.5em;
+    font: 600 10pt "Segoe UI";
 }
 
 TagEditor .QTextBrowser {
@@ -143,10 +144,6 @@ TagEditor QTextEdit QScrollBar::handle:vertical, TagList QScrollbar::handle:vert
     width: 6px;
     border-radius: 3px;
     background: #aaaaaa;
-}
-
-TagEditor .QLabel {
-    font: 600 10pt "Segoe UI";
 }
 
 TagEditor ReplaceWidget .QLabel {

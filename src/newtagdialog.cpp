@@ -41,7 +41,7 @@ void NewTagDialog::setTag(int id) {
     for (int c : tag->children())
         m_invalidNames.push_back(QString::fromStdString(TAGS[c]->key()));
 
-    if (tag != nullptr) {
+    if (tag) {
         std::string parentIcon = tag->icon();
         QString icon = QString::fromStdString(parentIcon.empty() ? ":/icons/flat/tag" : parentIcon);
         m_icon = icon;

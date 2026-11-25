@@ -19,7 +19,7 @@ IconDialog::~IconDialog() {
 
 void IconDialog::resizeEvent(QResizeEvent *event) { Q_UNUSED(event);
     if (!isVisible()) return;
-    if (ui->scrollArea->viewport() == nullptr) return;
+    if (!ui->scrollArea->viewport()) return;
     int cols = getAvailableColumns();
     if (cols+1 != ui->iconTable->columnCount())
         ui->iconTable->updateLayout(cols);
@@ -58,7 +58,7 @@ void IconDialog::clearSelection() {
 
 void IconDialog::accept() {
     IconPanel *selected = ui->iconTable->currentPanel();
-    emit iconSelected(selected != nullptr ? selected->icon() : m_iconPath);
+    emit iconSelected(selected ? selected->icon() : m_iconPath);
     QDialog::accept();
 }
 

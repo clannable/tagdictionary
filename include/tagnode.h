@@ -19,7 +19,7 @@ public:
 
     static TagNode* createRoot(json data);
 
-    bool isRoot() const;
+    bool isRoot();
 
     int id() const { return m_id; }
 

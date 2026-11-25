@@ -32,31 +32,29 @@ private:
     Ui::MainWindow *ui;
 
     QString m_jsonFilePath;
-
-    QAction* a_save;
-    QAction* a_open;
-    QAction* a_newTag;
-    QAction* a_icon;
-
-    QMenu* u_recent;
+    QStringList m_recentFiles;
     QTimer* m_searchDebounce;
 
     void pushToRecent();
     void setupRecentFileList();
 
 private slots:
-    void onSearchChange();
-    void onSearchTimeout();
+    // Menu bar slots
+    void newJson();
+    void openJson();
+    void openRecentFile(QAction* action);
+    void saveJson();
+    void setAutosaveEnabled(bool checked);
+    void setHideEmptyLists(bool checked);
+    // Search slots
+    void restartSearchDebounce();
+    void searchTree();
 
-    // void setEditMode(bool mode);
+    void onSelectedTagChanged(TagNode* selectedTag);
     void onTagTreeChange();
     void onEditorSave();
     void onTagUpdate();
-    void onToggleAutoSave(bool checked);
 
-    void saveJson();
-    void openJson();
-    void newJson();
     void reloadJson();
 };
 #endif // MAINWINDOW_H

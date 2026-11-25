@@ -40,34 +40,28 @@ ReplaceWidget::ReplaceWidget(QWidget *parent)
 }
 
 
-void ReplaceWidget::setTag(const TagNode *tag) {
-    if (tag != nullptr && tag->id() > 0 && tag->parent() != nullptr && tag->parent()->id() > 0) {
+void ReplaceWidget::setTag(TagNode *tag) {
+    if (!tag || tag->isRoot()) hide();
+    else {
         QString ic = QString::fromStdString(tag->parent()->icon());
         QIcon icon = QIcon(ic);
         static_cast<QCheckBox*>(layout()->itemAt(0)->widget())->setChecked(tag->replacesParent());
         static_cast<QLabel*>(layout()->itemAt(2)->widget())->setPixmap(icon.pixmap(QSize(15, 15)));
         static_cast<QLabel*>(layout()->itemAt(3)->widget())->setText(QString::fromStdString(tag->parent()->key()));
-        if (tag->replacesParent())
-            show();
-        else
-            hide();
-    } else {
-        hide();
+        if (tag->replacesParent()) show();
+        else hide();
     }
 }
 
 void ReplaceWidget::onEditModeChange(bool editModeEnabled) {
     if (editModeEnabled) {
-        if (APP_STATE->selectedTag()->parent() != nullptr && APP_STATE->selectedTag()->parent()->id() > 0)
-            show();
+        if (APP_STATE->selectedTag()->parent() && !APP_STATE->selectedTag()->parent()->isRoot()) show();
         else hide();
         layout()->itemAt(0)->widget()->show();
         layout()->itemAt(4)->widget()->show();
         setCursor(Qt::PointingHandCursor);
-    }
-    else {
-        if (isReplaceChecked())
-            show();
+    } else {
+        if (isReplaceChecked()) show();
         else hide();
         layout()->itemAt(0)->widget()->hide();
         layout()->itemAt(4)->widget()->hide();
@@ -85,7 +79,9 @@ bool ReplaceWidget::isReplaceChecked() {
 
 void ReplaceWidget::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton && APP_STATE->editModeEnabled() &&
-        APP_STATE->selectedTag()->parent() != nullptr && APP_STATE->selectedTag()->parent()->id() > 0)
-        static_cast<QCheckBox*>(layout()->itemAt(0)->widget())->toggle();
+        APP_STATE->selectedTag()->parent() && !APP_STATE->selectedTag()->parent()->isRoot())
+    {
+        static_cast<QCheckBox*>(layout()->itemAt(0)->widget())->toggle();       
+    }
 }
 

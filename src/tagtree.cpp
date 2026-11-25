@@ -32,8 +32,7 @@ QTreeWidgetItem* TagTree::findTag(int tagId) {
     QTreeWidgetItemIterator it(this);
 
     while (*it) {
-        if ((*it)->data(0, Qt::UserRole) == tagId)
-            return *it;
+        if ((*it)->data(0, Qt::UserRole) == tagId) return *it;
         ++it;
     }
     return m_rootItem;
@@ -43,7 +42,7 @@ void TagTree::loadTags() {
     clear();
     m_rootItem = nullptr;
     m_items.clear();
-    if (m_rootNode != nullptr)
+    if (m_rootNode)
         delete m_rootNode;
 
     m_rootNode = new TagNode();
@@ -54,7 +53,7 @@ void TagTree::loadTags() {
         m_items[id] = new TagTreeItem(tag);
 
     for (const auto [id, item] : m_items.asKeyValueRange()) {
-        if (item->tag()->parent() == nullptr)
+        if (!item->tag()->parent())
             m_rootItem->addChild(item);
         else
             m_items[item->tag()->parent()->id()]->addChild(item);
@@ -131,7 +130,8 @@ void TagTree::onRemoveTag(int id) {
 
 void TagTree::expandTreeTo(QTreeWidgetItem* item) {
     QTreeWidgetItem* ptr = item;
-    while ((ptr = ptr->parent()) != nullptr)
+
+    while ((ptr = ptr->parent()))
         expandItem(ptr);
     scrollToItem(item);
 }
@@ -179,16 +179,16 @@ void TagTree::collapseRecursive(QTreeWidgetItem* item) {
 
 void TagTree::onItemDoubleClicked(QTreeWidgetItem* item, int column) {
     Q_UNUSED(column);
-    TagNode* tag = static_cast<TagTreeItem*>(item)->tag();
-    if (!tag->isRoot()) {
-        APP_STATE->setSelectedTag(tag);
+    int id = item->data(0, Qt::UserRole).toInt();
+    if (id != 0) {
+        APP_STATE->setSelectedTag(TAGS[id]);
         APP_STATE->setEditModeEnabled(true);
     }
 }
 
 void TagTree::onItemSelected(QTreeWidgetItem* current, QTreeWidgetItem* previous) { Q_UNUSED(previous);
-    if (APP_STATE->editModeEnabled() || current == nullptr) return;
-    APP_STATE->setSelectedTag(static_cast<TagTreeItem*>(current)->tag());
+    if (APP_STATE->editModeEnabled() || !current) return;
+    APP_STATE->setSelectedTag(TAGS[current->data(0, Qt::UserRole).toInt()]);
 }
 
 void TagTree::onEditModeChanged(bool editModeEnabled) {
@@ -199,36 +199,44 @@ void TagTree::onEditModeChanged(bool editModeEnabled) {
 }
 
 void TagTree::dropEvent(QDropEvent *event) {
+    // Only allow drops from itself (internal move)
     if (event->source() != this) {
         event->ignore();
         return;
     }
     QTreeWidgetItem* dest = itemAt(event->position().toPoint());
+    if (!dest) dest = m_rootItem;
     int id = QVariant(event->mimeData()->data("application/x-tag-id")).toInt();
+    // Do nothing when the drop occurs over the selected tag itself
     if (dest->data(0, Qt::UserRole).toInt() == id) {
         event->ignore();
         return;
     }
-    if (QMessageBox::question(this, "Move tag", "Move \"" + QString::fromStdString(TAGS[id]->key()) + "\" here?") != QMessageBox::Yes) {
+    // Confirm move to catch cases of accidental dragging
+    if (QMessageBox::question(this, "Move tag",
+        "Move \"" + QString::fromStdString(TAGS[id]->key()) + "\" here?") != QMessageBox::Yes)
+    {
         event->ignore();
         return;
     }
+    // Move the dragged widget item to its new parent and update the related TagNode
     m_items[id]->parent()->removeChild(m_items[id]);
-    if (dest == nullptr || dest == m_rootItem) {
+    if (dest == m_rootItem) {
         m_rootItem->addChild(m_items[id]);
+        // Reset the "replaces parent" flag whenever a tag moves
         TAGS[id]->setReplacesParent(false);
     }
     else
         dynamic_cast<TagTreeItem*>(dest)->addChild(m_items[id]);
 
-    if (dest != nullptr)
+    if (dest)
         dest->sortChildren(0, Qt::AscendingOrder);
     emit tagsChanged();
 }
 
 QMimeData* TagTree::mimeData(const QList<QTreeWidgetItem*> &items) const {
     QMimeData* ret = QTreeWidget::mimeData(items);
-    if (ret == nullptr) return ret;
+    if (!ret) return ret;
     ret->setData("application/x-tag-id", QVariant(items.first()->data(0, Qt::UserRole)).toByteArray());
     return ret;
 }
@@ -248,41 +256,47 @@ void TagTree::dragMoveEvent(QDragMoveEvent *event) {
     int id = QVariant(event->mimeData()->data("application/x-tag-id")).toInt();
 
     QTreeWidgetItem *dest = itemAt(event->position().toPoint());
-    int dId = dest == nullptr ? 0 : dest->data(0, Qt::UserRole).toInt();
+    int dId = !dest ? 0 : dest->data(0, Qt::UserRole).toInt();
+    // If the tag being dragged is over that tag's parent or itself, do not allow the drop
     if (dId == id || dId == m_items[id]->parent()->data(0, Qt::UserRole).toInt())
         event->ignore();
     else
         event->accept();
 }
 
+//! Updates the selected item in the tree view to match the newly-selected tag in cases where a tag is selected outside of this widget, like when double-clicking an item in a sub-list.
 void TagTree::setCurrentTag(TagNode* tag) {
     if (this->currentItem()->data(0, Qt::UserRole).toInt() != tag->id()) {
-        expandTreeTo(m_items[tag->id()]);
+        if (tag->id() > 0) expandTreeTo(m_items[tag->id()]);
         setCurrentItem(m_items[tag->id()]);
     }
 }
 
 void TagTree::contextMenuEvent(QContextMenuEvent *event) {
     QTreeWidgetItem* item = itemAt(event->pos());
-    int id = item == nullptr ? 0 : item->data(0, Qt::UserRole).toInt();
+    int id = !item ? 0 : item->data(0, Qt::UserRole).toInt();
     QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
+    // Bind the new tag action to use the selected tag (or root if one was not clicked on) as the created tag's parent
     connect(menu->addAction("New Tag..."), &QAction::triggered,
             this, [id, this] { newTag(id); });
 
-    const bool validTagSelected = item != nullptr && item != m_rootItem;
+    const bool validTagSelected = item && item != m_rootItem;
+    // Only show the remove option if a non-root tag was clicked on and edit mode is enabled.
     if (validTagSelected && !APP_STATE->editModeEnabled())
         connect(menu->addAction("Remove \"" + item->text(0) + "\""), &QAction::triggered,
                 this, [id, this] { onRemoveTag(id); });
 
     menu->addSeparator();
 
+    // If a non-root tag was selected, add the expand/collapse actions bound to the selected tag.
     if (validTagSelected && m_items[id]->childCount()) {
         connect(menu->addAction("Expand Selected Tag"), &QAction::triggered,
                 this, [item, this] { expandRecursively(indexFromItem(item)); });
         connect(menu->addAction("Collapse Selected Tag Recursively"), &QAction::triggered,
                 this, [item, this] { collapseRecursive(item); });
     }
+    // Always add the expand/collapse all actions
     menu->addActions(actions());
     menu->exec(QCursor::pos());
 }

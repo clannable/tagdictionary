@@ -9,6 +9,7 @@ FileNav::FileNav(QWidget *parent)
     QHBoxLayout* row = new QHBoxLayout();
     row->setContentsMargins(0,0,0,0);
     row->setSpacing(10);
+    setLayout(row);
     setMinimumHeight(40);
     numContainer = new QWidget();
     numContainer->setObjectName("numbers");
@@ -21,20 +22,19 @@ FileNav::FileNav(QWidget *parent)
     prevButton->setEnabled(false);
     prevButton->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::GoPrevious));
     prevButton->setCursor(Qt::PointingHandCursor);
-    connect(prevButton, &QToolButton::clicked, this, [this]() { emit fileSelected(currentFile-1); });
-    row->addWidget(prevButton, 0);
 
-    row->addWidget(numContainer, 0);
     nextButton = new QToolButton();
     nextButton->setObjectName("next");
     nextButton->setEnabled(false);
     nextButton->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::GoNext));
     nextButton->setCursor(Qt::PointingHandCursor);
-    connect(nextButton, &QToolButton::clicked, this, [this]() { emit fileSelected(currentFile+1); });
+
+    row->addWidget(prevButton, 0);
+    row->addWidget(numContainer, 0);
     row->addWidget(nextButton, 0);
 
-    setLayout(row);
-
+    connect(prevButton, &QToolButton::clicked, this, [this]() { emit fileSelected(currentFile-1); });
+    connect(nextButton, &QToolButton::clicked, this, [this]() { emit fileSelected(currentFile+1); });
     connect(this, &FileNav::fileSelected, this, &FileNav::setSelected);
 }
 
@@ -52,16 +52,14 @@ void FileNav::setSelected(int index) {
     if (currentFile == index) return;
     if (currentFile < numFiles) {
         QToolButton* button = dynamic_cast<QToolButton*>(numContainer->layout()->itemAt(currentFile)->widget());
-        if (button != nullptr)
-            button->setEnabled(true);
+        if (button) button->setEnabled(true);
     }
 
     currentFile = index;
 
     if (numFiles != 0) {
         QToolButton* clicked = dynamic_cast<QToolButton*>(numContainer->layout()->itemAt(index)->widget());
-        if (clicked != nullptr)
-            clicked->setEnabled(false);
+        if (clicked) clicked->setEnabled(false);
     }
     prevButton->setEnabled(index > 0);
     nextButton->setEnabled(index < numFiles-1);
@@ -69,9 +67,9 @@ void FileNav::setSelected(int index) {
 
 void FileNav::clear() {
     numFiles = 0;
-    if (numContainer == nullptr) return;
+    if (!numContainer) return;
     QLayoutItem* child;
-    while((child = numContainer->layout()->takeAt(0)) != nullptr) {
+    while((child = numContainer->layout()->takeAt(0))) {
         if (QWidget *w = child->widget())
             w->deleteLater();
         delete child;
@@ -84,8 +82,7 @@ void FileNav::clear() {
 
 int FileNav::addFile(QString filePath) {
     int nextIndex = numFiles;
-    if (nextIndex > 0)
-        nextButton->setEnabled(true);
+    if (nextIndex > 0) nextButton->setEnabled(true);
     std::regex videoRegex("\\.(mov|mp4|wmv)$", std::regex_constants::icase);
     std::regex imageRegex("\\.(jpeg|png|gif|jpg|bmp|jfif|webp)$", std::regex_constants::icase);
 
@@ -103,7 +100,9 @@ int FileNav::addFile(QString filePath) {
     button->setToolTip(filePath);
     button->setEnabled(currentFile != nextIndex);
     numContainer->layout()->addWidget(button);
-    connect(button, &QToolButton::clicked, this, [this, button]() { emit fileSelected(numContainer->layout()->indexOf(button)); });
+    connect(button, &QToolButton::clicked, this, [this, button]() {
+        emit fileSelected(numContainer->layout()->indexOf(button));
+    });
     numFiles++;
     return nextIndex;
 }

@@ -19,7 +19,7 @@ void IconTable::refresh() {
 }
 
 int IconTable::columnCount() const {
-    if (layout() == nullptr) return 0;
+    if (!layout()) return 0;
     return static_cast<QGridLayout*>(layout())->columnCount();
 }
 
@@ -31,12 +31,8 @@ IconPanel* IconTable::item(QString icon) {
 
 void IconTable::setCurrentItem(IconPanel *panel) {
     if (u_currentPanel == panel) return;
-    if (u_currentPanel != nullptr)
-        u_currentPanel->setSelected(false);
-
-    if (panel != nullptr)
-        panel->setSelected(true);
-
+    if (u_currentPanel) u_currentPanel->setSelected(false);
+    if (panel) panel->setSelected(true);
     u_currentPanel = panel;
 }
 
@@ -54,7 +50,7 @@ void IconTable::updateLayout(int cols) {
     for (int r = 0; r < grid->rowCount(); r++)
         grid->setRowStretch(r, 0);
 
-    if (layout() != nullptr)
+    if (layout())
         delete layout();
     this->setLayout(grid);
 }

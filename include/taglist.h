@@ -31,7 +31,6 @@ signals:
 
 public slots:
     void onEditModeChanged(bool editModeEnabled);
-    void removeItem(QTreeWidgetItem* item);
     void clean();
 
 protected:

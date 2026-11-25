@@ -16,7 +16,7 @@ public:
 
 public slots:
     void onEditModeChange(bool editModeEnabled);
-    void setTag(const TagNode* tag);
+    void setTag(TagNode* tag);
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;

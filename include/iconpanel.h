@@ -17,7 +17,6 @@ public:
 
     void setSelected(bool selected);
     QString icon() const { return m_icon; }
-    QString shortName() const { return m_shortName; }
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
