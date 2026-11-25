@@ -27,21 +27,20 @@ ReplaceWidget::ReplaceWidget(QWidget *parent)
     layout->insertWidget(1, new QLabel("Replaces"), 0);
     layout->insertWidget(2, new QLabel(), 0);
     layout->insertWidget(3, new QLabel(), 0);
-    layout->insertWidget(4, new QLabel("?"), 0);
     layout->itemAt(0)->setAlignment(Qt::AlignVCenter);
     layout->itemAt(1)->setAlignment(Qt::AlignVCenter);
     layout->itemAt(2)->setAlignment(Qt::AlignVCenter);
     layout->itemAt(3)->setAlignment(Qt::AlignVCenter);
-    layout->itemAt(4)->setAlignment(Qt::AlignVCenter);
+    hide();
     connect(APP_STATE, &AppState::editModeChanged, this, &ReplaceWidget::onEditModeChange);
     connect(APP_STATE, &AppState::selectedTagChanged, this, &ReplaceWidget::setTag);
-    layout->itemAt(4)->widget()->hide();
-    hide();
+
+
 }
 
 
 void ReplaceWidget::setTag(TagNode *tag) {
-    if (!tag || tag->isRoot()) hide();
+    if (!tag || !tag->parent() || tag->parent()->isRoot()) hide();
     else {
         QString ic = QString::fromStdString(tag->parent()->icon());
         QIcon icon = QIcon(ic);
@@ -58,13 +57,11 @@ void ReplaceWidget::onEditModeChange(bool editModeEnabled) {
         if (APP_STATE->selectedTag()->parent() && !APP_STATE->selectedTag()->parent()->isRoot()) show();
         else hide();
         layout()->itemAt(0)->widget()->show();
-        layout()->itemAt(4)->widget()->show();
         setCursor(Qt::PointingHandCursor);
     } else {
         if (isReplaceChecked()) show();
         else hide();
         layout()->itemAt(0)->widget()->hide();
-        layout()->itemAt(4)->widget()->hide();
         setCursor(Qt::ArrowCursor);
     }
 }

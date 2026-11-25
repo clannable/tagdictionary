@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,1,1,2,0">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1,1,2,0">
    <property name="sizeConstraint">
     <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
    </property>
@@ -40,7 +40,7 @@
      <property name="styleSheet">
       <string notr="true"/>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0,1,0">
       <property name="spacing">
        <number>2</number>
       </property>
@@ -134,23 +134,23 @@
         </property>
        </widget>
       </item>
+      <item alignment="Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter">
+       <widget class="ReplaceWidget" name="replaceFrame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+       </widget>
+      </item>
      </layout>
-    </widget>
-   </item>
-   <item alignment="Qt::AlignmentFlag::AlignLeft">
-    <widget class="ReplaceWidget" name="replaceFrame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-       <bold>true</bold>
-      </font>
-     </property>
     </widget>
    </item>
    <item>
@@ -240,7 +240,7 @@
         <x>0</x>
         <y>0</y>
         <width>382</width>
-        <height>257</height>
+        <height>265</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -273,7 +273,7 @@
          <property name="frameShadow">
           <enum>QFrame::Shadow::Sunken</enum>
          </property>
-         <layout class="QVBoxLayout" name="listLayout" stretch="">
+         <layout class="QVBoxLayout" name="listLayout">
           <property name="spacing">
            <number>3</number>
           </property>

@@ -44,6 +44,8 @@ void FileNav::setFiles(QStringList files) {
         addFile(file);
     setSelected(0);
 
+    if (files.isEmpty()) hide();
+    else show();
     prevButton->setEnabled(currentFile > 0);
     nextButton->setEnabled(currentFile < numFiles-1);
 }

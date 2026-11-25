@@ -32,15 +32,13 @@ MediaDisplay::~MediaDisplay() {
 void MediaDisplay::refresh() {
     m_currentPage = 0;
     m_files.clear();
-    ui->addFileButton->setEnabled(APP_STATE->selectedTag() != nullptr && APP_STATE->selectedTag()->id() > 0);
-    if (APP_STATE->selectedTag() != nullptr) {
+    ui->fileNav->show();
+    ui->addFileButton->setEnabled(APP_STATE->selectedTag() && !APP_STATE->selectedTag()->isRoot());
+    if (APP_STATE->selectedTag()) {
         for (const std::string &file : APP_STATE->selectedTag()->files())
             m_files.append(QString::fromStdString(file));
     }
-    if (APP_STATE->selectedTag() == nullptr || APP_STATE->selectedTag()->id() <= 0)
-        ui->fileNav->hide();
-    else
-        ui->fileNav->show();
+
     ui->fileNav->setFiles(m_files);
     showFile(0);
 }
@@ -111,8 +109,6 @@ void MediaDisplay::showFile(int index) {
     }
     if (u_displayWidget)
         ui->viewportLayout->insertWidget(0, u_displayWidget, 1);
-    // if (m_isImage)
-        // resizeImage();
 }
 
 void MediaDisplay::setFile(int index) {
@@ -125,7 +121,7 @@ void MediaDisplay::openFile() {
 }
 
 void MediaDisplay::addFile() {
-    QStringList selected = QFileDialog::getOpenFileNames(
+    const QStringList selected = QFileDialog::getOpenFileNames(
         this,
         "Select files to add",
         QString::fromStdString(LAST_IMAGE_FOLDER_PATH),
@@ -134,7 +130,7 @@ void MediaDisplay::addFile() {
     if (!selected.empty())
         LAST_IMAGE_FOLDER_PATH = QFileInfo(selected.last()).absoluteDir().path().toStdString();
 
-    for (const QString &file : selected) {
+    for (const auto &file : selected) {
         QString f = file;
         insertFile(f);
         ui->fileNav->setSelected(m_currentPage);
@@ -167,7 +163,7 @@ void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
         event->ignore();
     } else if (data->hasUrls()) {
         // Only accept file drags that are images or videos
-        QString filePath = data->urls().front().toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
+        QString filePath = data->urls().at(0).toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
         QString mimeType = db.mimeTypeForFile(filePath).name();
         if (mimeType.startsWith("image") || mimeType.startsWith("video")) {
             event->setDropAction(Qt::CopyAction);
@@ -180,11 +176,10 @@ void MediaDisplay::dragEnterEvent(QDragEnterEvent *event) {
 }
 
 void MediaDisplay::dropEvent(QDropEvent *event) {
-    QUrl url = event->mimeData()->urls()[0];
+    QUrl url = event->mimeData()->urls().at(0);
     QString filePath = url.toString(QUrl::DecodeReserved | QUrl::PrettyDecoded);
     if (filePath.startsWith("file:///"))
         filePath = filePath.slice(8);
-    if (!filePath.isEmpty()) {
+    if (!filePath.isEmpty())
         insertFile(filePath);
-    }
 }
