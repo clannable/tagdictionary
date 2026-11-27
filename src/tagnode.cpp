@@ -29,7 +29,10 @@ TagNode::TagNode(json data, string key) : m_key(key) {
     setExcludes(data.value("excludes", json::array()));
     setFiles(data.value("files", list<string>()));
     m_children = data.value("children", list<int>());
-    setReplacesParent(data.value<bool>("replacesParent", false));
+    if (!data.contains("replacesParent"))
+        setParentRelation(static_cast<ParentLink>(data.value<int>("parentRelation", 0)));
+    else
+        setParentRelation(data.value<bool>("replacesParent", false) ? ParentLink::Replace : ParentLink::None);
 
     TAGS[m_id] = this;
 }
@@ -104,7 +107,7 @@ void TagNode::addChild(int id) {
     TAGS[id]->setParent(this);
 }
 
-void TagNode::setReplacesParent(bool replacesParent) { m_replacesParent = replacesParent; }
+void TagNode::setParentRelation(ParentLink parentRel) { m_parentRel = parentRel; }
 
 //! Remove a tag with the given ID from this tag's list of children, and unassign the removed tag's parent.
 void TagNode::removeChild(int id) {
@@ -134,7 +137,7 @@ json TagNode::toJson() {
     if (!m_frequent.empty()) ret["frequent"] = m_frequent;
     if (!m_excludes.empty()) ret["excludes"] = m_excludes;
     if (!m_files.empty()) ret["files"] = m_files;
-    if (m_replacesParent) ret["replacesParent"] = m_replacesParent;
+    if (m_parentRel != ParentLink::None) ret["parentRelation"] = m_parentRel;
     if (!m_children.empty()) ret["children"] = m_children;
     return ret;
 }

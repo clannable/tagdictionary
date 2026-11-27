@@ -14,6 +14,11 @@ class TagNode
 {
 
 public:
+    enum ParentLink {
+        None = 0,
+        Replace = 1,
+        Require = 2
+    };
     TagNode();
     TagNode(json data, string key="");
 
@@ -69,8 +74,8 @@ public:
     TagNode* parent() const { return m_parent; }
     void setParent(TagNode* parent);
 
-    bool replacesParent() const { return m_replacesParent; }
-    void setReplacesParent(bool replacesParent);
+    ParentLink parentRelation() const { return m_parentRel; }
+    void setParentRelation(ParentLink parentRel);
 
     // void convertSublistsToId();
 
@@ -93,7 +98,6 @@ private:
     json m_excludes = json::array();
 
     TagNode* m_parent = nullptr;
-    bool m_replacesParent = false;
 
     list<int> m_children = {};
 
@@ -101,6 +105,8 @@ private:
         int ix = isdigit(val[0]) ? 0 : 1;
         return stoi(val.substr(ix, val.length() - ix - (isdigit(val[val.length()-1]) ? 0 : 1)));
     }
+
+    ParentLink m_parentRel = ParentLink::None;
 };
 
 #endif // TAGNODE_H
