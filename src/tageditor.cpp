@@ -55,7 +55,7 @@ TagEditor::TagEditor(QWidget *parent)
     lists.append(new TagListContainer("Related Tags", u_relatedList));
     layout->addWidget(lists[3], 1);
 
-    static_cast<QVBoxLayout*>(ui->scrollArea->widget()->layout())->insertStretch(0, 1);
+    // static_cast<QVBoxLayout*>(ui->scrollArea->widget()->layout())->insertStretch(0, 1);
 
     // Signals, slots
     connect(ui->editButton, &QPushButton::clicked, this, [] { APP_STATE->toggleEditMode(); });
