@@ -47,6 +47,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     if (settings.contains("geometry")) // Restore previous window geometry
         this->restoreGeometry(settings.value("geometry").toByteArray());
+    if (settings.contains("layout"))
+        ui->splitter->restoreState(settings.value("layout").toByteArray());
+
     m_jsonFilePath = settings.value("data/lastOpened", "").toString();
     m_recentFiles = settings.value("data/recentFiles").toStringList();
     if (!m_jsonFilePath.isEmpty() && !QFileInfo::exists(m_jsonFilePath)) {
@@ -79,7 +82,8 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     QSettings settings("MyApp","Tag Viewer");
-    settings.setValue("geometry", this->saveGeometry());
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("layout", ui->splitter->saveState());
     settings.setValue("autosave", AUTOSAVE_ENABLED);
     settings.setValue("hideEmptySubLists", HIDE_EMPTY_LISTS);
     settings.setValue("data/recentFiles", m_recentFiles);
