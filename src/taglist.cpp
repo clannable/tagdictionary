@@ -140,9 +140,9 @@ void TagList::onEditModeChanged(bool editModeEnabled) {
     setDragEnabled(editModeEnabled);
     setDropIndicatorShown(editModeEnabled);
     setDragDropMode(editModeEnabled ? DragDropMode::DragDrop : DragDropMode::NoDragDrop);
-    setStyleSheet(editModeEnabled
-        ? "TagList { background-color: #eeeeee; border: 1px solid #777777; border-radius: 4px; }"
-        : "");
+    // setStyleSheet(editModeEnabled
+    //     ? "TagList { background-color: #eeeeee; border: 1px solid #777777; border-radius: 4px; }"
+    //     : "");
     if (editModeEnabled) {
         show();
         setFixedHeight(max(65, (21*(topLevelItemCount()+1))+2));

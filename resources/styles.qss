@@ -71,17 +71,21 @@ QPushButton#saveButton:disabled {
     color: #bebebe;
 }
 
-TagEditor QLineEdit:disabled {
-    border: none;
-    padding-bottom: 1px;
+
+
+TagEditor #iconLabel {
+    border: 1px solid transparent;
 }
 
 TagEditor QLineEdit {
-    height: 24px;
-    border: 1px solid #6a6a6a;
+    border-width: 1px;
+    border-style: solid;
+    background: palette(alternate-base);
+}
+
+TagEditor QLineEdit:read-only {
+    border-color: transparent;
     background: transparent;
-    color: #3d3d3d;
-    padding-bottom: 0;
 }
 
 TagEditor QToolButton:disabled {
@@ -90,7 +94,7 @@ TagEditor QToolButton:disabled {
 }
 
 TagEditor .QTextEdit {
-    background-color: white;
+    background-color: palette(light);
 }
 
 TagEditor #listContainer {
@@ -146,10 +150,6 @@ TagEditor QTextEdit QScrollBar::handle:vertical, TagList QScrollbar::handle:vert
     background: #aaaaaa;
 }
 
-TagEditor ReplaceWidget .QLabel {
-    font: 350 9pt 'Segoe UI';
-}
-
 VideoPlayer QSlider::groove:horizontal {
     height: 5px;
     background: #ffffff;
@@ -184,7 +184,7 @@ VideoPlayer QSlider::sub-page:horizontal::disabled {
 }
 
 VideoPlayer QSlider::add-page:horizontal {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0  #d9d9d9, stop:1 #e4e4e4);
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0  palette(mid), stop:1 palette(midlight));
     border: 1px solid #b1b1b1;
     height: 5px;
     border-radius: 2px;
@@ -224,7 +224,7 @@ FileNav #numbers QToolButton:pressed {
 
 FileNav #previous, FileNav #next {
     border-radius: 12px;
-    border-color: rgba(74, 157, 208, 125);
+    border-color: palette(mid);
     background-color: transparent;
 }
 
@@ -244,14 +244,10 @@ TagTree {
     background-color: palette(alternate-base);
 }
 
-TagEditor .ReplaceWidget > QLabel {
-    background-color: transparent;
-    font-weight: 500;
-}
-
 TagEditor .ReplaceWidget {
     background-color: palette(midlight);
     margin-left: 10px;
     border-radius: 2px;
     padding: 3px 10px 3px 10px;
+    font-weight: 750;
 }

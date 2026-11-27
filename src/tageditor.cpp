@@ -16,10 +16,10 @@ TagListContainer::TagListContainer(QString title, TagList* list, QWidget* parent
     f->setFrameShadow(QFrame::Sunken);
     layout->addWidget(list);
     layout->addWidget(f);
-    connect(APP_STATE, &AppState::editModeChanged, this, [f](bool editModeEnabled) {
-        if (editModeEnabled) f->hide();
-        else f->show();
-    });
+    // connect(APP_STATE, &AppState::editModeChanged, this, [f](bool editModeEnabled) {
+    //     if (editModeEnabled) f->hide();
+    //     else f->show();
+    // });
 }
 //! Show/hide the horizontal line below the list widget.
 void TagListContainer::setLineVisible(bool visible) {
@@ -37,6 +37,7 @@ TagEditor::TagEditor(QWidget *parent)
     ui->iconButton->hide();
     ui->descriptionEditor->hide();
     ui->tagLabelEdit->setText("");
+    ui->tagLabelEdit->setReadOnly(true);
     ui->scrollArea->setMaximumHeight(height() * 0.7);
     ui->listContainer->hide();
 
@@ -77,11 +78,11 @@ void TagEditor::setTag(TagNode *tag) {
     if (!tag || tag->isRoot()) {
         ui->listContainer->hide();
         ui->tagLabelEdit->setText("");
+        ui->tagLabelEdit->setReadOnly(true);
         ui->editButton->setEnabled(false);
         ui->description->setMarkdown("");
         ui->description->show();
         ui->iconLabel->hide();
-        ui->tagLabelEdit->setText("");
         ui->saveButton->setEnabled(false);
         return;
     }
@@ -103,6 +104,7 @@ void TagEditor::setTag(TagNode *tag) {
     ui->description->setMarkdown(QString::fromStdString(tag->description()));
     ui->descriptionEditor->hide();
     ui->tagLabelEdit->setText(QString::fromStdString(tag->key()));
+    ui->tagLabelEdit->setReadOnly(true);
 
     u_relatedList->setValues(tag->related());
     u_excludesList->setValues(tag->excludes());
@@ -114,7 +116,7 @@ void TagEditor::setTag(TagNode *tag) {
 
 void TagEditor::onEditModeChange(bool editModeEnabled) {
     const TagNode* selectedTag = APP_STATE->selectedTag();
-    ui->tagLabelEdit->setEnabled(editModeEnabled);
+    ui->tagLabelEdit->setReadOnly(!editModeEnabled);
     ui->saveButton->setEnabled(editModeEnabled);
     ui->editButton->setIcon(QIcon::fromTheme(editModeEnabled
         ? QIcon::ThemeIcon::EditClear
@@ -132,7 +134,12 @@ void TagEditor::onEditModeChange(bool editModeEnabled) {
         ui->iconLabel->hide();
 
         ui->listContainer->show();
-        for(const auto &l : lists) l->show();    // Always show all sub-lists when in edit mode
+
+        for(const auto &l : lists) {
+            l->show();                      // Always show all sub-lists when in edit mode
+            l->setLineVisible(true);
+        }
+        lists.last()->setLineVisible(false);
     }
     else {
         // Hide input fields, show read-only widgets
@@ -207,7 +214,7 @@ void TagEditor::save() {
     tag->setRequired(u_requiredList->values());
     tag->setFrequent(u_frequentList->values());
     tag->setExcludes(u_excludesList->values());
-    tag->setReplacesParent(ui->replaceFrame->isReplaceChecked());
+    tag->setParentRelation(ui->replaceFrame->value());
 
     emit tagSaved(tag);
 }

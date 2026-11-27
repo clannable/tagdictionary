@@ -224,7 +224,7 @@ void TagTree::dropEvent(QDropEvent *event) {
     if (dest == m_rootItem) {
         m_rootItem->addChild(m_items[id]);
         // Reset the "replaces parent" flag whenever a tag moves
-        TAGS[id]->setReplacesParent(false);
+        TAGS[id]->setParentRelation(TagNode::None);
     }
     else
         dynamic_cast<TagTreeItem*>(dest)->addChild(m_items[id]);

@@ -16,12 +16,12 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
    <property name="leftMargin">
     <number>9</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>6</number>
    </property>
    <property name="bottomMargin">
     <number>0</number>
@@ -46,7 +46,7 @@
    </item>
    <item alignment="Qt::AlignmentFlag::AlignBottom">
     <widget class="QWidget" name="pageButtons" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1,0,1,0">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,1,0">
       <property name="spacing">
        <number>5</number>
       </property>
@@ -63,35 +63,53 @@
        <number>0</number>
       </property>
       <item alignment="Qt::AlignmentFlag::AlignBottom">
-       <widget class="QToolButton" name="addFileButton">
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="toolTip">
-         <string>Import file</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
-        </property>
-       </widget>
-      </item>
-      <item alignment="Qt::AlignmentFlag::AlignBottom">
-       <widget class="QToolButton" name="openButton">
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="toolTip">
-         <string>Open file externally</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::FolderOpen"/>
-        </property>
+       <widget class="QWidget" name="widget_2" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>3</number>
+         </property>
+         <item>
+          <widget class="QToolButton" name="addFileButton">
+           <property name="cursor">
+            <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="toolTip">
+            <string>Import file</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="openButton">
+           <property name="cursor">
+            <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="toolTip">
+            <string>Open file externally</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset theme="QIcon::ThemeIcon::FolderOpen"/>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
