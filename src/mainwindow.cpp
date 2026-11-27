@@ -63,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(APP_STATE, &AppState::selectedTagChanged, this, &MainWindow::onSelectedTagChanged);
 
     connect(ui->a_newTag, &QAction::triggered, ui->tagTree, &TagTree::newTag);
+    connect(ui->a_modifyIcon, &QAction::triggered, ui->tagEditor, &TagEditor::selectIcon);
     connect(ui->tagEditor, &TagEditor::tagSaved, this, &MainWindow::onEditorSave);
     connect(ui->tagEditor, &TagEditor::displayLinkClicked, ui->mediaDisplay, &MediaDisplay::setFile);
     connect(ui->tagTree, &TagTree::tagsChanged, this, &MainWindow::onTagTreeChange);
@@ -231,10 +232,12 @@ void MainWindow::reloadJson() {
         ui->tagTree->loadTags();
         ui->tagTree->sortByColumn(0, Qt::AscendingOrder);
         ui->a_newTag->setEnabled(true);
+        setWindowTitle("Tag Dictionary - " + QFileInfo(m_jsonFilePath).fileName());
     } catch (std::exception e) {
         QMessageBox::critical(this, "An error has occurred", "Error loading dictionary");
         ui->tagTree->clear();
         ui->a_newTag->setEnabled(false);
+        setWindowTitle("Tag Dictionary");
     }
 
     if (f->is_open())
